@@ -764,6 +764,426 @@
       #game-tetris .game-title { letter-spacing: 0.1em; }
       #game-tetris .panel-box { padding: 8px 10px; }
     }
+
+    /* =========================================================
+       Snake — vista de jogo (overlay em tela cheia)
+       Tema escuro próprio, isolado sob a classe .snake-game
+       (o componente já vem preparado para ser incorporado a uma
+       página com vários jogos, então quase todo o CSS original
+       é mantido — só a casca de tela cheia é nova).
+       ========================================================= */
+    #game-snake {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      overflow: auto;
+      background: #05070f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(4px, 2vw, 10px);
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+
+    .snake-game {
+      --sg-bg: #05070f;
+      --sg-panel-bg: #0c1120;
+      --sg-panel-border: rgba(255, 255, 255, 0.08);
+      --sg-board-bg: #02030a;
+      --sg-board-border: rgba(255, 255, 255, 0.14);
+      --sg-text-primary: #e8ebf5;
+      --sg-text-secondary: #8890a8;
+      --sg-accent: #16a34a;
+      --sg-accent-strong: #4ade80;
+      --sg-accent-ink: #04150b;
+      --sg-danger: #ff4d5e;
+      --sg-font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      --sg-mono: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
+
+      display: block;
+      width: 100%;
+      font-family: var(--sg-font);
+      color: var(--sg-text-primary);
+    }
+
+    /* ---------- Reset básico (restrito a este componente) ---------- */
+    .snake-game,
+    .snake-game *,
+    .snake-game *::before,
+    .snake-game *::after {
+      box-sizing: border-box;
+    }
+
+    .snake-game ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .snake-game button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .snake-game h1,
+    .snake-game h2,
+    .snake-game p {
+      margin: 0;
+    }
+
+    .snake-game .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .snake-game .hidden {
+      display: none !important;
+    }
+
+    /* ---------- Layout geral ---------- */
+    .snake-game .game-container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(8px, 2.2vh, 14px);
+    }
+
+    .snake-game .game-topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+      gap: 8px;
+    }
+    .snake-game .game-back-btn {
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--sg-panel-border);
+      color: var(--sg-text-secondary);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: var(--sg-font);
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .snake-game .game-back-btn:hover { color: var(--sg-text-primary); border-color: var(--sg-accent); }
+    .snake-game .game-back-btn:focus-visible { outline: 2px solid var(--sg-accent); outline-offset: 2px; }
+    .snake-game .game-topbar-spacer { justify-self: end; }
+
+    .snake-game .game-title {
+      font-family: var(--sg-mono);
+      font-weight: 900;
+      letter-spacing: 0.22em;
+      font-size: clamp(1.4rem, 6vw, 2.2rem);
+      color: var(--sg-accent);
+      text-shadow: 0 0 8px rgba(22, 163, 74, 0.55), 0 0 22px rgba(22, 163, 74, 0.25);
+      text-align: center;
+    }
+
+    /* ---------- HUD: pontuação, recorde e nível ---------- */
+    .snake-game .hud {
+      display: flex;
+      gap: clamp(20px, 10vw, 56px);
+      justify-content: center;
+    }
+
+    .snake-game .stat-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 74px;
+    }
+
+    .snake-game .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sg-text-secondary);
+    }
+
+    .snake-game .stat-value {
+      font-family: var(--sg-mono);
+      font-weight: 700;
+      font-size: clamp(1.2rem, 5vw, 1.6rem);
+      color: var(--sg-text-primary);
+    }
+
+    .snake-game .level-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--sg-mono);
+    }
+
+    .snake-game .level-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--sg-text-secondary);
+    }
+
+    .snake-game .level-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--sg-accent);
+    }
+
+    /* Pequeno "pulso" reutilizado sempre que um valor do HUD muda. */
+    .snake-game .bump {
+      animation: sgBump 0.28s ease;
+    }
+
+    @keyframes sgBump {
+      0% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(1.22);
+        color: var(--sg-accent-strong);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* ---------- Tabuleiro ---------- */
+    .snake-game .board-wrapper {
+      position: relative;
+      width: min(92vw, 480px, 60vh);
+      aspect-ratio: 1 / 1;
+      background: var(--sg-board-bg);
+      border: 2px solid var(--sg-board-border);
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .snake-game #snake-board-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    .snake-game .board-wrapper.flash-gameover {
+      animation: sgFlashRed 0.5s ease-in-out 2;
+    }
+
+    @keyframes sgFlashRed {
+      0%,
+      100% {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
+      }
+      50% {
+        box-shadow: 0 0 0 3px var(--sg-danger), 0 0 40px rgba(255, 77, 94, 0.6);
+      }
+    }
+
+    /* ---------- Overlays (início, pausa, game over) ---------- */
+    .snake-game .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 4, 10, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+      padding: 16px;
+      z-index: 5;
+      animation: sgFadeIn 0.25s ease;
+    }
+
+    @keyframes sgFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .snake-game .overlay-title {
+      font-family: var(--sg-mono);
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      font-size: 1.6rem;
+      color: var(--sg-accent);
+      text-shadow: 0 0 8px rgba(22, 163, 74, 0.5);
+    }
+
+    .snake-game .overlay-title-danger {
+      color: var(--sg-danger);
+      text-shadow: 0 0 10px rgba(255, 77, 94, 0.55);
+    }
+
+    .snake-game .overlay-subtitle {
+      font-size: 0.92rem;
+      color: var(--sg-text-secondary);
+    }
+
+    .snake-game .overlay-text {
+      font-size: 0.9rem;
+      color: var(--sg-text-secondary);
+      line-height: 1.6;
+    }
+
+    .snake-game .overlay-hint {
+      font-size: 0.74rem;
+      color: var(--sg-text-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .snake-game .overlay-hint-caps {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ---------- Botões ---------- */
+    .snake-game .btn {
+      background: #141a2e;
+      color: var(--sg-text-primary);
+      border: 1px solid var(--sg-panel-border);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      font-family: var(--sg-font);
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .snake-game .btn:hover {
+      background: #1c2440;
+      border-color: var(--sg-accent);
+    }
+
+    .snake-game .btn:active {
+      transform: scale(0.96);
+    }
+
+    .snake-game .btn:focus-visible {
+      outline: 2px solid var(--sg-accent);
+      outline-offset: 2px;
+    }
+
+    .snake-game .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .snake-game .btn:disabled:hover {
+      background: #141a2e;
+      border-color: var(--sg-panel-border);
+    }
+
+    .snake-game .btn-primary {
+      background: var(--sg-accent);
+      color: var(--sg-accent-ink);
+      border-color: var(--sg-accent);
+    }
+
+    .snake-game .btn-primary:hover {
+      background: var(--sg-accent-strong);
+    }
+
+    .snake-game .actions {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ---------- Legenda de teclado ---------- */
+    .snake-game .controls-legend {
+      font-family: var(--sg-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--sg-text-secondary);
+      text-align: center;
+    }
+
+    /* ---------- Controles de toque (mobile) ---------- */
+    .snake-game .mobile-controls {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      max-width: 220px;
+    }
+
+    @media (max-width: 640px), (hover: none) and (pointer: coarse) {
+      .snake-game .mobile-controls {
+        display: flex;
+      }
+
+      .snake-game .controls-legend {
+        display: none;
+      }
+    }
+
+    .snake-game .mobile-controls-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .snake-game .touch-btn {
+      width: clamp(50px, 15vw, 62px);
+      height: clamp(50px, 15vw, 62px);
+      font-size: 1.3rem;
+      background: var(--sg-panel-bg);
+      border: 1px solid var(--sg-panel-border);
+      border-radius: 12px;
+      color: var(--sg-text-primary);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .snake-game .touch-btn:active {
+      background: #1c2440;
+      transform: scale(0.94);
+    }
+
+    .snake-game .touch-btn:focus-visible {
+      outline: 2px solid var(--sg-accent);
+      outline-offset: 2px;
+    }
+
+    /* ---------- Ajustes finos para telas muito pequenas ---------- */
+    @media (max-width: 360px) {
+      .snake-game .game-title {
+        letter-spacing: 0.12em;
+      }
+
+      .snake-game .hud {
+        gap: clamp(16px, 9vw, 40px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -834,7 +1254,7 @@
             </div>
             <h3 class="game-card-title">Minhoca</h3>
             <p class="game-card-desc">Guie a minhoca, coma para crescer e não esbarre nas paredes nem em você mesmo.</p>
-            <button type="button" class="btn btn-soon btn-block" onclick="openGame('snake')">🚧 Em breve</button>
+            <button type="button" class="btn btn-primary pixel-corners btn-block" onclick="openGame('snake')">Jogar</button>
           </article>
 
           <article class="game-card reveal">
@@ -922,9 +1342,9 @@
         <div class="rank-grid">
           <div class="rank-card reveal">
             <span class="rank-icon" aria-hidden="true">🐍</span>
-            <span class="rank-value" id="rank-snake">—</span>
+            <span class="rank-value" id="rank-snake">0</span>
             <span class="rank-label">Maior pontuação — Minhoca</span>
-            <span class="rank-note">Em breve</span>
+            <span class="rank-note" id="rank-snake-note">Jogue para pontuar</span>
           </div>
           <div class="rank-card reveal">
             <span class="rank-icon" aria-hidden="true">🧱</span>
@@ -1111,6 +1531,91 @@
     </div>
   </div>
 
+  <!-- ================= Vista de jogo: Snake ================= -->
+  <div id="game-snake" class="hidden" role="region" aria-label="Minhoca (Snake)">
+    <div class="snake-game" id="snake-game">
+      <!-- Região invisível para leitores de tela anunciarem eventos importantes -->
+      <div id="snake-sr-status" class="sr-only" aria-live="polite"></div>
+
+      <div class="game-container">
+        <header class="game-topbar">
+          <button type="button" class="game-back-btn" onclick="closeGame('snake')">
+            <span aria-hidden="true">←</span> Voltar
+          </button>
+          <h1 class="game-title">SNAKE</h1>
+          <span class="game-topbar-spacer" aria-hidden="true"></span>
+        </header>
+
+        <!-- HUD: pontuação e recorde -->
+        <div class="hud">
+          <div class="stat-block">
+            <span class="stat-label">Pontuação</span>
+            <span id="snake-score" class="stat-value">0000</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-label">Recorde</span>
+            <span id="snake-high-score" class="stat-value">0000</span>
+          </div>
+        </div>
+
+        <!-- Nível atual -->
+        <div class="level-row">
+          <span class="level-label">Nível</span>
+          <span id="snake-level" class="level-value">1</span>
+        </div>
+
+        <!-- Tabuleiro principal -->
+        <main class="board-wrapper" id="snake-board-wrapper">
+          <canvas id="snake-board-canvas" width="480" height="480" role="img" aria-label="Tabuleiro do Snake">
+            Seu navegador não tem suporte a Canvas, necessário para jogar Snake.
+          </canvas>
+
+          <!-- Tela inicial -->
+          <div id="snake-start-screen" class="overlay">
+            <h2 class="overlay-title">SNAKE</h2>
+            <p class="overlay-subtitle">Clássico jogo da minhoca</p>
+            <button id="snake-play-btn" class="btn btn-primary" type="button">Jogar</button>
+            <p class="overlay-hint">Use as setas ou WASD para controlar</p>
+          </div>
+
+          <!-- Tela de pausa -->
+          <div id="snake-pause-overlay" class="overlay hidden">
+            <h2 class="overlay-title">PAUSADO</h2>
+            <p class="overlay-hint overlay-hint-caps">Pressione espaço para continuar</p>
+          </div>
+
+          <!-- Tela de game over -->
+          <div id="snake-game-over-overlay" class="overlay hidden">
+            <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
+            <p class="overlay-text">
+              Pontuação: <strong id="snake-final-score">0</strong><br />
+              Recorde: <strong id="snake-final-high-score">0</strong>
+            </p>
+            <button id="snake-restart-btn" class="btn btn-primary" type="button">Jogar Novamente</button>
+          </div>
+        </main>
+
+        <div class="actions">
+          <button id="snake-pause-btn" class="btn" type="button">Pausar</button>
+        </div>
+
+        <p class="controls-legend">↑ ↓ ← → / W A S D</p>
+
+        <!-- Controles para toque (mobile) -->
+        <div class="mobile-controls" id="snake-mobile-controls" aria-label="Controles de toque">
+          <div class="mobile-controls-row">
+            <button class="touch-btn" id="snake-btn-up" type="button" aria-label="Mover para cima">&#9650;</button>
+          </div>
+          <div class="mobile-controls-row">
+            <button class="touch-btn" id="snake-btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
+            <button class="touch-btn" id="snake-btn-down" type="button" aria-label="Mover para baixo">&#9660;</button>
+            <button class="touch-btn" id="snake-btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <noscript>
     Este site precisa de JavaScript habilitado no navegador para funcionar.
   </noscript>
@@ -1124,17 +1629,24 @@
     (function () {
       "use strict";
 
-      const gameRoot = document.getElementById("game-tetris");
       const toastEl = document.getElementById("toast");
       let toastTimer = null;
       let lastFocused = null;
 
+      // Jogos ainda não implementados: aparecem como "Em breve" ao clicar.
       const GAME_TITLES = {
         chess: "Xadrez",
-        snake: "Minhoca",
         word: "Palavra do Dia",
         city: "Evolução das Cidades",
       };
+
+      // Controlador exposto por cada jogo já implementado (init preguiçoso +
+      // pausa ao fechar). Cada módulo de jogo registra a si mesmo aqui.
+      function getGameController(id) {
+        if (id === "tetris") return window.TetrisGame;
+        if (id === "snake") return window.SnakeGame;
+        return null;
+      }
 
       function showToast(message) {
         toastEl.textContent = message;
@@ -1147,35 +1659,39 @@
 
       // Abre a vista de um jogo, se ela existir; caso contrário, avisa que está em breve.
       window.openGame = function (id) {
-        if (id === "tetris") {
-          lastFocused = document.activeElement;
-          if (window.TetrisGame && !window.TetrisGame.started) {
-            window.TetrisGame.init();
-          }
-          gameRoot.classList.remove("hidden");
-          document.documentElement.classList.add("no-scroll");
-          const backBtn = gameRoot.querySelector(".game-back-btn");
-          if (backBtn) backBtn.focus();
+        const overlay = document.getElementById("game-" + id);
+        if (!overlay) {
+          showToast("🚧 " + (GAME_TITLES[id] || "Este jogo") + " ainda está em desenvolvimento. Volte em breve!");
           return;
         }
-        showToast("🚧 " + (GAME_TITLES[id] || "Este jogo") + " ainda está em desenvolvimento. Volte em breve!");
+        lastFocused = document.activeElement;
+        const controller = getGameController(id);
+        if (controller && !controller.started) controller.init();
+        overlay.classList.remove("hidden");
+        document.documentElement.classList.add("no-scroll");
+        const backBtn = overlay.querySelector(".game-back-btn");
+        if (backBtn) backBtn.focus();
       };
 
       window.closeGame = function (id) {
-        if (id === "tetris") {
-          gameRoot.classList.add("hidden");
-          document.documentElement.classList.remove("no-scroll");
-          if (window.TetrisGame) window.TetrisGame.pauseIfPlaying();
-          loadTetrisRanking();
-          if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
-        }
+        const overlay = document.getElementById("game-" + id);
+        if (!overlay) return;
+        overlay.classList.add("hidden");
+        document.documentElement.classList.remove("no-scroll");
+        const controller = getGameController(id);
+        if (controller) controller.pauseIfPlaying();
+        if (id === "tetris") loadTetrisRanking();
+        if (id === "snake") loadSnakeRanking();
+        if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
       };
 
       // Fecha a vista de jogo aberta ao pressionar Esc.
       window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !gameRoot.classList.contains("hidden")) {
-          closeGame("tetris");
-        }
+        if (e.key !== "Escape") return;
+        ["tetris", "snake"].forEach((id) => {
+          const overlay = document.getElementById("game-" + id);
+          if (overlay && !overlay.classList.contains("hidden")) closeGame(id);
+        });
       });
 
       function loadTetrisRanking() {
@@ -1187,6 +1703,19 @@
         }
         const valueEl = document.getElementById("rank-tetris");
         const noteEl = document.getElementById("rank-tetris-note");
+        if (valueEl) valueEl.textContent = high.toLocaleString("pt-BR");
+        if (noteEl) noteEl.textContent = high > 0 ? "Recorde local" : "Jogue para pontuar";
+      }
+
+      function loadSnakeRanking() {
+        let high = 0;
+        try {
+          high = parseInt(localStorage.getItem("snakeClassicHighScore"), 10) || 0;
+        } catch (err) {
+          high = 0;
+        }
+        const valueEl = document.getElementById("rank-snake");
+        const noteEl = document.getElementById("rank-snake-note");
         if (valueEl) valueEl.textContent = high.toLocaleString("pt-BR");
         if (noteEl) noteEl.textContent = high > 0 ? "Recorde local" : "Jogue para pontuar";
       }
@@ -1217,6 +1746,7 @@
       }
 
       loadTetrisRanking();
+      loadSnakeRanking();
       setupReveal();
     })();
   </script>
@@ -1994,6 +2524,615 @@
 
       // Exposto para o roteador da landing page (init preguiçoso + pausa ao fechar).
       window.TetrisGame = {
+        started: false,
+        init,
+        pauseIfPlaying() {
+          if (state.phase === "playing") togglePause();
+        },
+      };
+    })();
+  </script>
+
+  <script>
+    /* =========================================================
+       Snake — lógica do jogo
+       JavaScript puro (ES6+), encapsulado numa IIFE para evitar
+       variáveis globais. Exposto como window.SnakeGame para ser
+       controlado pelo roteador da landing page.
+
+       Organização (cada bloco é um "sistema" independente):
+         Constantes · Estado do jogo · Minhoca (movimentação) ·
+         Alimento · Colisão · Pontuação e níveis ·
+         Estados do jogo (início/pausa/reinício/game over) ·
+         HUD, recorde (localStorage) e acessibilidade ·
+         Renderização (Canvas) · Loop principal ·
+         Entrada (teclado, botões e toque) · Inicialização
+       ========================================================= */
+    (function () {
+      "use strict";
+
+      /* ---------------------------------------------------------
+       * Constantes
+       * ------------------------------------------------------- */
+      const COLS = 20;
+      const ROWS = 20;
+      const CELL = 24; // px por célula (resolução interna do canvas)
+      const BOARD_PX = COLS * CELL; // 480
+
+      const BASE_TICK_MS = 160; // velocidade inicial (nível 1)
+      const SPEED_STEP_MS = 14; // reduzido a cada nível (fica mais rápido)
+      const MIN_TICK_MS = 55; // velocidade máxima (piso)
+      const FOODS_PER_LEVEL = 5; // alimentos necessários para subir de nível
+
+      const POINTS_PER_FOOD = 10;
+      const HIGH_SCORE_KEY = "snakeClassicHighScore";
+
+      const FOOD_SPAWN_ANIM_MS = 180;
+
+      const UP = { x: 0, y: -1 };
+      const DOWN = { x: 0, y: 1 };
+      const LEFT = { x: -1, y: 0 };
+      const RIGHT = { x: 1, y: 0 };
+
+      // Cores usadas no Canvas (mantidas em sincronia com as variáveis CSS,
+      // já que um <canvas> não pode ler var(--sg-...) diretamente).
+      const SNAKE_BODY_COLOR = "#16a34a";
+      const SNAKE_HEAD_COLOR = "#4ade80";
+      const SNAKE_EYE_COLOR = "#04150b";
+      const FOOD_COLOR = "#ff4d5e";
+      const FOOD_SHINE_COLOR = "rgba(255, 255, 255, 0.35)";
+      const GRID_LINE_COLOR = "rgba(255, 255, 255, 0.05)";
+      const BOARD_BG_COLOR = "#02030a";
+
+      /* ---------------------------------------------------------
+       * Referências DOM
+       * ------------------------------------------------------- */
+      const $ = (id) => document.getElementById(id);
+
+      const gameRoot = $("game-snake");
+      const boardCanvas = $("snake-board-canvas");
+      const boardCtx = boardCanvas.getContext("2d");
+      const boardWrapper = $("snake-board-wrapper");
+      const srStatus = $("snake-sr-status");
+
+      const startScreen = $("snake-start-screen");
+      const pauseOverlay = $("snake-pause-overlay");
+      const gameOverOverlay = $("snake-game-over-overlay");
+
+      const scoreEl = $("snake-score");
+      const highScoreEl = $("snake-high-score");
+      const levelEl = $("snake-level");
+      const finalScoreEl = $("snake-final-score");
+      const finalHighScoreEl = $("snake-final-high-score");
+
+      const playBtn = $("snake-play-btn");
+      const pauseBtn = $("snake-pause-btn");
+      const restartBtn = $("snake-restart-btn");
+
+      const btnUp = $("snake-btn-up");
+      const btnDown = $("snake-btn-down");
+      const btnLeft = $("snake-btn-left");
+      const btnRight = $("snake-btn-right");
+
+      /* ---------------------------------------------------------
+       * Estado do jogo (evita variáveis globais soltas)
+       * ------------------------------------------------------- */
+      const state = {
+        snake: [],
+        direction: RIGHT,
+        directionQueue: [],
+        food: null,
+        foodSpawnTime: 0,
+        score: 0,
+        highScore: 0,
+        level: 1,
+        foodsEaten: 0,
+        tickInterval: BASE_TICK_MS,
+        tickCounter: 0,
+        lastTime: 0,
+        phase: "start", // 'start' | 'playing' | 'paused' | 'gameover'
+      };
+
+      /* ---------------------------------------------------------
+       * Minhoca — criação e movimentação
+       * ------------------------------------------------------- */
+      function createInitialSnake() {
+        const startY = Math.floor(ROWS / 2);
+        const startX = Math.floor(COLS / 2) - 1;
+        // Índice 0 é sempre a cabeça.
+        return [
+          { x: startX + 1, y: startY },
+          { x: startX, y: startY },
+          { x: startX - 1, y: startY },
+        ];
+      }
+
+      // Enfileira uma mudança de direção. Nunca aceita uma inversão direta
+      // (180°) em relação à direção atual OU à última já enfileirada, e
+      // limita a fila para não acumular teclas pressionadas rapidamente.
+      function queueDirection(dir) {
+        if (state.phase !== "playing") return;
+
+        const last = state.directionQueue.length
+          ? state.directionQueue[state.directionQueue.length - 1]
+          : state.direction;
+
+        const isOpposite = dir.x === -last.x && dir.y === -last.y;
+        const isSame = dir.x === last.x && dir.y === last.y;
+        if (isOpposite || isSame) return;
+
+        if (state.directionQueue.length >= 2) return;
+        state.directionQueue.push(dir);
+      }
+
+      // Avança a minhoca uma célula (chamada pelo loop principal a cada tick).
+      function advanceSnake() {
+        if (state.directionQueue.length) {
+          state.direction = state.directionQueue.shift();
+        }
+
+        const head = state.snake[0];
+        const newHead = { x: head.x + state.direction.x, y: head.y + state.direction.y };
+
+        if (isWallCollision(newHead)) {
+          triggerGameOver();
+          return;
+        }
+
+        const willGrow = sameCell(newHead, state.food);
+
+        if (isSelfCollision(newHead, willGrow)) {
+          triggerGameOver();
+          return;
+        }
+
+        state.snake.unshift(newHead);
+
+        if (willGrow) {
+          onFoodEaten();
+        } else {
+          state.snake.pop();
+        }
+      }
+
+      /* ---------------------------------------------------------
+       * Alimento
+       * ------------------------------------------------------- */
+      // Sorteia uma posição livre (nunca dentro do corpo da minhoca) a
+      // partir da lista de células vazias — garante uma posição válida
+      // mesmo quando o tabuleiro já está quase cheio.
+      function spawnFood() {
+        const free = [];
+        for (let y = 0; y < ROWS; y++) {
+          for (let x = 0; x < COLS; x++) {
+            if (!state.snake.some((seg) => seg.x === x && seg.y === y)) {
+              free.push({ x, y });
+            }
+          }
+        }
+
+        if (free.length === 0) {
+          // Minhoca ocupa o tabuleiro inteiro: não há onde nascer o alimento.
+          triggerGameOver();
+          return;
+        }
+
+        state.food = free[Math.floor(Math.random() * free.length)];
+        state.foodSpawnTime = performance.now();
+      }
+
+      /* ---------------------------------------------------------
+       * Colisão
+       * ------------------------------------------------------- */
+      function sameCell(a, b) {
+        return !!a && !!b && a.x === b.x && a.y === b.y;
+      }
+
+      function isWallCollision(cell) {
+        return cell.x < 0 || cell.x >= COLS || cell.y < 0 || cell.y >= ROWS;
+      }
+
+      // Quando a minhoca vai crescer neste passo, a cauda NÃO se move, então
+      // ela também conta como obstáculo. Caso contrário, a cauda libera a
+      // célula neste mesmo instante e pode ser ocupada pela cabeça.
+      function isSelfCollision(cell, willGrow) {
+        const body = willGrow ? state.snake : state.snake.slice(0, -1);
+        return body.some((seg) => sameCell(seg, cell));
+      }
+
+      /* ---------------------------------------------------------
+       * Pontuação e níveis
+       * ------------------------------------------------------- */
+      function computeTickInterval(level) {
+        return Math.max(MIN_TICK_MS, BASE_TICK_MS - (level - 1) * SPEED_STEP_MS);
+      }
+
+      function onFoodEaten() {
+        state.score += POINTS_PER_FOOD;
+        state.foodsEaten += 1;
+
+        const newLevel = Math.floor(state.foodsEaten / FOODS_PER_LEVEL) + 1;
+        const leveledUp = newLevel !== state.level;
+        if (leveledUp) {
+          state.level = newLevel;
+          state.tickInterval = computeTickInterval(state.level);
+        }
+
+        const newRecord = state.score > state.highScore;
+        if (newRecord) {
+          state.highScore = state.score;
+          saveHighScore(state.highScore);
+        }
+
+        spawnFood();
+        updateHUD();
+        bumpElement(scoreEl);
+        if (newRecord) bumpElement(highScoreEl);
+
+        if (leveledUp) {
+          bumpElement(levelEl);
+          announce(`Nível ${state.level}. Pontuação ${state.score}.`);
+        } else {
+          announce(`Mais 10 pontos. Pontuação ${state.score}.`);
+        }
+      }
+
+      /* ---------------------------------------------------------
+       * Estados do jogo: início, pausa, reinício, game over
+       * ------------------------------------------------------- */
+      function resetState() {
+        state.snake = createInitialSnake();
+        state.direction = RIGHT;
+        state.directionQueue = [];
+        state.score = 0;
+        state.level = 1;
+        state.foodsEaten = 0;
+        state.tickInterval = BASE_TICK_MS;
+        state.tickCounter = 0;
+        state.lastTime = performance.now();
+        spawnFood();
+        updateHUD();
+      }
+
+      function hideAllOverlays() {
+        startScreen.classList.add("hidden");
+        pauseOverlay.classList.add("hidden");
+        gameOverOverlay.classList.add("hidden");
+      }
+
+      function startGame() {
+        resetState();
+        state.phase = "playing";
+        hideAllOverlays();
+        updatePauseButtonState();
+        announce("Jogo iniciado");
+      }
+
+      function restartGame() {
+        startGame();
+      }
+
+      function togglePause() {
+        if (state.phase === "playing") {
+          state.phase = "paused";
+          pauseOverlay.classList.remove("hidden");
+          updatePauseButtonState();
+          announce("Jogo pausado");
+        } else if (state.phase === "paused") {
+          state.phase = "playing";
+          pauseOverlay.classList.add("hidden");
+          state.lastTime = performance.now();
+          updatePauseButtonState();
+          announce("Jogo retomado");
+        }
+      }
+
+      function triggerGameOver() {
+        state.phase = "gameover";
+
+        if (state.score > state.highScore) {
+          state.highScore = state.score;
+          saveHighScore(state.highScore);
+        }
+
+        finalScoreEl.textContent = state.score;
+        finalHighScoreEl.textContent = state.highScore;
+        updateHUD();
+        updatePauseButtonState();
+
+        gameOverOverlay.classList.remove("hidden");
+        boardWrapper.classList.add("flash-gameover");
+        setTimeout(() => boardWrapper.classList.remove("flash-gameover"), 600);
+
+        announce(`Fim de jogo. Pontuação ${state.score}.`);
+      }
+
+      /* ---------------------------------------------------------
+       * HUD, recorde (localStorage) e acessibilidade
+       * ------------------------------------------------------- */
+      function formatScore(value) {
+        return String(value).padStart(4, "0");
+      }
+
+      function updateHUD() {
+        scoreEl.textContent = formatScore(state.score);
+        highScoreEl.textContent = formatScore(state.highScore);
+        levelEl.textContent = state.level;
+      }
+
+      function updatePauseButtonState() {
+        pauseBtn.disabled = state.phase === "start" || state.phase === "gameover";
+        pauseBtn.textContent = state.phase === "paused" ? "Continuar" : "Pausar";
+      }
+
+      function loadHighScore() {
+        try {
+          const value = localStorage.getItem(HIGH_SCORE_KEY);
+          return value ? parseInt(value, 10) || 0 : 0;
+        } catch (err) {
+          return 0;
+        }
+      }
+
+      function saveHighScore(value) {
+        try {
+          localStorage.setItem(HIGH_SCORE_KEY, String(value));
+        } catch (err) {
+          // localStorage indisponível (ex.: modo privado) — ignora silenciosamente.
+        }
+      }
+
+      function announce(message) {
+        srStatus.textContent = message;
+      }
+
+      // Pequena animação de "pulso" reutilizada por qualquer valor do HUD.
+      function bumpElement(el) {
+        el.classList.remove("bump");
+        void el.offsetWidth; // força reflow para reiniciar a animação
+        el.classList.add("bump");
+      }
+
+      /* ---------------------------------------------------------
+       * Renderização (Canvas)
+       * ------------------------------------------------------- */
+      function easeOutCubic(t) {
+        const clamped = Math.max(0, Math.min(1, t));
+        return 1 - Math.pow(1 - clamped, 3);
+      }
+
+      function roundRect(ctx, x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      }
+
+      function drawBackground() {
+        boardCtx.fillStyle = BOARD_BG_COLOR;
+        boardCtx.fillRect(0, 0, BOARD_PX, BOARD_PX);
+      }
+
+      function drawGrid() {
+        boardCtx.strokeStyle = GRID_LINE_COLOR;
+        boardCtx.lineWidth = 1;
+        boardCtx.beginPath();
+        for (let x = 1; x < COLS; x++) {
+          boardCtx.moveTo(x * CELL + 0.5, 0);
+          boardCtx.lineTo(x * CELL + 0.5, BOARD_PX);
+        }
+        for (let y = 1; y < ROWS; y++) {
+          boardCtx.moveTo(0, y * CELL + 0.5);
+          boardCtx.lineTo(BOARD_PX, y * CELL + 0.5);
+        }
+        boardCtx.stroke();
+      }
+
+      function drawFood() {
+        if (!state.food) return;
+
+        const elapsed = performance.now() - state.foodSpawnTime;
+        const progress = easeOutCubic(elapsed / FOOD_SPAWN_ANIM_MS);
+        const radius = CELL * 0.36 * progress;
+        if (radius <= 0) return;
+
+        const cx = state.food.x * CELL + CELL / 2;
+        const cy = state.food.y * CELL + CELL / 2;
+
+        boardCtx.beginPath();
+        boardCtx.fillStyle = FOOD_COLOR;
+        boardCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+        boardCtx.fill();
+
+        // Brilho sutil para dar acabamento ao alimento.
+        boardCtx.beginPath();
+        boardCtx.fillStyle = FOOD_SHINE_COLOR;
+        boardCtx.arc(cx - radius * 0.3, cy - radius * 0.3, radius * 0.3, 0, Math.PI * 2);
+        boardCtx.fill();
+      }
+
+      function drawHeadEyes(px, py) {
+        const dx = state.direction.x;
+        const dy = state.direction.y;
+        const cx = px + CELL / 2;
+        const cy = py + CELL / 2;
+        const forward = CELL * 0.16;
+        const spread = CELL * 0.16;
+        const perpX = -dy;
+        const perpY = dx;
+        const r = Math.max(1.3, CELL * 0.065);
+
+        const eye1x = cx + dx * forward + perpX * spread;
+        const eye1y = cy + dy * forward + perpY * spread;
+        const eye2x = cx + dx * forward - perpX * spread;
+        const eye2y = cy + dy * forward - perpY * spread;
+
+        boardCtx.fillStyle = SNAKE_EYE_COLOR;
+        boardCtx.beginPath();
+        boardCtx.arc(eye1x, eye1y, r, 0, Math.PI * 2);
+        boardCtx.arc(eye2x, eye2y, r, 0, Math.PI * 2);
+        boardCtx.fill();
+      }
+
+      function drawSnakeSegment(seg, isHead) {
+        const px = seg.x * CELL;
+        const py = seg.y * CELL;
+        const pad = Math.max(1, CELL * 0.08);
+        const size = CELL - pad * 2;
+        const radius = Math.max(2, CELL * 0.22);
+
+        boardCtx.fillStyle = isHead ? SNAKE_HEAD_COLOR : SNAKE_BODY_COLOR;
+        roundRect(boardCtx, px + pad, py + pad, size, size, radius);
+        boardCtx.fill();
+
+        if (isHead) drawHeadEyes(px, py);
+      }
+
+      function drawSnake() {
+        // Desenha da cauda para a cabeça, assim a cabeça sempre fica por cima.
+        for (let i = state.snake.length - 1; i >= 0; i--) {
+          drawSnakeSegment(state.snake[i], i === 0);
+        }
+      }
+
+      function render() {
+        drawBackground();
+        drawGrid();
+        drawFood();
+        drawSnake();
+      }
+
+      /* ---------------------------------------------------------
+       * Loop principal
+       * ------------------------------------------------------- */
+      function loop(time) {
+        const delta = time - state.lastTime;
+        state.lastTime = time;
+
+        if (state.phase === "playing") {
+          state.tickCounter += delta;
+          if (state.tickCounter >= state.tickInterval) {
+            state.tickCounter = 0;
+            advanceSnake();
+          }
+        }
+
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      /* ---------------------------------------------------------
+       * Entrada: teclado
+       * ------------------------------------------------------- */
+      const GAME_KEYS = new Set([
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "Space",
+      ]);
+
+      const KEY_DIRECTIONS = {
+        ArrowUp: UP,
+        KeyW: UP,
+        ArrowDown: DOWN,
+        KeyS: DOWN,
+        ArrowLeft: LEFT,
+        KeyA: LEFT,
+        ArrowRight: RIGHT,
+        KeyD: RIGHT,
+      };
+
+      window.addEventListener(
+        "keydown",
+        (e) => {
+          // Só processa teclas do jogo quando a vista do Snake está aberta,
+          // para não bloquear rolagem/atalhos da landing page.
+          if (gameRoot.classList.contains("hidden")) return;
+          if (GAME_KEYS.has(e.code)) e.preventDefault();
+
+          if (e.code === "Space") {
+            if (e.repeat) return;
+            togglePause();
+            return;
+          }
+
+          const dir = KEY_DIRECTIONS[e.code];
+          if (dir) queueDirection(dir);
+        },
+        { passive: false }
+      );
+
+      // Evita que o toque na área do jogo role a página durante a partida.
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (state.phase === "playing") e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      /* ---------------------------------------------------------
+       * Entrada: botões (clique e toque)
+       * ------------------------------------------------------- */
+      function bindTapControl(el, handler) {
+        el.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            handler();
+          },
+          { passive: false }
+        );
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          handler();
+        });
+      }
+
+      bindTapControl(playBtn, startGame);
+      bindTapControl(pauseBtn, togglePause);
+      bindTapControl(restartBtn, restartGame);
+
+      bindTapControl(btnUp, () => queueDirection(UP));
+      bindTapControl(btnDown, () => queueDirection(DOWN));
+      bindTapControl(btnLeft, () => queueDirection(LEFT));
+      bindTapControl(btnRight, () => queueDirection(RIGHT));
+
+      /* ---------------------------------------------------------
+       * Inicialização
+       * ------------------------------------------------------- */
+      function setupCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        boardCanvas.width = BOARD_PX * dpr;
+        boardCanvas.height = BOARD_PX * dpr;
+        boardCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        render();
+      }
+
+      function init() {
+        if (window.SnakeGame.started) return;
+        window.SnakeGame.started = true;
+        state.highScore = loadHighScore();
+        setupCanvas();
+        resetState();
+        updateHUD();
+        updatePauseButtonState();
+        window.addEventListener("resize", setupCanvas);
+        state.lastTime = performance.now();
+        requestAnimationFrame(loop);
+      }
+
+      // Exposto para o roteador da landing page (init preguiçoso + pausa ao fechar).
+      window.SnakeGame = {
         started: false,
         init,
         pauseIfPlaying() {
