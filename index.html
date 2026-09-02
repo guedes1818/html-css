@@ -2,75 +2,100 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#05070f" />
-  <meta name="description" content="Tetris Classic — o clássico jogo de blocos, feito em HTML, CSS e JavaScript puro." />
-  <title>Tetris Classic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f6f3" />
+  <meta name="description" content="PixelPlay: Xadrez, Minhoca, Tetris, Palavra do Dia e Evolução das Cidades — jogos clássicos para jogar direto no navegador, sem instalar nada." />
+  <title>PixelPlay — Jogos clássicos no navegador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     /* =========================================================
-       Tetris Classic — estilos
-       Tema escuro, arcade moderno, responsivo.
+       PixelPlay — estilos
+       Tema claro, retrô + moderno, responsivo.
        ========================================================= */
 
+    /* ---------- Tokens de design ---------- */
     :root {
-      --bg-color: #05070f;
-      --panel-bg: #0c1120;
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --board-bg: #02030a;
-      --board-border: rgba(255, 255, 255, 0.14);
-      --text-primary: #e8ebf5;
-      --text-secondary: #8890a8;
-      --accent: #4fd1ff;
-      --accent-strong: #7fe0ff;
-      --danger: #ff4d5e;
-      --radius: 10px;
-      --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-      --mono: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
+      --bg: #f6f6f3;
+      --bg-alt: #efeeea;
+      --surface: #ffffff;
+      --border: #e4e3dd;
+      --border-strong: #d3d1c8;
+      --text: #1c1c1e;
+      --text-muted: #5c5c63;
+      --text-faint: #8a8a90;
+
+      --accent: #4f46e5;
+      --accent-strong: #4338ca;
+      --accent-ink: #ffffff;
+      --accent-soft: #ecebfd;
+
+      --success: #16a34a;
+      --success-soft: #e6f6ea;
+      --warning: #b45309;
+      --warning-soft: #fdf1e0;
+      --danger: #dc2626;
+      --danger-soft: #fde8e8;
+
+      --radius: 14px;
+      --shadow-sm: 0 1px 2px rgba(20, 20, 25, 0.05);
+      --shadow-md: 0 10px 26px rgba(20, 20, 25, 0.08);
+      --shadow-lg: 0 18px 40px rgba(20, 20, 25, 0.16);
+
+      --pixel-notch: 8px;
+      --pixel-corners: polygon(
+        0 var(--pixel-notch), var(--pixel-notch) var(--pixel-notch), var(--pixel-notch) 0,
+        calc(100% - var(--pixel-notch)) 0, calc(100% - var(--pixel-notch)) var(--pixel-notch), 100% var(--pixel-notch),
+        100% calc(100% - var(--pixel-notch)), calc(100% - var(--pixel-notch)) calc(100% - var(--pixel-notch)), calc(100% - var(--pixel-notch)) 100%,
+        var(--pixel-notch) 100%, var(--pixel-notch) calc(100% - var(--pixel-notch)), 0 calc(100% - var(--pixel-notch))
+      );
+
+      --font-pixel: "Press Start 2P", "Courier New", monospace;
+      --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+      --c-chess: #475569;
+      --c-chess-soft: #eef1f5;
+      --c-snake: #16a34a;
+      --c-snake-soft: #e8f7ec;
+      --c-tetris: #2563eb;
+      --c-tetris-soft: #e8eefd;
+      --c-word: #ca8a04;
+      --c-word-soft: #fbf1dc;
+      --c-city: #ea580c;
+      --c-city-soft: #fdece0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
     }
 
     /* ---------- Reset básico ---------- */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+    html.no-scroll, html.no-scroll body { overflow: hidden; }
 
     body {
       margin: 0;
-      min-height: 100dvh;
-      background: var(--bg-color);
-      color: var(--text-primary);
-      font-family: var(--font);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(4px, 2vw, 10px);
-      overscroll-behavior: none;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    a { color: inherit; }
+    button { font: inherit; color: inherit; }
+    h1, h2, h3, p { margin: 0; }
 
-    button {
-      font: inherit;
-      color: inherit;
-    }
-
-    h1,
-    h2,
-    p {
-      margin: 0;
-    }
-
-    /* Utilitário para esconder elementos sem remover do fluxo de acessibilidade */
     .sr-only {
       position: absolute;
       width: 1px;
@@ -83,12 +108,410 @@
       border: 0;
     }
 
-    .hidden {
-      display: none !important;
+    .hidden { display: none !important; }
+
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
     }
 
-    /* ---------- Layout geral ---------- */
-    .game-container {
+    .pixel-corners { clip-path: var(--pixel-corners); }
+
+    /* ---------- Skip link ---------- */
+    .skip-link {
+      position: absolute;
+      left: 12px;
+      top: -60px;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      z-index: 200;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: top 0.2s ease;
+    }
+    .skip-link:focus { top: 12px; }
+
+    /* ---------- Tipografia utilitária ---------- */
+    .eyebrow {
+      font-family: var(--font-pixel);
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title {
+      font-family: var(--font-pixel);
+      font-size: clamp(1rem, 2.4vw, 1.4rem);
+      line-height: 1.65;
+      color: var(--text);
+      margin-top: 10px;
+    }
+
+    .section-lede {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 620px;
+      margin-top: 12px;
+    }
+
+    .section { padding: 64px 0; }
+    .section-alt { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* ---------- Reveal ao rolar ---------- */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ---------- Botões ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--font-pixel);
+      font-size: 0.68rem;
+      letter-spacing: 0.01em;
+      line-height: 1.4;
+      padding: 13px 18px;
+      border-radius: 10px;
+      border: 2px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-color: var(--accent); }
+    .btn:active { transform: translateY(0) scale(0.97); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-strong); --pixel-notch: 6px; }
+    .btn-primary:hover { background: var(--accent-strong); }
+
+    .btn-soon {
+      background: var(--bg-alt);
+      color: var(--text-faint);
+      border-style: dashed;
+    }
+    .btn-soon:hover { color: var(--text-muted); border-color: var(--text-faint); transform: none; box-shadow: none; }
+
+    .btn-block { width: 100%; }
+
+    /* ---------- Badges de dificuldade ---------- */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .badge-easy { background: var(--success-soft); color: var(--success); }
+    .badge-medium { background: var(--warning-soft); color: var(--warning); }
+    .badge-hard { background: var(--danger-soft); color: var(--danger); }
+
+    /* ---------- Navegação ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(246, 246, 243, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-block: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      font-size: 1.05rem;
+      border: 2px solid var(--border-strong);
+      --pixel-notch: 5px;
+    }
+    .brand-name { font-family: var(--font-pixel); font-size: 0.82rem; letter-spacing: 0.02em; color: var(--text); white-space: nowrap; }
+    .brand-accent { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; font-size: 0.92rem; font-weight: 500; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); transition: color 0.15s ease; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { padding: 10px 16px; font-size: 0.6rem; }
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      padding: 76px 0 56px;
+      text-align: center;
+      background-image: radial-gradient(var(--border) 1px, transparent 1px);
+      background-size: 22px 22px;
+      background-position: center top;
+    }
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .hero-title {
+      font-family: var(--font-pixel);
+      font-size: clamp(1.1rem, 3.4vw, 1.9rem);
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .hero-lede { color: var(--text-muted); font-size: 1.05rem; max-width: 520px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+    .hero-icons { display: flex; gap: 14px; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
+    .hero-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--bg, var(--icon-bg));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 1px solid var(--border);
+      animation: floatIcon 3.2s ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ---------- Biblioteca de jogos ---------- */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 18px;
+      margin-top: 30px;
+    }
+    .game-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .game-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+    .game-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .game-icon {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.55rem;
+      background: var(--icon-bg, var(--accent-soft));
+      border: 2px solid var(--border-strong);
+      --pixel-notch: 6px;
+      clip-path: var(--pixel-corners);
+    }
+    .game-card-title { font-family: var(--font-pixel); font-size: 0.85rem; color: var(--text); }
+    .game-card-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; flex: 1; }
+
+    /* ---------- Clássicos (cartuchos retrô) ---------- */
+    .cartridge-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 30px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scroll-snap-type: x proximity;
+    }
+    .cartridge {
+      flex: 0 0 156px;
+      scroll-snap-align: start;
+      background: var(--surface);
+      border: 2px solid var(--border-strong);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      text-align: center;
+      --pixel-notch: 8px;
+    }
+    .cartridge-bar { width: 100%; height: 6px; border-radius: 3px; background: var(--c, var(--accent)); }
+    .cartridge-icon { font-size: 1.8rem; }
+    .cartridge-name { font-family: var(--font-pixel); font-size: 0.66rem; color: var(--text); line-height: 1.5; }
+    .cartridge-tag { font-size: 0.75rem; color: var(--text-muted); background: var(--cs, var(--accent-soft)); padding: 2px 9px; border-radius: 999px; }
+
+    /* ---------- Ranking ---------- */
+    .rank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+    .rank-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+    .rank-icon { font-size: 1.6rem; }
+    .rank-value {
+      font-family: var(--font-pixel);
+      font-size: 1.35rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      margin-top: 4px;
+    }
+    .rank-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .rank-note { font-size: 0.72rem; color: var(--text-faint); }
+
+    /* ---------- Destaque: Evolução das Cidades ---------- */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (max-width: 820px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+    .feature-lede { color: var(--text-muted); margin-top: 14px; max-width: 480px; }
+    .feature-list { display: flex; flex-direction: column; gap: 10px; margin: 22px 0 26px; }
+    .feature-list li { font-size: 0.92rem; color: var(--text); }
+
+    .city-preview {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: #e3edf4;
+      border: 2px solid var(--border-strong);
+      overflow: hidden;
+      --pixel-notch: 10px;
+    }
+    .city-sun { position: absolute; top: 12%; right: 12%; width: 34px; height: 34px; background: #ffd76b; border-radius: 50%; }
+    .city-skyline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 14%;
+      height: 68%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+    }
+    .building { width: 15%; height: var(--h); background: var(--bg); position: relative; }
+    .building .window {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      left: 30%;
+      top: 22%;
+      background: #ffe08a;
+      animation: winBlink 3s ease-in-out infinite;
+      animation-delay: var(--d, 0s);
+    }
+    .building .window + .window { left: 58%; top: 48%; }
+    @keyframes winBlink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .city-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 14%; background: #bcd4c6; }
+
+    /* ---------- Rodapé ---------- */
+    .site-footer { border-top: 1px solid var(--border); padding: 40px 0; }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+    .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; font-size: 0.88rem; }
+    .footer-links a { text-decoration: none; color: var(--text-muted); }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--text-faint); font-size: 0.78rem; margin-top: 6px; }
+
+    /* ---------- Toast ---------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translate(-50%, 20px);
+      background: var(--text);
+      color: #fff;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      max-width: min(90vw, 360px);
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* =========================================================
+       Tetris — vista de jogo (overlay em tela cheia)
+       Tema escuro próprio, isolado sob #game-tetris.
+       ========================================================= */
+    #game-tetris {
+      --bg-color: #05070f;
+      --panel-bg: #0c1120;
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --board-bg: #02030a;
+      --board-border: rgba(255, 255, 255, 0.14);
+      --text-primary: #e8ebf5;
+      --text-secondary: #8890a8;
+      --t-accent: #4fd1ff;
+      --t-accent-strong: #7fe0ff;
+      --t-danger: #ff4d5e;
+      --t-radius: 10px;
+      --t-font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      --t-mono: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
+
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      overflow: auto;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--t-font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(4px, 2vw, 10px);
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+
+    #game-tetris .game-container {
       width: 100%;
       max-width: 920px;
       display: flex;
@@ -97,21 +520,43 @@
       gap: clamp(6px, 1.5vh, 12px);
     }
 
-    .game-header {
+    #game-tetris .game-topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+      gap: 8px;
+    }
+    #game-tetris .game-back-btn {
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--text-secondary);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    #game-tetris .game-back-btn:hover { color: var(--text-primary); border-color: var(--t-accent); }
+    #game-tetris .game-back-btn:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+    #game-tetris .game-topbar-spacer { justify-self: end; }
+
+    #game-tetris .game-title {
+      font-family: var(--t-mono);
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      font-size: clamp(1.1rem, 4vw, 1.7rem);
+      color: var(--t-accent);
+      text-shadow: 0 0 8px rgba(79, 209, 255, 0.55), 0 0 22px rgba(79, 209, 255, 0.25);
+      margin: 0;
       text-align: center;
     }
 
-    .game-title {
-      font-family: var(--mono);
-      font-weight: 900;
-      letter-spacing: 0.18em;
-      font-size: clamp(1.3rem, 5vw, 2.4rem);
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(79, 209, 255, 0.55), 0 0 22px rgba(79, 209, 255, 0.25);
-      margin: 0;
-    }
-
-    .game-layout {
+    #game-tetris .game-layout {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -120,19 +565,15 @@
     }
 
     @media (min-width: 860px) {
-      .game-layout {
+      #game-tetris .game-layout {
         flex-direction: row;
         align-items: flex-start;
         justify-content: center;
       }
-
-      .panel {
-        width: 190px;
-      }
+      #game-tetris .panel { width: 190px; }
     }
 
-    /* ---------- Painéis laterais ---------- */
-    .panel {
+    #game-tetris .panel {
       width: 100%;
       max-width: 340px;
       display: flex;
@@ -140,14 +581,14 @@
       gap: 10px;
     }
 
-    .panel-box {
+    #game-tetris .panel-box {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
-      border-radius: var(--radius);
+      border-radius: var(--t-radius);
       padding: 10px 14px;
     }
 
-    .panel-title {
+    #game-tetris .panel-title {
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -156,13 +597,9 @@
       text-align: center;
     }
 
-    .next-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    #game-tetris .next-box { display: flex; flex-direction: column; align-items: center; }
 
-    #next-canvas {
+    #game-tetris #next-canvas {
       display: block;
       width: 80px;
       height: 80px;
@@ -171,58 +608,26 @@
       border-radius: 6px;
     }
 
-    .stats-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    #game-tetris .stats-box { display: flex; flex-direction: column; gap: 8px; }
+    #game-tetris .stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #game-tetris .stat-label { font-size: 0.78rem; color: var(--text-secondary); }
+    #game-tetris .stat-value { font-family: var(--t-mono); font-weight: 700; font-size: 1.05rem; color: var(--text-primary); }
 
-    .stat {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
+    #game-tetris .key-list li { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); padding: 3px 0; }
 
-    .stat-label {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-    }
-
-    .stat-value {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-primary);
-    }
-
-    .key-list li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      padding: 3px 0;
-    }
-
-    kbd {
+    #game-tetris kbd {
       background: #171d33;
       border: 1px solid var(--panel-border);
       border-radius: 4px;
       padding: 1px 6px;
-      font-family: var(--mono);
+      font-family: var(--t-mono);
       font-size: 0.75rem;
       color: var(--text-primary);
     }
 
-    .action-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    #game-tetris .action-box { display: flex; flex-direction: column; gap: 8px; }
 
-    /* ---------- Tabuleiro ---------- */
-    .board-wrapper {
+    #game-tetris .board-wrapper {
       position: relative;
       width: min(80vw, 320px, 40vh);
       aspect-ratio: 1 / 2;
@@ -234,163 +639,59 @@
       flex-shrink: 0;
     }
 
-    #board-canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
+    #game-tetris #board-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+    #game-tetris .board-wrapper.flash-gameover { animation: tFlashRed 0.5s ease-in-out 2; }
+
+    @keyframes tFlashRed {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6); }
+      50% { box-shadow: 0 0 0 3px var(--t-danger), 0 0 40px rgba(255, 77, 94, 0.6); }
     }
 
-    .board-wrapper.flash-gameover {
-      animation: flashRed 0.5s ease-in-out 2;
-    }
-
-    @keyframes flashRed {
-      0%,
-      100% {
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
-      }
-      50% {
-        box-shadow: 0 0 0 3px var(--danger), 0 0 40px rgba(255, 77, 94, 0.6);
-      }
-    }
-
-    /* ---------- Layout compacto para telas estreitas (tablet/mobile) ----------
-       Em vez do painel lateral empilhado, vira uma barra horizontal enxuta
-       acima do tabuleiro, e a legenda de teclado some (sem teclado no toque). */
     @media (max-width: 859.98px) {
-      .panel {
-        max-width: 320px;
-      }
-
-      .panel-left {
-        flex-direction: row;
-        align-items: stretch;
-        gap: 8px;
-      }
-
-      .next-box {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-      }
-
-      .next-box .panel-title {
-        margin-bottom: 0;
-        writing-mode: vertical-rl;
-        font-size: 0.65rem;
-      }
-
-      #next-canvas {
-        width: 42px;
-        height: 42px;
-      }
-
-      .stats-box {
-        flex: 1;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: center;
-        justify-content: space-between;
-        gap: 2px 10px;
-        padding: 6px 10px;
-      }
-
-      .stat {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0;
-        min-width: 42px;
-      }
-
-      .stat-label {
-        font-size: 0.6rem;
-      }
-
-      .stat-value {
-        font-size: 0.85rem;
-      }
-
-      /* Legenda de teclado é irrelevante em telas de toque. */
-      .controls-box {
-        display: none;
-      }
-
-      .action-box {
-        flex-direction: row;
-        justify-content: center;
-        padding: 6px 10px;
-      }
-
-      /* O botão de pausa por toque já cobre essa função. */
-      #pause-btn {
-        display: none;
-      }
-
-      .action-box .btn {
-        padding: 8px 14px;
-        font-size: 0.82rem;
-      }
-
-      .panel-box {
-        padding: 6px 10px;
-      }
-
-      /* A altura do tabuleiro é 2x a largura (proporção 1:2), então a largura é
-         limitada a metade do espaço vertical restante após o resto da interface
-         (cabeçalho, HUD, ações, controles de toque e espaçamentos). */
-      .board-wrapper {
-        width: min(84vw, 300px, calc((100dvh - 356px) / 2));
-      }
+      #game-tetris .panel { max-width: 320px; }
+      #game-tetris .panel-left { flex-direction: row; align-items: stretch; gap: 8px; }
+      #game-tetris .next-box { flex-direction: row; justify-content: center; align-items: center; gap: 8px; padding: 6px 10px; }
+      #game-tetris .next-box .panel-title { margin-bottom: 0; writing-mode: vertical-rl; font-size: 0.65rem; }
+      #game-tetris #next-canvas { width: 42px; height: 42px; }
+      #game-tetris .stats-box { flex: 1; flex-direction: row; flex-wrap: wrap; align-content: center; justify-content: space-between; gap: 2px 10px; padding: 6px 10px; }
+      #game-tetris .stat { flex-direction: column; align-items: flex-start; gap: 0; min-width: 42px; }
+      #game-tetris .stat-label { font-size: 0.6rem; }
+      #game-tetris .stat-value { font-size: 0.85rem; }
+      #game-tetris .controls-box { display: none; }
+      #game-tetris .action-box { flex-direction: row; justify-content: center; padding: 6px 10px; }
+      #game-tetris #pause-btn { display: none; }
+      #game-tetris .action-box .btn { padding: 8px 14px; font-size: 0.82rem; }
+      #game-tetris .panel-box { padding: 6px 10px; }
+      #game-tetris .board-wrapper { width: min(84vw, 300px, calc((100dvh - 356px) / 2)); }
     }
 
-    /* ---------- Toast de combo (efeito ao limpar linhas) ---------- */
-    .combo-toast {
+    #game-tetris .combo-toast {
       position: absolute;
       top: 42%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-family: var(--mono);
+      font-family: var(--t-mono);
       font-weight: 900;
       font-size: 1.5rem;
       letter-spacing: 0.06em;
       color: #ffffff;
-      text-shadow: 0 0 10px var(--accent), 0 0 26px var(--accent);
+      text-shadow: 0 0 10px var(--t-accent), 0 0 26px var(--t-accent);
       opacity: 0;
       pointer-events: none;
       z-index: 6;
       white-space: nowrap;
     }
-
-    .combo-toast.show {
-      animation: comboPop 0.9s ease forwards;
+    #game-tetris .combo-toast.show { animation: tComboPop 0.9s ease forwards; }
+    @keyframes tComboPop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30% { transform: translate(-50%, -50%) scale(1); }
+      75% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-14px); }
     }
 
-    @keyframes comboPop {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.6);
-      }
-      15% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-      }
-      30% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-      75% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1) translateY(-14px);
-      }
-    }
-
-    /* ---------- Overlays (início, pausa, game over) ---------- */
-    .overlay {
+    #game-tetris .overlay {
       position: absolute;
       inset: 0;
       background: rgba(2, 4, 10, 0.9);
@@ -402,43 +703,25 @@
       text-align: center;
       padding: 16px;
       z-index: 5;
-      animation: fadeIn 0.25s ease;
+      animation: tFadeIn 0.25s ease;
     }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.96);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+    @keyframes tFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
     }
-
-    .overlay-title {
-      font-family: var(--mono);
+    #game-tetris .overlay-title {
+      font-family: var(--t-mono);
       font-weight: 900;
       letter-spacing: 0.12em;
       font-size: 1.5rem;
-      color: var(--accent);
+      color: var(--t-accent);
       text-shadow: 0 0 8px rgba(79, 209, 255, 0.5);
     }
+    #game-tetris .overlay-title-danger { color: var(--t-danger); text-shadow: 0 0 10px rgba(255, 77, 94, 0.55); }
+    #game-tetris .overlay-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; max-width: 240px; }
 
-    .overlay-title-danger {
-      color: var(--danger);
-      text-shadow: 0 0 10px rgba(255, 77, 94, 0.55);
-    }
-
-    .overlay-text {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      max-width: 240px;
-    }
-
-    /* ---------- Botões ---------- */
-    .btn {
+    #game-tetris .btn {
+      font-family: var(--t-font);
       background: #141a2e;
       color: var(--text-primary);
       border: 1px solid var(--panel-border);
@@ -447,55 +730,21 @@
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
+      letter-spacing: normal;
       transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
     }
+    #game-tetris .btn:hover { background: #1c2440; border-color: var(--t-accent); transform: none; box-shadow: none; }
+    #game-tetris .btn:active { transform: scale(0.96); }
+    #game-tetris .btn:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+    #game-tetris .btn-primary { background: var(--t-accent); color: #04121a; border-color: var(--t-accent); }
+    #game-tetris .btn-primary:hover { background: var(--t-accent-strong); }
 
-    .btn:hover {
-      background: #1c2440;
-      border-color: var(--accent);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #04121a;
-      border-color: var(--accent);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-strong);
-    }
-
-    /* ---------- Controles de toque (mobile) ---------- */
-    .mobile-controls {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-      max-width: 320px;
-    }
-
+    #game-tetris .mobile-controls { display: none; flex-direction: column; gap: 6px; width: 100%; max-width: 320px; }
     @media (max-width: 860px), (hover: none) and (pointer: coarse) {
-      .mobile-controls {
-        display: flex;
-      }
+      #game-tetris .mobile-controls { display: flex; }
     }
-
-    .mobile-controls-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .touch-btn {
+    #game-tetris .mobile-controls-row { display: flex; justify-content: space-between; gap: 6px; }
+    #game-tetris .touch-btn {
       flex: 1;
       height: clamp(44px, 12vh, 58px);
       font-size: 1.3rem;
@@ -508,146 +757,476 @@
       -webkit-user-select: none;
       transition: background-color 0.15s ease, transform 0.1s ease;
     }
+    #game-tetris .touch-btn:active { background: #1c2440; transform: scale(0.94); }
+    #game-tetris .touch-btn:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 2px; }
 
-    .touch-btn:active {
-      background: #1c2440;
-      transform: scale(0.94);
-    }
-
-    .touch-btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* ---------- Ajustes finos para telas muito pequenas ---------- */
     @media (max-width: 360px) {
-      .game-title {
-        letter-spacing: 0.1em;
-      }
-
-      .panel-box {
-        padding: 8px 10px;
-      }
+      #game-tetris .game-title { letter-spacing: 0.1em; }
+      #game-tetris .panel-box { padding: 8px 10px; }
     }
   </style>
 </head>
 <body>
-  <!-- Região invisível para leitores de tela anunciarem eventos importantes -->
+  <a href="#top" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- Região invisível para leitores de tela anunciarem eventos do jogo -->
   <div id="sr-status" class="sr-only" aria-live="polite"></div>
 
-  <div class="game-container">
-    <header class="game-header">
-      <h1 class="game-title">TETRIS</h1>
-    </header>
-
-    <div class="game-layout">
-      <!-- Painel esquerdo: próxima peça + estatísticas -->
-      <aside class="panel panel-left" aria-label="Informações da partida">
-        <section class="panel-box next-box">
-          <h2 class="panel-title">Próxima</h2>
-          <canvas id="next-canvas" width="80" height="80" role="img" aria-label="Prévia da próxima peça"></canvas>
-        </section>
-
-        <section class="panel-box stats-box">
-          <div class="stat">
-            <span class="stat-label">Pontuação</span>
-            <span id="score" class="stat-value">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Recorde</span>
-            <span id="high-score" class="stat-value">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Nível</span>
-            <span id="level" class="stat-value">1</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Linhas</span>
-            <span id="lines" class="stat-value">0</span>
-          </div>
-        </section>
-      </aside>
-
-      <!-- Tabuleiro principal -->
-      <main class="board-wrapper" id="board-wrapper">
-        <canvas id="board-canvas" width="280" height="560" role="img" aria-label="Tabuleiro do Tetris">
-          Seu navegador não tem suporte a Canvas, necessário para jogar Tetris Classic.
-        </canvas>
-
-        <div id="combo-toast" class="combo-toast" aria-hidden="true"></div>
-
-        <!-- Tela inicial -->
-        <div id="start-screen" class="overlay">
-          <h2 class="overlay-title">TETRIS</h2>
-          <p class="overlay-text">
-            Encaixe as peças e complete linhas para pontuar.<br />
-            Use as setas para mover e girar, espaço para queda instantânea.
-          </p>
-          <button id="play-btn" class="btn btn-primary" type="button">Jogar</button>
-        </div>
-
-        <!-- Tela de pausa -->
-        <div id="pause-overlay" class="overlay hidden">
-          <h2 class="overlay-title">PAUSADO</h2>
-          <button id="resume-btn" class="btn btn-primary" type="button">Continuar</button>
-        </div>
-
-        <!-- Tela de game over -->
-        <div id="game-over-overlay" class="overlay hidden">
-          <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
-          <p class="overlay-text">
-            Pontuação: <strong id="final-score">0</strong><br />
-            Recorde: <strong id="final-high-score">0</strong>
-          </p>
-          <button id="restart-btn-overlay" class="btn btn-primary" type="button">Jogar Novamente</button>
-        </div>
-      </main>
-
-      <!-- Painel direito: controles + ações -->
-      <aside class="panel panel-right" aria-label="Controles do jogo">
-        <section class="panel-box controls-box">
-          <h2 class="panel-title">Controles</h2>
-          <ul class="key-list">
-            <li><kbd>&larr;</kbd><kbd>&rarr;</kbd> Mover</li>
-            <li><kbd>&uarr;</kbd> Rotacionar</li>
-            <li><kbd>&darr;</kbd> Descer rápido</li>
-            <li><kbd>Espaço</kbd> Queda instantânea</li>
-            <li><kbd>P</kbd> Pausar</li>
-            <li><kbd>R</kbd> Reiniciar</li>
-          </ul>
-        </section>
-
-        <section class="panel-box action-box">
-          <button id="pause-btn" class="btn" type="button">Pausar</button>
-          <button id="restart-btn" class="btn" type="button">Reiniciar</button>
-        </section>
-      </aside>
+  <header class="site-nav">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-badge pixel-corners" aria-hidden="true">🕹️</span>
+        <span class="brand-name">PIXEL<span class="brand-accent">PLAY</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="#biblioteca">Biblioteca</a>
+        <a href="#classicos">Clássicos</a>
+        <a href="#ranking">Ranking</a>
+        <a href="#cidades">Cidades</a>
+      </nav>
+      <a href="#biblioteca" class="btn btn-primary pixel-corners nav-cta">Jogar</a>
     </div>
+  </header>
 
-    <!-- Controles para toque (mobile) -->
-    <div class="mobile-controls" id="mobile-controls" aria-label="Controles de toque">
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
-        <button class="touch-btn" id="btn-rotate" type="button" aria-label="Rotacionar peça">&#8635;</button>
-        <button class="touch-btn" id="btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
+  <main id="top">
+    <!-- ================= Hero ================= -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow reveal">🕹️ Arcade grátis no navegador</p>
+        <h1 class="hero-title reveal">Seus jogos favoritos, direto no navegador.</h1>
+        <p class="hero-lede reveal">Uma coleção de jogos clássicos para jogar no computador, sem instalar nada.</p>
+        <div class="hero-actions reveal">
+          <a href="#biblioteca" class="btn btn-primary pixel-corners">Jogar agora</a>
+          <a href="#classicos" class="btn">Conhecer os jogos</a>
+        </div>
+        <div class="hero-icons reveal" aria-hidden="true">
+          <span class="hero-icon" style="--delay:0s">♟️</span>
+          <span class="hero-icon" style="--delay:.15s">🐍</span>
+          <span class="hero-icon" style="--delay:.3s">🧱</span>
+          <span class="hero-icon" style="--delay:.45s">📝</span>
+          <span class="hero-icon" style="--delay:.6s">🏙️</span>
+        </div>
       </div>
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-down" type="button" aria-label="Descer rápido">&#9660;</button>
-        <button class="touch-btn" id="btn-drop" type="button" aria-label="Queda instantânea">&#10515;</button>
-        <button class="touch-btn" id="btn-pause" type="button" aria-label="Pausar jogo">&#10074;&#10074;</button>
+    </section>
+
+    <!-- ================= Biblioteca de jogos ================= -->
+    <section class="section" id="biblioteca">
+      <div class="container">
+        <p class="eyebrow reveal">📚 Biblioteca</p>
+        <h2 class="section-title reveal">Biblioteca de jogos</h2>
+        <p class="section-lede reveal">Escolha um jogo e comece a jogar agora — direto do navegador.</p>
+
+        <div class="game-grid">
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-chess-soft)" aria-hidden="true">♟️</div>
+              <span class="badge badge-hard">Difícil</span>
+            </div>
+            <h3 class="game-card-title">Xadrez</h3>
+            <p class="game-card-desc">Jogue contra o computador ou desafie um amigo no mesmo dispositivo.</p>
+            <button type="button" class="btn btn-soon btn-block" onclick="openGame('chess')">🚧 Em breve</button>
+          </article>
+
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-snake-soft)" aria-hidden="true">🐍</div>
+              <span class="badge badge-easy">Fácil</span>
+            </div>
+            <h3 class="game-card-title">Minhoca</h3>
+            <p class="game-card-desc">Guie a minhoca, coma para crescer e não esbarre nas paredes nem em você mesmo.</p>
+            <button type="button" class="btn btn-soon btn-block" onclick="openGame('snake')">🚧 Em breve</button>
+          </article>
+
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-tetris-soft)" aria-hidden="true">🧱</div>
+              <span class="badge badge-medium">Médio</span>
+            </div>
+            <h3 class="game-card-title">Tetris</h3>
+            <p class="game-card-desc">Encaixe as peças, complete linhas e suba de nível o mais rápido que conseguir.</p>
+            <button type="button" class="btn btn-primary pixel-corners btn-block" onclick="openGame('tetris')">Jogar</button>
+          </article>
+
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-word-soft)" aria-hidden="true">📝</div>
+              <span class="badge badge-easy">Fácil</span>
+            </div>
+            <h3 class="game-card-title">Palavra do Dia</h3>
+            <p class="game-card-desc">Descubra a palavra secreta em tentativas limitadas. Uma palavra nova a cada dia.</p>
+            <button type="button" class="btn btn-soon btn-block" onclick="openGame('word')">🚧 Em breve</button>
+          </article>
+
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-city-soft)" aria-hidden="true">🏙️</div>
+              <span class="badge badge-medium">Médio</span>
+            </div>
+            <h3 class="game-card-title">Evolução das Cidades</h3>
+            <p class="game-card-desc">Comece com uma vila pequena e transforme-a em uma grande metrópole.</p>
+            <button type="button" class="btn btn-soon btn-block" onclick="openGame('city')">🚧 Em breve</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Clássicos ================= -->
+    <section class="section section-alt" id="classicos">
+      <div class="container">
+        <p class="eyebrow reveal">🏆 Coleção retrô</p>
+        <h2 class="section-title reveal">Clássicos que marcaram época</h2>
+        <p class="section-lede reveal">De fliperamas a computadores pessoais — esses jogos atravessaram gerações e agora cabem direto no seu navegador.</p>
+
+        <div class="cartridge-row">
+          <div class="cartridge reveal pixel-corners" style="--c:var(--c-chess); --cs:var(--c-chess-soft)">
+            <div class="cartridge-bar" aria-hidden="true"></div>
+            <span class="cartridge-icon" aria-hidden="true">♟️</span>
+            <strong class="cartridge-name">Xadrez</strong>
+            <span class="cartridge-tag">Estratégia</span>
+          </div>
+          <div class="cartridge reveal pixel-corners" style="--c:var(--c-snake); --cs:var(--c-snake-soft)">
+            <div class="cartridge-bar" aria-hidden="true"></div>
+            <span class="cartridge-icon" aria-hidden="true">🐍</span>
+            <strong class="cartridge-name">Minhoca</strong>
+            <span class="cartridge-tag">Arcade</span>
+          </div>
+          <div class="cartridge reveal pixel-corners" style="--c:var(--c-tetris); --cs:var(--c-tetris-soft)">
+            <div class="cartridge-bar" aria-hidden="true"></div>
+            <span class="cartridge-icon" aria-hidden="true">🧱</span>
+            <strong class="cartridge-name">Tetris</strong>
+            <span class="cartridge-tag">Puzzle</span>
+          </div>
+          <div class="cartridge reveal pixel-corners" style="--c:var(--c-word); --cs:var(--c-word-soft)">
+            <div class="cartridge-bar" aria-hidden="true"></div>
+            <span class="cartridge-icon" aria-hidden="true">📝</span>
+            <strong class="cartridge-name">Palavra do Dia</strong>
+            <span class="cartridge-tag">Palavras</span>
+          </div>
+          <div class="cartridge reveal pixel-corners" style="--c:var(--c-city); --cs:var(--c-city-soft)">
+            <div class="cartridge-bar" aria-hidden="true"></div>
+            <span class="cartridge-icon" aria-hidden="true">🏙️</span>
+            <strong class="cartridge-name">Evolução das Cidades</strong>
+            <span class="cartridge-tag">Gestão</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Ranking ================= -->
+    <section class="section" id="ranking">
+      <div class="container">
+        <p class="eyebrow reveal">🏅 Placar</p>
+        <h2 class="section-title reveal">Ranking</h2>
+        <p class="section-lede reveal">Recordes salvos neste navegador.</p>
+
+        <div class="rank-grid">
+          <div class="rank-card reveal">
+            <span class="rank-icon" aria-hidden="true">🐍</span>
+            <span class="rank-value" id="rank-snake">—</span>
+            <span class="rank-label">Maior pontuação — Minhoca</span>
+            <span class="rank-note">Em breve</span>
+          </div>
+          <div class="rank-card reveal">
+            <span class="rank-icon" aria-hidden="true">🧱</span>
+            <span class="rank-value" id="rank-tetris">0</span>
+            <span class="rank-label">Maior pontuação — Tetris</span>
+            <span class="rank-note" id="rank-tetris-note">Jogue para pontuar</span>
+          </div>
+          <div class="rank-card reveal">
+            <span class="rank-icon" aria-hidden="true">📝</span>
+            <span class="rank-value" id="rank-word">—</span>
+            <span class="rank-label">Melhor sequência — Palavra do Dia</span>
+            <span class="rank-note">Em breve</span>
+          </div>
+          <div class="rank-card reveal">
+            <span class="rank-icon" aria-hidden="true">🏙️</span>
+            <span class="rank-value" id="rank-city">—</span>
+            <span class="rank-label">Maior cidade construída</span>
+            <span class="rank-note">Em breve</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Destaque: Evolução das Cidades ================= -->
+    <section class="section section-alt" id="cidades">
+      <div class="container feature-grid">
+        <div class="feature-text reveal">
+          <p class="eyebrow">🏙️ Em destaque</p>
+          <h2 class="section-title">Evolução das Cidades</h2>
+          <p class="feature-lede">Comece com uma pequena vila. Construa, administre recursos e transforme seu pequeno território em uma metrópole.</p>
+          <ul class="feature-list">
+            <li>🏗️ Construa casas, fazendas e indústrias</li>
+            <li>💰 Administre recursos e economia</li>
+            <li>📈 Desbloqueie evoluções conforme sua cidade cresce</li>
+            <li>🏆 Dispute o posto de maior cidade do ranking</li>
+          </ul>
+          <button type="button" class="btn btn-soon" onclick="openGame('city')">🚧 Em breve</button>
+        </div>
+        <div class="feature-visual reveal">
+          <div class="city-preview pixel-corners" aria-hidden="true">
+            <div class="city-sun"></div>
+            <div class="city-skyline">
+              <div class="building" style="--h:34%; background:#94a9bd"></div>
+              <div class="building" style="--h:52%; background:#64748b"><span class="window" style="--d:0s"></span></div>
+              <div class="building" style="--h:70%; background:#475569"><span class="window" style="--d:.4s"></span><span class="window" style="--d:.9s"></span></div>
+              <div class="building" style="--h:46%; background:#64748b"><span class="window" style="--d:.2s"></span></div>
+              <div class="building" style="--h:60%; background:#94a9bd"><span class="window" style="--d:.7s"></span></div>
+              <div class="building" style="--h:30%; background:#475569"></div>
+            </div>
+            <div class="city-ground"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="brand">
+        <span class="brand-badge pixel-corners" aria-hidden="true">🕹️</span>
+        <span class="brand-name">PIXEL<span class="brand-accent">PLAY</span></span>
+      </div>
+      <p class="footer-text">Jogos clássicos, direto no navegador — sem instalar nada.</p>
+      <nav class="footer-links" aria-label="Links do rodapé">
+        <a href="#biblioteca">Biblioteca</a>
+        <a href="#classicos">Clássicos</a>
+        <a href="#ranking">Ranking</a>
+        <a href="#cidades">Cidades</a>
+      </nav>
+      <p class="footer-copy">Feito com HTML, CSS e JavaScript puro.</p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ================= Vista de jogo: Tetris ================= -->
+  <div id="game-tetris" class="hidden" role="region" aria-label="Tetris">
+    <div class="game-container">
+      <header class="game-topbar">
+        <button type="button" class="game-back-btn" onclick="closeGame('tetris')">
+          <span aria-hidden="true">←</span> Voltar
+        </button>
+        <h1 class="game-title">TETRIS</h1>
+        <span class="game-topbar-spacer" aria-hidden="true"></span>
+      </header>
+
+      <div class="game-layout">
+        <!-- Painel esquerdo: próxima peça + estatísticas -->
+        <aside class="panel panel-left" aria-label="Informações da partida">
+          <section class="panel-box next-box">
+            <h2 class="panel-title">Próxima</h2>
+            <canvas id="next-canvas" width="80" height="80" role="img" aria-label="Prévia da próxima peça"></canvas>
+          </section>
+
+          <section class="panel-box stats-box">
+            <div class="stat">
+              <span class="stat-label">Pontuação</span>
+              <span id="score" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Recorde</span>
+              <span id="high-score" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Nível</span>
+              <span id="level" class="stat-value">1</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Linhas</span>
+              <span id="lines" class="stat-value">0</span>
+            </div>
+          </section>
+        </aside>
+
+        <!-- Tabuleiro principal -->
+        <main class="board-wrapper" id="board-wrapper">
+          <canvas id="board-canvas" width="280" height="560" role="img" aria-label="Tabuleiro do Tetris">
+            Seu navegador não tem suporte a Canvas, necessário para jogar Tetris Classic.
+          </canvas>
+
+          <div id="combo-toast" class="combo-toast" aria-hidden="true"></div>
+
+          <!-- Tela inicial -->
+          <div id="start-screen" class="overlay">
+            <h2 class="overlay-title">TETRIS</h2>
+            <p class="overlay-text">
+              Encaixe as peças e complete linhas para pontuar.<br />
+              Use as setas para mover e girar, espaço para queda instantânea.
+            </p>
+            <button id="play-btn" class="btn btn-primary" type="button">Jogar</button>
+          </div>
+
+          <!-- Tela de pausa -->
+          <div id="pause-overlay" class="overlay hidden">
+            <h2 class="overlay-title">PAUSADO</h2>
+            <button id="resume-btn" class="btn btn-primary" type="button">Continuar</button>
+          </div>
+
+          <!-- Tela de game over -->
+          <div id="game-over-overlay" class="overlay hidden">
+            <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
+            <p class="overlay-text">
+              Pontuação: <strong id="final-score">0</strong><br />
+              Recorde: <strong id="final-high-score">0</strong>
+            </p>
+            <button id="restart-btn-overlay" class="btn btn-primary" type="button">Jogar Novamente</button>
+          </div>
+        </main>
+
+        <!-- Painel direito: controles + ações -->
+        <aside class="panel panel-right" aria-label="Controles do jogo">
+          <section class="panel-box controls-box">
+            <h2 class="panel-title">Controles</h2>
+            <ul class="key-list">
+              <li><kbd>&larr;</kbd><kbd>&rarr;</kbd> Mover</li>
+              <li><kbd>&uarr;</kbd> Rotacionar</li>
+              <li><kbd>&darr;</kbd> Descer rápido</li>
+              <li><kbd>Espaço</kbd> Queda instantânea</li>
+              <li><kbd>P</kbd> Pausar</li>
+              <li><kbd>R</kbd> Reiniciar</li>
+            </ul>
+          </section>
+
+          <section class="panel-box action-box">
+            <button id="pause-btn" class="btn" type="button">Pausar</button>
+            <button id="restart-btn" class="btn" type="button">Reiniciar</button>
+          </section>
+        </aside>
+      </div>
+
+      <!-- Controles para toque (mobile) -->
+      <div class="mobile-controls" id="mobile-controls" aria-label="Controles de toque">
+        <div class="mobile-controls-row">
+          <button class="touch-btn" id="btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
+          <button class="touch-btn" id="btn-rotate" type="button" aria-label="Rotacionar peça">&#8635;</button>
+          <button class="touch-btn" id="btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
+        </div>
+        <div class="mobile-controls-row">
+          <button class="touch-btn" id="btn-down" type="button" aria-label="Descer rápido">&#9660;</button>
+          <button class="touch-btn" id="btn-drop" type="button" aria-label="Queda instantânea">&#10515;</button>
+          <button class="touch-btn" id="btn-pause" type="button" aria-label="Pausar jogo">&#10074;&#10074;</button>
+        </div>
       </div>
     </div>
   </div>
 
   <noscript>
-    Este jogo precisa de JavaScript habilitado no navegador para funcionar.
+    Este site precisa de JavaScript habilitado no navegador para funcionar.
   </noscript>
+
+  <script>
+    /* =========================================================
+       PixelPlay — lógica compartilhada do site
+       Roteamento simples entre a landing page e as vistas de jogo,
+       toasts, ranking e animações de entrada.
+       ========================================================= */
+    (function () {
+      "use strict";
+
+      const gameRoot = document.getElementById("game-tetris");
+      const toastEl = document.getElementById("toast");
+      let toastTimer = null;
+      let lastFocused = null;
+
+      const GAME_TITLES = {
+        chess: "Xadrez",
+        snake: "Minhoca",
+        word: "Palavra do Dia",
+        city: "Evolução das Cidades",
+      };
+
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.remove("show");
+        void toastEl.offsetWidth; // força reflow para reiniciar a animação
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
+      }
+
+      // Abre a vista de um jogo, se ela existir; caso contrário, avisa que está em breve.
+      window.openGame = function (id) {
+        if (id === "tetris") {
+          lastFocused = document.activeElement;
+          if (window.TetrisGame && !window.TetrisGame.started) {
+            window.TetrisGame.init();
+          }
+          gameRoot.classList.remove("hidden");
+          document.documentElement.classList.add("no-scroll");
+          const backBtn = gameRoot.querySelector(".game-back-btn");
+          if (backBtn) backBtn.focus();
+          return;
+        }
+        showToast("🚧 " + (GAME_TITLES[id] || "Este jogo") + " ainda está em desenvolvimento. Volte em breve!");
+      };
+
+      window.closeGame = function (id) {
+        if (id === "tetris") {
+          gameRoot.classList.add("hidden");
+          document.documentElement.classList.remove("no-scroll");
+          if (window.TetrisGame) window.TetrisGame.pauseIfPlaying();
+          loadTetrisRanking();
+          if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+        }
+      };
+
+      // Fecha a vista de jogo aberta ao pressionar Esc.
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !gameRoot.classList.contains("hidden")) {
+          closeGame("tetris");
+        }
+      });
+
+      function loadTetrisRanking() {
+        let high = 0;
+        try {
+          high = parseInt(localStorage.getItem("tetrisClassicHighScore"), 10) || 0;
+        } catch (err) {
+          high = 0;
+        }
+        const valueEl = document.getElementById("rank-tetris");
+        const noteEl = document.getElementById("rank-tetris-note");
+        if (valueEl) valueEl.textContent = high.toLocaleString("pt-BR");
+        if (noteEl) noteEl.textContent = high > 0 ? "Recorde local" : "Jogue para pontuar";
+      }
+
+      function setupReveal() {
+        const targets = document.querySelectorAll(".reveal");
+        [".game-grid .game-card", ".cartridge-row .cartridge", ".rank-grid .rank-card"].forEach((sel) => {
+          document.querySelectorAll(sel).forEach((el, i) => {
+            el.style.transitionDelay = Math.min(i, 6) * 70 + "ms";
+          });
+        });
+        if (!("IntersectionObserver" in window)) {
+          targets.forEach((el) => el.classList.add("in"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("in");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        targets.forEach((el) => io.observe(el));
+      }
+
+      loadTetrisRanking();
+      setupReveal();
+    })();
+  </script>
 
   <script>
     /* =========================================================
        Tetris Classic — lógica do jogo
        JavaScript puro (ES6+), encapsulado numa IIFE para evitar
-       variáveis globais.
+       variáveis globais. Exposto como window.TetrisGame para ser
+       controlado pelo roteador da landing page.
        ========================================================= */
     (function () {
       "use strict";
@@ -747,6 +1326,7 @@
        * ------------------------------------------------------- */
       const $ = (id) => document.getElementById(id);
 
+      const gameRoot = $("game-tetris");
       const boardCanvas = $("board-canvas");
       const boardCtx = boardCanvas.getContext("2d");
       const nextCanvas = $("next-canvas");
@@ -1298,6 +1878,9 @@
       window.addEventListener(
         "keydown",
         (e) => {
+          // Só processa teclas do jogo quando a vista do Tetris está aberta,
+          // para não bloquear rolagem/atalhos da landing page.
+          if (gameRoot.classList.contains("hidden")) return;
           if (GAME_KEYS.has(e.code)) e.preventDefault();
 
           switch (e.code) {
@@ -1399,6 +1982,8 @@
       }
 
       function init() {
+        if (window.TetrisGame.started) return;
+        window.TetrisGame.started = true;
         setupCanvases();
         resetState();
         updateHUD();
@@ -1407,7 +1992,14 @@
         requestAnimationFrame(loop);
       }
 
-      init();
+      // Exposto para o roteador da landing page (init preguiçoso + pausa ao fechar).
+      window.TetrisGame = {
+        started: false,
+        init,
+        pauseIfPlaying() {
+          if (state.phase === "playing") togglePause();
+        },
+      };
     })();
   </script>
 </body>
