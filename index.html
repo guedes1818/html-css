@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="description" content="Tetris Classic — o clássico jogo de blocos, feito em HTML, CSS e JavaScript puro." />
+  <title>Tetris Classic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Região invisível para leitores de tela anunciarem eventos importantes -->
+  <div id="sr-status" class="sr-only" aria-live="polite"></div>
+
+  <div class="game-container">
+    <header class="game-header">
+      <h1 class="game-title">TETRIS</h1>
+    </header>
+
+    <div class="game-layout">
+      <!-- Painel esquerdo: próxima peça + estatísticas -->
+      <aside class="panel panel-left" aria-label="Informações da partida">
+        <section class="panel-box next-box">
+          <h2 class="panel-title">Próxima</h2>
+          <canvas id="next-canvas" width="80" height="80" role="img" aria-label="Prévia da próxima peça"></canvas>
+        </section>
+
+        <section class="panel-box stats-box">
+          <div class="stat">
+            <span class="stat-label">Pontuação</span>
+            <span id="score" class="stat-value">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Recorde</span>
+            <span id="high-score" class="stat-value">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Nível</span>
+            <span id="level" class="stat-value">1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Linhas</span>
+            <span id="lines" class="stat-value">0</span>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Tabuleiro principal -->
+      <main class="board-wrapper" id="board-wrapper">
+        <canvas id="board-canvas" width="280" height="560" role="img" aria-label="Tabuleiro do Tetris">
+          Seu navegador não tem suporte a Canvas, necessário para jogar Tetris Classic.
+        </canvas>
+
+        <div id="combo-toast" class="combo-toast" aria-hidden="true"></div>
+
+        <!-- Tela inicial -->
+        <div id="start-screen" class="overlay">
+          <h2 class="overlay-title">TETRIS</h2>
+          <p class="overlay-text">
+            Encaixe as peças e complete linhas para pontuar.<br />
+            Use as setas para mover e girar, espaço para queda instantânea.
+          </p>
+          <button id="play-btn" class="btn btn-primary" type="button">Jogar</button>
+        </div>
+
+        <!-- Tela de pausa -->
+        <div id="pause-overlay" class="overlay hidden">
+          <h2 class="overlay-title">PAUSADO</h2>
+          <button id="resume-btn" class="btn btn-primary" type="button">Continuar</button>
+        </div>
+
+        <!-- Tela de game over -->
+        <div id="game-over-overlay" class="overlay hidden">
+          <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
+          <p class="overlay-text">
+            Pontuação: <strong id="final-score">0</strong><br />
+            Recorde: <strong id="final-high-score">0</strong>
+          </p>
+          <button id="restart-btn-overlay" class="btn btn-primary" type="button">Jogar Novamente</button>
+        </div>
+      </main>
+
+      <!-- Painel direito: controles + ações -->
+      <aside class="panel panel-right" aria-label="Controles do jogo">
+        <section class="panel-box controls-box">
+          <h2 class="panel-title">Controles</h2>
+          <ul class="key-list">
+            <li><kbd>&larr;</kbd><kbd>&rarr;</kbd> Mover</li>
+            <li><kbd>&uarr;</kbd> Rotacionar</li>
+            <li><kbd>&darr;</kbd> Descer rápido</li>
+            <li><kbd>Espaço</kbd> Queda instantânea</li>
+            <li><kbd>P</kbd> Pausar</li>
+            <li><kbd>R</kbd> Reiniciar</li>
+          </ul>
+        </section>
+
+        <section class="panel-box action-box">
+          <button id="pause-btn" class="btn" type="button">Pausar</button>
+          <button id="restart-btn" class="btn" type="button">Reiniciar</button>
+        </section>
+      </aside>
+    </div>
+
+    <!-- Controles para toque (mobile) -->
+    <div class="mobile-controls" id="mobile-controls" aria-label="Controles de toque">
+      <div class="mobile-controls-row">
+        <button class="touch-btn" id="btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
+        <button class="touch-btn" id="btn-rotate" type="button" aria-label="Rotacionar peça">&#8635;</button>
+        <button class="touch-btn" id="btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
+      </div>
+      <div class="mobile-controls-row">
+        <button class="touch-btn" id="btn-down" type="button" aria-label="Descer rápido">&#9660;</button>
+        <button class="touch-btn" id="btn-drop" type="button" aria-label="Queda instantânea">&#10515;</button>
+        <button class="touch-btn" id="btn-pause" type="button" aria-label="Pausar jogo">&#10074;&#10074;</button>
+      </div>
+    </div>
+  </div>
+
+  <noscript>
+    Este jogo precisa de JavaScript habilitado no navegador para funcionar.
+  </noscript>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
