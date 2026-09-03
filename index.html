@@ -636,6 +636,9 @@
   html.js-reveal .reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1); }
   html.js-reveal .reveal.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) { html.js-reveal .reveal { opacity: 1; transform: none; transition: none; } .tile img { transition: none; } }
+
+  /* cursor com spotlight (desktop/mouse apenas) — abaixo do nav (200) e do CTA mobile (190) */
+  .spotlight-cursor { position: fixed; inset: 0; z-index: 150; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -1298,6 +1301,55 @@
     /* posição inicial da pílula depois das fontes carregarem */
     setTimeout(function () { positionPill(false); }, 60);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { positionPill(false); });
+  })();
+</script>
+
+<!-- ===================== CURSOR SPOTLIGHT ===================== -->
+<canvas class="spotlight-cursor" id="spotlightCursor" aria-hidden="true"></canvas>
+<script>
+  (function () {
+    // Efeito é decorativo e só faz sentido com mouse de verdade — em touch
+    // (celular/tablet) não há cursor, então nem cria o canvas.
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    var canvas = document.getElementById('spotlightCursor');
+    var ctx = canvas && canvas.getContext('2d');
+    if (!ctx) return;
+
+    var config = { radius: 200, brightness: 0.15, color: '#ffffff' };
+    var rgb = (function (hex) {
+      var n = parseInt(hex.slice(1), 16);
+      return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
+    })(config.color);
+
+    var mouseX = -1000, mouseY = -1000, rafId = null;
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (mouseX !== -1000) {
+        var gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, config.radius);
+        gradient.addColorStop(0, 'rgba(' + rgb + ',' + config.brightness + ')');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      rafId = requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('mousemove', function (e) { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
+    window.addEventListener('mouseleave', function () { mouseX = -1000; mouseY = -1000; });
+
+    // pausa o rAF com a aba em segundo plano (evita gastar CPU/bateria à toa)
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+      else if (!rafId) { rafId = requestAnimationFrame(draw); }
+    });
+
+    rafId = requestAnimationFrame(draw);
   })();
 </script>
 </body>
