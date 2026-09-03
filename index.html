@@ -639,33 +639,6 @@
 
   /* cursor com spotlight (desktop/mouse apenas) — abaixo do nav (200) e do CTA mobile (190) */
   .spotlight-cursor { position: fixed; inset: 0; z-index: 150; pointer-events: none; }
-
-  /* ---------- cursor customizado (ponto + anel) — desktop/mouse apenas ---------- */
-  html.custom-cursor, html.custom-cursor * { cursor: none !important; }
-  .cursor-dot, .cursor-ring {
-    position: fixed; top: 0; left: 0; z-index: 300; pointer-events: none;
-    border-radius: 50%; will-change: transform;
-  }
-  .cursor-dot {
-    width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
-    background: var(--blue-500);
-    transition: opacity .2s ease, transform .15s ease;
-  }
-  .cursor-ring {
-    width: 34px; height: 34px; margin: -17px 0 0 -17px;
-    border: 1.5px solid color-mix(in srgb, var(--blue-500) 55%, transparent);
-    transition: width .28s cubic-bezier(.2,.8,.2,1), height .28s cubic-bezier(.2,.8,.2,1),
-                margin .28s cubic-bezier(.2,.8,.2,1), border-color .25s ease,
-                background .25s ease, opacity .2s ease, transform .1s linear;
-  }
-  html.custom-cursor.cursor-hover .cursor-ring {
-    width: 56px; height: 56px; margin: -28px 0 0 -28px;
-    background: color-mix(in srgb, var(--blue-500) 10%, transparent);
-    border-color: var(--blue-500);
-  }
-  html.custom-cursor.cursor-down .cursor-dot { transform: scale(0.7); }
-  html.custom-cursor.cursor-down .cursor-ring { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
-  @media (prefers-reduced-motion: reduce) { .cursor-dot, .cursor-ring { display: none; } }
 </style>
 </head>
 <body>
@@ -1331,81 +1304,44 @@
   })();
 </script>
 
-<!-- ===================== CURSOR: SPOTLIGHT + PONTEIRO CUSTOMIZADO ===================== -->
+<!-- ===================== CURSOR SPOTLIGHT ===================== -->
 <canvas class="spotlight-cursor" id="spotlightCursor" aria-hidden="true"></canvas>
 <script>
   (function () {
-    // Efeitos são decorativos e só fazem sentido com mouse de verdade — em
-    // touch (celular/tablet) não há cursor, então nem criam nada.
+    // Efeito é decorativo e só faz sentido com mouse de verdade — em touch
+    // (celular/tablet) não há cursor, então nem cria o canvas.
     if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var root = document.documentElement;
-    var mouseX = -1000, mouseY = -1000, rafId = null;
-
-    /* ---------- spotlight (canvas) ---------- */
     var canvas = document.getElementById('spotlightCursor');
     var ctx = canvas && canvas.getContext('2d');
-    var spot = { radius: 200, brightness: 0.15, color: '#ffffff' };
-    var spotRgb = (function (hex) {
+    if (!ctx) return;
+
+    var config = { radius: 200, brightness: 0.15, color: '#ffffff' };
+    var rgb = (function (hex) {
       var n = parseInt(hex.slice(1), 16);
       return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
-    })(spot.color);
+    })(config.color);
 
-    function resize() { if (canvas) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
+    var mouseX = -1000, mouseY = -1000, rafId = null;
 
-    /* ---------- ponteiro customizado (ponto + anel com leve atraso) ---------- */
-    var dot = null, ring = null, ringX = -1000, ringY = -1000;
-    if (!reduce) {
-      dot = document.createElement('div'); dot.className = 'cursor-dot';
-      ring = document.createElement('div'); ring.className = 'cursor-ring';
-      document.body.appendChild(dot);
-      document.body.appendChild(ring);
-      root.classList.add('custom-cursor');
-
-      var HOVER_SEL = 'a, button, summary, input, textarea, select, [role="button"], .nav-btn, .theme-btn, .brand-chip';
-      var hoverEl = null;
-      document.addEventListener('mouseover', function (e) {
-        var el = e.target.closest ? e.target.closest(HOVER_SEL) : null;
-        if (el !== hoverEl) { hoverEl = el; root.classList.toggle('cursor-hover', !!el); }
-      }, { passive: true });
-      document.addEventListener('mousedown', function () { root.classList.add('cursor-down'); }, { passive: true });
-      document.addEventListener('mouseup', function () { root.classList.remove('cursor-down'); }, { passive: true });
-    }
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
     function draw() {
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (mouseX !== -1000) {
-          var gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, spot.radius);
-          gradient.addColorStop(0, 'rgba(' + spotRgb + ',' + spot.brightness + ')');
-          gradient.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-      }
-      if (dot && mouseX !== -1000) {
-        dot.style.transform = 'translate(' + mouseX + 'px,' + mouseY + 'px)';
-        // o anel persegue o ponto com um leve atraso (easing), o ponto é instantâneo
-        ringX += (mouseX - ringX) * 0.2;
-        ringY += (mouseY - ringY) * 0.2;
-        ring.style.transform = 'translate(' + ringX + 'px,' + ringY + 'px)';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (mouseX !== -1000) {
+        var gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, config.radius);
+        gradient.addColorStop(0, 'rgba(' + rgb + ',' + config.brightness + ')');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
       rafId = requestAnimationFrame(draw);
     }
 
-    function show() { if (dot) { dot.style.opacity = '1'; ring.style.opacity = '1'; } }
-    function hide() { if (dot) { dot.style.opacity = '0'; ring.style.opacity = '0'; } }
-
     resize();
     window.addEventListener('resize', resize, { passive: true });
-    window.addEventListener('mousemove', function (e) {
-      // primeira posição real (depois do load ou de reentrar na janela): o
-      // anel aparece direto no lugar certo em vez de "voar" de fora da tela
-      if (mouseX === -1000) { show(); ringX = e.clientX; ringY = e.clientY; }
-      mouseX = e.clientX; mouseY = e.clientY;
-    }, { passive: true });
-    window.addEventListener('mouseleave', function () { mouseX = -1000; mouseY = -1000; hide(); });
+    window.addEventListener('mousemove', function (e) { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
+    window.addEventListener('mouseleave', function () { mouseX = -1000; mouseY = -1000; });
 
     // pausa o rAF com a aba em segundo plano (evita gastar CPU/bateria à toa)
     document.addEventListener('visibilitychange', function () {
