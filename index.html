@@ -725,6 +725,85 @@
         }
       };
 
+      // Vocabulário adicional aceito como tentativa válida (não usado como palavra
+      // secreta) — amplia bastante o dicionário além do banco curado acima, para que
+      // palavras reais e comuns do português não sejam recusadas como "não encontrada".
+      const EXTRA_GUESS_WORDS = {
+        4: [
+          "ALHO", "ALTO", "AMAR", "AMOR", "ATOR", "ATUM", "BEGE", "BICO", "BIDE", "BODE", "BOLO", "BOTO", "BOXE", "BULE",
+          "CABO", "CAES", "CAFE", "CAIR", "CANO", "CARO", "CEDO", "COCO", "COXA", "CRUA", "DOAR", "DURO", "FEIO", "FIGO",
+          "FINO", "FITA", "FOCA", "FOME", "FONE", "FRIO", "GUIA", "HOJE", "JACA", "JILO", "JOGO", "JUDO", "JUIZ", "LAGO",
+          "LEAL", "LEVE", "LISO", "MACA", "MAPA", "MEDO", "MEIA", "MULA", "NABO", "NOJO", "NOVO", "NUCA", "OLEO", "OLHO",
+          "ONCA", "OURO", "PAIS", "PANO", "PELE", "PERU", "POTE", "RARO", "RASO", "REDE", "RENA", "RETO", "RUDE", "SACO",
+          "SAGU", "SAIA", "SAIR", "SECO", "SEDA", "SEDE", "SEIO", "SIRI", "SONO", "SOPA", "SUJO", "TATU", "TELA", "TOLO",
+          "TUBO", "UNHA", "VALE", "VEIA", "VILA", "VOAR"
+        ],
+        5: [
+          "ABRIR", "ACHAR", "AGORA", "AGUIA", "AIPIM", "AMORA", "ANTES", "APITO", "ARAME", "AREIA", "ARENA", "ASSAR",
+          "ATRIZ", "AVEIA", "AVELA", "BACON", "BAIXO", "BALDE", "BEBER", "BERCO", "BICHO", "BILHA", "BLUSA", "BOTAO",
+          "BRACO", "BRAVO", "BRUTO", "BURRO", "CACAU", "CALMA", "CALMO", "CALOR", "CAMPO", "CAQUI", "CARNE", "CARTA",
+          "CERTO", "CERVO", "CESTA", "CESTO", "CHEIO", "CINTO", "CIUME", "CLARO", "CLIPE", "COBRE", "COMER", "COMUM",
+          "CONTO", "COURO", "COUVE", "CRAVO", "CREME", "CUECA", "CUNHA", "CUPIM", "CURAR", "CURTO", "CURVO", "DAMAS",
+          "DENTE", "DISCO", "EMAIL", "EPOCA", "FACIL", "FALSO", "FELIZ", "FERIR", "FERRO", "FORCA", "FORMA", "FORTE",
+          "FRACO", "FUNIL", "FURAO", "GAMBA", "GANSO", "GRILO", "GRUTA", "HIENA", "IDOSO", "IGUAL", "JOGAR", "JOVEM",
+          "JUSTO", "LABIO", "LAGOA", "LARGO", "LAVAR", "LEBRE", "LEGAL", "LENTE", "LENTO", "LEVAR", "LIMAO", "LIMPO",
+          "LINDO", "LINHO", "LOCAL", "MACIO", "MALHA", "MANTA", "MASSA", "MELAO", "MELRO", "METAL", "MILHO", "MOLHO",
+          "MONGE", "MORAR", "MORNO", "MOSCA", "MOUSE", "MUDAR", "NARIZ", "NERVO", "NUNCA", "NYLON", "OBVIO", "ODIAR",
+          "OMBRO", "ONTEM", "OPACO", "OSTRA", "OUVIR", "PADRE", "PAGAR", "PALMA", "PANDA", "PAPEL", "PARAR", "PASTA",
+          "PAVAO", "PEDRA", "PEITO", "PEQUI", "PICAR", "PILHA", "PIRES", "PISTA", "PLANO", "PODAR", "POEMA", "POLVO",
+          "POMBA", "PRACA", "PRAIA", "PRATA", "PREGO", "PULAR", "PULSO", "PUNHO", "PUXAR", "QUATI", "RADIO", "RAIVA",
+          "REGAR", "ROSTO", "ROUPA", "SABIA", "SABIO", "SALSA", "SECAR", "SELVA", "SENHA", "SEXTA", "SINAL", "SKATE",
+          "SUAVE", "SUBIR", "SUINO", "SURFE", "TACHO", "TAMPA", "TECER", "TELHA", "TENIS", "TERCA", "TERRA", "TESTA",
+          "TOCAR", "TORAX", "TORTA", "TORTO", "TRAVE", "TUNEL", "UNICO", "URUBU", "VAZIO", "VELHO", "VELOZ", "VEZES",
+          "VIDEO", "VIDRO", "VOLEI", "ZEBRA"
+        ],
+        6: [
+          "ABAJUR", "ABELHA", "ABERTO", "ACELGA", "AGRIAO", "AJUDAR", "ALEGRE", "ALTURA", "AMANHA", "AMAVEL", "AMEIXA",
+          "ANANAS", "ANTENA", "ANTIGO", "ARANHA", "ARGILA", "ARRAIA", "ASPERO", "ATLETA", "AZEITE", "BAIRRO", "BARATO",
+          "BONECA", "BONITO", "BOSQUE", "BRONZE", "BUSCAR", "BUZINA", "CABECA", "CABIDE", "CAMELO", "CAMERA", "CANELA",
+          "CANTAR", "CANTOR", "CARURU", "CARVAO", "CASTOR", "CEREAL", "CEREJA", "CHAPEU", "CHORAR", "CHUCHU", "CHUMBO",
+          "CODIGO", "COIOTE", "COLCHA", "COLETE", "COLINA", "CONDOR", "CORTAR", "CORUJA", "COSTAS", "CUIDAR", "CUSCUZ",
+          "DANCAR", "DECADA", "DEITAR", "DEPOIS", "DESCER", "DOBRAR", "DOMINO", "DORMIR", "DUVIDA", "EMPATE", "ENGUIA",
+          "ENORME", "ENSAIO", "ENTRAR", "ENVIAR", "EQUIPE", "ERRADO", "ESCADA", "ESCURO", "ESPACO", "ESTADO", "FADIGA",
+          "FAISAO", "FALCAO", "FECHAR", "FERVER", "FIGADO", "FISICO", "FIVELA", "FRALDA", "FRANGO", "FREIRA", "FRITAR",
+          "FRONHA", "GANCHO", "GARCOM", "GAVIAO", "GELADO", "GENTIL", "GOIABA", "GORILA", "GOSTAR", "GRAMPO", "GRANDE",
+          "GRELHA", "GRITAR", "GROSSO", "GUERRA", "HARPIA", "HOSTIL", "IGUANA", "ILEGAL", "IMENSO", "INSETO", "INVEJA",
+          "JABUTI", "JACARE", "JAGUAR", "JIBOIA", "JOELHO", "KARATE", "LEGUME", "LIMPAR", "LINGUA", "LONTRA", "MADURO",
+          "MAMUTE", "MANADA", "MANUAL", "MARROM", "MEDICO", "MEDIDA", "MEDUSA", "MINGAU", "MOCOTO", "MONTAR", "MUSICO",
+          "NARVAL", "NOMADE", "NORMAL", "NOVELO", "OCEANO", "OPOSTO", "ORELHA", "OVELHA", "PAINEL", "PAIXAO", "PALETO",
+          "PARDAL", "PARQUE", "PARTIR", "PASSAR", "PASTOR", "PATINS", "PATRAO", "PENSAR", "PEPINO", "PERDER", "PESADO",
+          "PILOTO", "PINCEL", "PINHAO", "PINTAR", "PINTOR", "PIOLHO", "PIPOCA", "POESIA", "PRAZER", "PRESSA", "PULMAO",
+          "QUADRA", "QUADRO", "QUARTA", "QUEIXO", "QUENTE", "QUIABO", "QUIETO", "QUINTA", "RABINO", "RAPIDO", "RAPOSA",
+          "REGIAO", "RIACHO", "RICOTA", "RISOTO", "ROEDOR", "ROUBAR", "RUCULA", "SABADO", "SALADA", "SALAME", "SALVAR",
+          "SANGUE", "SECULO", "SEMPRE", "SENTAR", "SOMBRA", "SONHAR", "SORRIR", "TALHER", "TECIDO", "TEXUGO", "TIJOLO",
+          "TITULO", "TOMADA", "TRAZER", "TRINCO", "TRISTE", "TROCAR", "TUCANO", "TUCUPI", "UMBIGO", "VARRER", "VENCER",
+          "VENDER", "VIAJAR", "VOLUME", "XADREZ", "XAROPE"
+        ],
+        7: [
+          "ABOBORA", "ACORDAR", "AGITADO", "ALAMEDA", "ALECRIM", "ALEGRIA", "ALGODAO", "ALICATE", "AMARELO", "AMENDOA",
+          "AMIZADE", "ANDAIME", "ANSIOSO", "AQUARIO", "ARBITRO", "ARQUIVO", "ASSENTO", "ATRASAR", "AVAREZA", "AVENIDA",
+          "AVENTAL", "AZULEJO", "BANDEJA", "BARALHO", "BATENTE", "BATERIA", "BEZERRO", "BILHETE", "BIOLOGO", "BOLACHA",
+          "BONDADE", "BRINCAR", "CACADOR", "CALCADA", "CALCADO", "CANCELA", "CANGURU", "CANSACO", "CAPACHO", "CAPITAL",
+          "CARDUME", "CARINHO", "CAVERNA", "CEGONHA", "CELULAR", "CERTEZA", "CHINELO", "CIDADAO", "CIGARRA", "CIMENTO",
+          "CINTURA", "CODORNA", "COLCHAO", "COLEIRA", "COMECAR", "COMPRAR", "CONFIAR", "CONFUSO", "CORAGEM", "CORRETO",
+          "COSTELA", "COVARDE", "CRONICA", "DAMASCO", "DECIDIR", "DEMORAR", "DESERTO", "DIFICIL", "DIPLOMA", "DOMINGO",
+          "DOURADO", "DUVIDAR", "EDREDOM", "EDUCADO", "EMPATAR", "ENERGIA", "ENFEITE", "ENGOLIR", "ENSINAR", "ERVILHA",
+          "ESCUTAR", "ESPERAR", "ESPERTO", "ESPONJA", "ESPORTE", "ESQUILO", "ESTACAO", "ESTADIO", "ESTANHO", "ESTANTE",
+          "ESTEIRA", "ESTUDAR", "EUFORIA", "FALESIA", "FARINHA", "FECHADO", "FORMIGA", "FRUTOSE", "GERENTE", "GIGANTE",
+          "GORDURA", "GRANITO", "GUARDAR", "HAMSTER", "HONESTO", "HUMILDE", "INJUSTO", "JOGADOR", "JUSTICA", "LAGARTA",
+          "LAGARTO", "LAGOSTA", "LAMBARI", "LAMPADA", "LARGURA", "LASANHA", "LITORAL", "LOUCURA", "LUXUOSO", "MADEIRA",
+          "MALDADE", "MANDRIL", "MANOPLA", "MAQUINA", "MARMELO", "MARMITA", "MARMORE", "MARMOTA", "MARRECO", "MARTELO",
+          "MEMORIA", "MENTIRA", "MINHOCA", "MODERNO", "MOLDURA", "MOLHADO", "MOMENTO", "MONITOR", "MORANGO", "MORCEGO",
+          "MUSCULO", "NERVOSO", "OMELETE", "OREGANO", "ORGULHO", "OUSADIA", "PADEIRO", "PALMITO", "PANTERA", "PARTIDA",
+          "PEQUENO", "PERIODO", "PESCOCO", "PESSEGO", "PICANHA", "PIMENTA", "PISCINA", "PLANTAR", "POLENTA", "POVOADO",
+          "PRESSAO", "PRIVADO", "PROIBIR", "PUBLICO", "QUEBRAR", "QUIMICO", "QUINTAL", "RECEBER", "RECEITA", "RELAXAR",
+          "REPOLHO", "REPRESA", "ROCHEDO", "RODOVIA", "ROMANCE", "SALGADO", "SAUDADE", "SCANNER", "SEGUNDA", "SENADOR",
+          "SIMPLES", "SINCERO", "SISTEMA", "SOLIDAO", "SUPORTE", "TAMANHO", "TAPIOCA", "TECLADO", "TECNICO", "TELHADO",
+          "TEMPERO", "TESOURA", "TIMIDEZ", "TORNEIO", "TRAICAO", "TRAIDOR", "TREINAR", "TURISTA", "VALVULA", "VASILHA",
+          "VERDADE", "VIADUTO", "VINAGRE", "VIOLETA", "VISITAR", "ZELADOR"
+        ]
+      };
+
       /* ---------------------------------------------------------
        * Constantes gerais
        * ------------------------------------------------------- */
@@ -837,10 +916,14 @@
         return [].concat(bank.facil, bank.normal, bank.dificil);
       }
 
+      // Dicionário aceito para validar tentativas: banco curado (usado também como
+      // fonte das palavras secretas) + vocabulário extra (só para validação, nunca
+      // sorteado como palavra secreta) — bem mais amplo, para não recusar palavras
+      // reais e comuns do jogador com "Palavra não encontrada".
       function buildWordSets() {
         const sets = {};
         LENGTHS.forEach((len) => {
-          sets[len] = new Set(getAllWordsForLength(len));
+          sets[len] = new Set(getAllWordsForLength(len).concat(EXTRA_GUESS_WORDS[len]));
         });
         return sets;
       }
