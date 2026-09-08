@@ -2,1409 +2,1494 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#05070f" />
-  <meta name="description" content="Tetris Classic — o clássico jogo de blocos, feito em HTML, CSS e JavaScript puro." />
-  <title>Tetris Classic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f6f7f9" id="meta-theme-color" />
+  <meta name="description" content="Palavra Certa — jogo de adivinhação de palavras em português brasileiro, com partidas ilimitadas, inspirado em Termo/Wordle. 100% HTML, CSS e JavaScript, sem servidor." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A4%3C/text%3E%3C/svg%3E" />
+  <title>Palavra Certa</title>
   <style>
     /* =========================================================
-       Tetris Classic — estilos
-       Tema escuro, arcade moderno, responsivo.
+       Palavra Certa — estilos
+       Tema claro/escuro via variáveis CSS, layout responsivo,
+       sem dependências externas.
        ========================================================= */
 
     :root {
-      --bg-color: #05070f;
-      --panel-bg: #0c1120;
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --board-bg: #02030a;
-      --board-border: rgba(255, 255, 255, 0.14);
-      --text-primary: #e8ebf5;
-      --text-secondary: #8890a8;
-      --accent: #4fd1ff;
-      --accent-strong: #7fe0ff;
-      --danger: #ff4d5e;
-      --radius: 10px;
-      --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-      --mono: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
+      color-scheme: light dark;
+
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-alt: #eef0f3;
+      --text: #1c1d21;
+      --text-muted: #6b7280;
+      --border: #e1e4e9;
+      --border-strong: #c3c8d1;
+
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-contrast: #ffffff;
+
+      --correct: #2f8a52;
+      --present: #ad7f0a;
+      --absent: #6b7280;
+      --tile-text: #ffffff;
+      --tile-border-empty: #d1d5db;
+      --tile-border-filled: #9aa2af;
+
+      --key-bg: #e2e5ea;
+      --key-text: #1c1d21;
+      --key-bg-hover: #d3d7dd;
+
+      --danger: #d64545;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
+      --shadow-md: 0 8px 28px rgba(16, 24, 40, 0.16);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #101114;
+      --surface: #18191d;
+      --surface-alt: #212227;
+      --text: #f1f2f4;
+      --text-muted: #9498a1;
+      --border: #2c2e34;
+      --border-strong: #3d4048;
+
+      --accent: #8681f5;
+      --accent-hover: #9d98f7;
+      --accent-contrast: #101114;
+
+      --correct: #3a9d64;
+      --present: #c99a1d;
+      --absent: #5b6070;
+      --tile-border-empty: #3a3d44;
+      --tile-border-filled: #565a63;
+
+      --key-bg: #33363d;
+      --key-text: #f1f2f4;
+      --key-bg-hover: #40444c;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 10px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #101114;
+        --surface: #18191d;
+        --surface-alt: #212227;
+        --text: #f1f2f4;
+        --text-muted: #9498a1;
+        --border: #2c2e34;
+        --border-strong: #3d4048;
+
+        --accent: #8681f5;
+        --accent-hover: #9d98f7;
+        --accent-contrast: #101114;
+
+        --correct: #3a9d64;
+        --present: #c99a1d;
+        --absent: #5b6070;
+        --tile-border-empty: #3a3d44;
+        --tile-border-filled: #565a63;
+
+        --key-bg: #33363d;
+        --key-text: #f1f2f4;
+        --key-bg-hover: #40444c;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+        --shadow-md: 0 10px 32px rgba(0, 0, 0, 0.5);
+      }
     }
 
     /* ---------- Reset básico ---------- */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
 
     body {
       margin: 0;
       min-height: 100dvh;
-      background: var(--bg-color);
-      color: var(--text-primary);
+      background: var(--bg);
+      color: var(--text);
       font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(4px, 2vw, 10px);
-      overscroll-behavior: none;
+      flex-direction: column;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+    h1, h2, h3, p { margin: 0; }
 
     button {
       font: inherit;
       color: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    h1,
-    h2,
-    p {
-      margin: 0;
-    }
+    ul { list-style: none; margin: 0; padding: 0; }
 
-    /* Utilitário para esconder elementos sem remover do fluxo de acessibilidade */
+    .hidden { display: none !important; }
+
     .sr-only {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
       overflow: hidden;
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
       border: 0;
     }
 
-    .hidden {
-      display: none !important;
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
 
     /* ---------- Layout geral ---------- */
-    .game-container {
+    .app-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
       width: 100%;
-      max-width: 920px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(6px, 1.5vh, 12px);
+      max-width: 560px;
+      margin: 0 auto;
+      padding-inline: clamp(10px, 4vw, 20px);
     }
 
-    .game-header {
-      text-align: center;
-    }
-
-    .game-title {
-      font-family: var(--mono);
-      font-weight: 900;
-      letter-spacing: 0.18em;
-      font-size: clamp(1.3rem, 5vw, 2.4rem);
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(79, 209, 255, 0.55), 0 0 22px rgba(79, 209, 255, 0.25);
-      margin: 0;
-    }
-
-    .game-layout {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(6px, 1.5vh, 12px);
-      width: 100%;
-    }
-
-    @media (min-width: 860px) {
-      .game-layout {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-      }
-
-      .panel {
-        width: 190px;
-      }
-    }
-
-    /* ---------- Painéis laterais ---------- */
-    .panel {
-      width: 100%;
-      max-width: 340px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .panel-box {
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-    }
-
-    .panel-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    .next-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #next-canvas {
-      display: block;
-      width: 80px;
-      height: 80px;
-      background: var(--board-bg);
-      border: 1px solid var(--board-border);
-      border-radius: 6px;
-    }
-
-    .stats-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .stat {
+    .app-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-    }
-
-    .stat-label {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-    }
-
-    .stat-value {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-primary);
-    }
-
-    .key-list li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      padding: 3px 0;
-    }
-
-    kbd {
-      background: #171d33;
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--text-primary);
-    }
-
-    .action-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* ---------- Tabuleiro ---------- */
-    .board-wrapper {
-      position: relative;
-      width: min(80vw, 320px, 40vh);
-      aspect-ratio: 1 / 2;
-      background: var(--board-bg);
-      border: 2px solid var(--board-border);
-      border-radius: 8px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
-      overflow: hidden;
+      padding-block: 14px;
       flex-shrink: 0;
     }
 
-    #board-canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-mark { font-size: 1.25rem; }
+    .brand-name {
+      font-size: clamp(1.05rem, 4vw, 1.35rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
+    .brand-name strong { color: var(--accent); font-weight: 800; }
 
-    .board-wrapper.flash-gameover {
-      animation: flashRed 0.5s ease-in-out 2;
+    .header-actions { display: flex; gap: 4px; }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      border-radius: 50%;
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
+    .icon-btn:hover { background: var(--surface-alt); }
+    .icon-btn:active { transform: scale(0.92); }
 
-    @keyframes flashRed {
-      0%,
-      100% {
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
-      }
-      50% {
-        box-shadow: 0 0 0 3px var(--danger), 0 0 40px rgba(255, 77, 94, 0.6);
-      }
-    }
-
-    /* ---------- Layout compacto para telas estreitas (tablet/mobile) ----------
-       Em vez do painel lateral empilhado, vira uma barra horizontal enxuta
-       acima do tabuleiro, e a legenda de teclado some (sem teclado no toque). */
-    @media (max-width: 859.98px) {
-      .panel {
-        max-width: 320px;
-      }
-
-      .panel-left {
-        flex-direction: row;
-        align-items: stretch;
-        gap: 8px;
-      }
-
-      .next-box {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-      }
-
-      .next-box .panel-title {
-        margin-bottom: 0;
-        writing-mode: vertical-rl;
-        font-size: 0.65rem;
-      }
-
-      #next-canvas {
-        width: 42px;
-        height: 42px;
-      }
-
-      .stats-box {
-        flex: 1;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: center;
-        justify-content: space-between;
-        gap: 2px 10px;
-        padding: 6px 10px;
-      }
-
-      .stat {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0;
-        min-width: 42px;
-      }
-
-      .stat-label {
-        font-size: 0.6rem;
-      }
-
-      .stat-value {
-        font-size: 0.85rem;
-      }
-
-      /* Legenda de teclado é irrelevante em telas de toque. */
-      .controls-box {
-        display: none;
-      }
-
-      .action-box {
-        flex-direction: row;
-        justify-content: center;
-        padding: 6px 10px;
-      }
-
-      /* O botão de pausa por toque já cobre essa função. */
-      #pause-btn {
-        display: none;
-      }
-
-      .action-box .btn {
-        padding: 8px 14px;
-        font-size: 0.82rem;
-      }
-
-      .panel-box {
-        padding: 6px 10px;
-      }
-
-      /* A altura do tabuleiro é 2x a largura (proporção 1:2), então a largura é
-         limitada a metade do espaço vertical restante após o resto da interface
-         (cabeçalho, HUD, ações, controles de toque e espaçamentos). */
-      .board-wrapper {
-        width: min(84vw, 300px, calc((100dvh - 356px) / 2));
-      }
-    }
-
-    /* ---------- Toast de combo (efeito ao limpar linhas) ---------- */
-    .combo-toast {
-      position: absolute;
-      top: 42%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: var(--mono);
-      font-weight: 900;
-      font-size: 1.5rem;
-      letter-spacing: 0.06em;
-      color: #ffffff;
-      text-shadow: 0 0 10px var(--accent), 0 0 26px var(--accent);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 6;
-      white-space: nowrap;
-    }
-
-    .combo-toast.show {
-      animation: comboPop 0.9s ease forwards;
-    }
-
-    @keyframes comboPop {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.6);
-      }
-      15% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-      }
-      30% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-      75% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1) translateY(-14px);
-      }
-    }
-
-    /* ---------- Overlays (início, pausa, game over) ---------- */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(2, 4, 10, 0.9);
+    .app-main {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      text-align: center;
-      padding: 16px;
-      z-index: 5;
-      animation: fadeIn 0.25s ease;
+      width: 100%;
+      padding-block: 4px 16px;
+      min-height: 0;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.96);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+    .screen { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+    /* ---------- Tela inicial ---------- */
+    .setup-screen { gap: 20px; text-align: center; padding-block: 8px 24px; }
+
+    .setup-title {
+      font-size: clamp(1.5rem, 6vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
 
-    .overlay-title {
-      font-family: var(--mono);
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      font-size: 1.5rem;
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(79, 209, 255, 0.5);
-    }
-
-    .overlay-title-danger {
-      color: var(--danger);
-      text-shadow: 0 0 10px rgba(255, 77, 94, 0.55);
-    }
-
-    .overlay-text {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
+    .setup-subtitle {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+      max-width: 380px;
       line-height: 1.5;
-      max-width: 240px;
+    }
+    .setup-subtitle strong { color: var(--text); }
+
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
     }
 
-    /* ---------- Botões ---------- */
-    .btn {
-      background: #141a2e;
-      color: var(--text-primary);
-      border: 1px solid var(--panel-border);
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    .option-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
     }
 
-    .btn:hover {
-      background: #1c2440;
+    .pill-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pill {
+      min-width: 52px;
+      height: 44px;
+      padding-inline: 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+    .pill:hover { border-color: var(--accent); }
+    .pill:active { transform: scale(0.96); }
+    .pill.selected {
+      background: var(--accent);
       border-color: var(--accent);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
+      color: var(--accent-contrast);
     }
 
     .btn-primary {
+      min-height: 50px;
+      padding-inline: 32px;
+      border-radius: var(--radius-md);
       background: var(--accent);
-      color: #04121a;
-      border-color: var(--accent);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-strong);
-    }
-
-    /* ---------- Controles de toque (mobile) ---------- */
-    .mobile-controls {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    @media (max-width: 860px), (hover: none) and (pointer: coarse) {
-      .mobile-controls {
-        display: flex;
-      }
-    }
-
-    .mobile-controls-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .touch-btn {
-      flex: 1;
-      height: clamp(44px, 12vh, 58px);
-      font-size: 1.3rem;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      color: var(--text-primary);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
+      color: var(--accent-contrast);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      box-shadow: var(--shadow-sm);
       transition: background-color 0.15s ease, transform 0.1s ease;
     }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:active { transform: scale(0.97); }
 
-    .touch-btn:active {
-      background: #1c2440;
-      transform: scale(0.94);
+    .btn-text {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 8px;
+    }
+    .btn-text:hover { color: var(--text); }
+
+    .mini-rules {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-top: 2px;
     }
 
-    .touch-btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
+    .mini-rule {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
     }
 
-    /* ---------- Ajustes finos para telas muito pequenas ---------- */
-    @media (max-width: 360px) {
-      .game-title {
-        letter-spacing: 0.1em;
-      }
+    .mini-tile {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--tile-text);
+      flex-shrink: 0;
+    }
+    .mini-tile-correct { background: var(--correct); }
+    .mini-tile-present { background: var(--present); }
+    .mini-tile-absent { background: var(--absent); }
 
-      .panel-box {
-        padding: 8px 10px;
-      }
+    /* ---------- Tela de jogo / tabuleiro ---------- */
+    .game-screen { gap: 16px; flex: 1; justify-content: center; }
+
+    .board {
+      --cols: 5;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: clamp(5px, 1.6vw, 8px);
+      width: min(100%, calc(var(--cols) * 62px + (var(--cols) - 1) * 8px));
+      margin-inline: auto;
+    }
+
+    .tile {
+      aspect-ratio: 1 / 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--tile-border-empty);
+      border-radius: var(--radius-sm);
+      font-size: clamp(1.1rem, 5.5vw, 1.9rem);
+      font-weight: 700;
+      color: var(--text);
+      background: var(--surface);
+      text-transform: uppercase;
+      user-select: none;
+      transition: border-color 0.1s ease, background-color 0.1s ease;
+    }
+
+    .tile[data-state="filled"] { border-color: var(--tile-border-filled); }
+
+    .tile[data-state="correct"],
+    .tile[data-state="present"],
+    .tile[data-state="absent"] {
+      color: var(--tile-text);
+      border-color: transparent;
+    }
+    .tile[data-state="correct"] { background: var(--correct); }
+    .tile[data-state="present"] { background: var(--present); }
+    .tile[data-state="absent"] { background: var(--absent); }
+
+    .tile.pop { animation: tilePop 0.1s ease; }
+    @keyframes tilePop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .tile.flip { animation: tileFlip 0.3s ease; }
+    @keyframes tileFlip {
+      0% { transform: rotateX(0deg); }
+      50% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .tile.bounce { animation: tileBounce 0.5s ease; }
+    @keyframes tileBounce {
+      0%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-22%); }
+      50% { transform: translateY(0); }
+      65% { transform: translateY(-8%); }
+      80% { transform: translateY(0); }
+    }
+
+    .tile.shake { animation: tileShake 0.4s ease; }
+    @keyframes tileShake {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-4px); }
+      40%, 60% { transform: translateX(4px); }
+    }
+
+    /* ---------- Teclado virtual ---------- */
+    .keyboard {
+      width: min(100%, 500px);
+      margin: 0 auto;
+      padding-block: 10px calc(10px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .keyboard-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .key {
+      flex: 1;
+      min-width: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: var(--key-bg);
+      color: var(--key-text);
+      font-weight: 700;
+      font-size: clamp(0.7rem, 3.6vw, 0.95rem);
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .key:hover { background: var(--key-bg-hover); }
+    .key:active { transform: scale(0.92); }
+
+    .key-wide { flex: 1.6; font-size: clamp(0.62rem, 3vw, 0.78rem); }
+
+    .key[data-state="correct"] { background: var(--correct); color: var(--tile-text); }
+    .key[data-state="present"] { background: var(--present); color: var(--tile-text); }
+    .key[data-state="absent"] { background: var(--absent); color: var(--tile-text); opacity: 0.75; }
+
+    /* ---------- Toast ---------- */
+    .toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translate(-50%, -14px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 60;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      max-width: min(90vw, 320px);
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- Overlays (resultado / estatísticas) ---------- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 11, 14, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 40;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .overlay.show { opacity: 1; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 26px 22px;
+      width: 100%;
+      max-width: 380px;
+      max-height: min(88vh, 640px);
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(8px) scale(0.98);
+      opacity: 0;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+    .overlay.show .card { transform: translateY(0) scale(1); opacity: 1; }
+
+    .result-card { text-align: center; }
+    .result-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
+    .result-title.result-title-win { color: var(--correct); }
+    .result-title.result-title-lose { color: var(--danger); }
+
+    .result-detail {
+      color: var(--text-muted);
+      font-size: 0.94rem;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .result-detail strong { color: var(--text); letter-spacing: 0.03em; }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .mini-stats div { display: flex; flex-direction: column; gap: 2px; }
+    .mini-stats strong { font-size: 1.1rem; font-weight: 800; }
+    .mini-stats span { font-size: 0.63rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+    .result-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .result-actions .btn-primary { width: 100%; }
+
+    .close-btn { position: absolute; top: 12px; right: 12px; }
+
+    .stats-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 18px; text-align: center; }
+    .stats-subtitle { font-size: 0.92rem; font-weight: 700; margin: 20px 0 10px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .stat-box {
+      background: var(--surface-alt);
+      border-radius: var(--radius-sm);
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-box strong { font-size: 1.2rem; font-weight: 800; }
+    .stat-box span { font-size: 0.63rem; color: var(--text-muted); text-align: center; line-height: 1.2; }
+
+    .distribution { display: flex; flex-direction: column; gap: 6px; }
+    .dist-row { display: flex; align-items: center; gap: 8px; }
+    .dist-label { width: 14px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+    .dist-bar-wrap { flex: 1; background: var(--surface-alt); border-radius: 4px; height: 20px; overflow: hidden; }
+    .dist-bar { height: 100%; background: var(--correct); border-radius: 4px; transition: width 0.4s ease; }
+    .dist-count { width: 22px; text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--text); flex-shrink: 0; }
+
+    .history-list { display: flex; flex-direction: column; gap: 6px; }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      padding: 8px 10px;
+      background: var(--surface-alt);
+      border-radius: var(--radius-sm);
+    }
+    .history-icon { font-size: 0.88rem; }
+    .history-word { font-weight: 700; letter-spacing: 0.03em; flex: 1; }
+    .history-meta { color: var(--text-muted); font-size: 0.73rem; text-align: right; }
+    .history-empty { color: var(--text-muted); font-size: 0.84rem; text-align: center; padding: 12px; }
+
+    /* ---------- Ajustes finos para telas pequenas ---------- */
+    @media (max-width: 380px) {
+      .pill { min-width: 44px; padding-inline: 10px; font-size: 0.88rem; }
+      .key { height: 46px; }
+      .icon-btn { width: 36px; height: 36px; font-size: 1rem; }
+    }
+
+    @media (max-height: 640px) {
+      .app-header { padding-block: 8px; }
+      .key { height: 44px; }
+      .keyboard { gap: 6px; padding-block: 6px calc(6px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
 <body>
-  <!-- Região invisível para leitores de tela anunciarem eventos importantes -->
-  <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
 
-  <div class="game-container">
-    <header class="game-header">
-      <h1 class="game-title">TETRIS</h1>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🔤</span>
+        <h1 class="brand-name">Palavra<strong>Certa</strong></h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-new" class="icon-btn hidden" type="button" aria-label="Novo jogo (voltar às configurações)" title="Novo jogo">
+          <span aria-hidden="true">🔁</span>
+        </button>
+        <button id="btn-stats" class="icon-btn" type="button" aria-label="Ver estatísticas" title="Estatísticas">
+          <span aria-hidden="true">📊</span>
+        </button>
+        <button id="btn-theme" class="icon-btn" type="button" aria-label="Alternar tema" title="Alternar tema">
+          <span id="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
     </header>
 
-    <div class="game-layout">
-      <!-- Painel esquerdo: próxima peça + estatísticas -->
-      <aside class="panel panel-left" aria-label="Informações da partida">
-        <section class="panel-box next-box">
-          <h2 class="panel-title">Próxima</h2>
-          <canvas id="next-canvas" width="80" height="80" role="img" aria-label="Prévia da próxima peça"></canvas>
-        </section>
+    <main class="app-main">
+      <!-- ==================== TELA INICIAL ==================== -->
+      <section id="setup-screen" class="screen setup-screen">
+        <h2 class="setup-title">Descubra a palavra.</h2>
+        <p class="setup-subtitle">Você tem <strong>6 tentativas</strong> para descobrir a palavra secreta. Partidas ilimitadas, o dia todo.</p>
 
-        <section class="panel-box stats-box">
-          <div class="stat">
-            <span class="stat-label">Pontuação</span>
-            <span id="score" class="stat-value">0</span>
+        <div class="option-group">
+          <span class="option-label" id="length-label">Escolha o tamanho</span>
+          <div class="pill-group" id="length-options" role="group" aria-labelledby="length-label">
+            <button class="pill" type="button" data-length="4" aria-pressed="false">4</button>
+            <button class="pill" type="button" data-length="5" aria-pressed="false">5</button>
+            <button class="pill" type="button" data-length="6" aria-pressed="false">6</button>
+            <button class="pill" type="button" data-length="7" aria-pressed="false">7</button>
           </div>
-          <div class="stat">
-            <span class="stat-label">Recorde</span>
-            <span id="high-score" class="stat-value">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Nível</span>
-            <span id="level" class="stat-value">1</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Linhas</span>
-            <span id="lines" class="stat-value">0</span>
-          </div>
-        </section>
-      </aside>
-
-      <!-- Tabuleiro principal -->
-      <main class="board-wrapper" id="board-wrapper">
-        <canvas id="board-canvas" width="280" height="560" role="img" aria-label="Tabuleiro do Tetris">
-          Seu navegador não tem suporte a Canvas, necessário para jogar Tetris Classic.
-        </canvas>
-
-        <div id="combo-toast" class="combo-toast" aria-hidden="true"></div>
-
-        <!-- Tela inicial -->
-        <div id="start-screen" class="overlay">
-          <h2 class="overlay-title">TETRIS</h2>
-          <p class="overlay-text">
-            Encaixe as peças e complete linhas para pontuar.<br />
-            Use as setas para mover e girar, espaço para queda instantânea.
-          </p>
-          <button id="play-btn" class="btn btn-primary" type="button">Jogar</button>
         </div>
 
-        <!-- Tela de pausa -->
-        <div id="pause-overlay" class="overlay hidden">
-          <h2 class="overlay-title">PAUSADO</h2>
-          <button id="resume-btn" class="btn btn-primary" type="button">Continuar</button>
+        <div class="option-group">
+          <span class="option-label" id="difficulty-label">Escolha a dificuldade</span>
+          <div class="pill-group" id="difficulty-options" role="group" aria-labelledby="difficulty-label">
+            <button class="pill" type="button" data-difficulty="facil" aria-pressed="false">Fácil</button>
+            <button class="pill" type="button" data-difficulty="normal" aria-pressed="false">Normal</button>
+            <button class="pill" type="button" data-difficulty="dificil" aria-pressed="false">Difícil</button>
+          </div>
         </div>
 
-        <!-- Tela de game over -->
-        <div id="game-over-overlay" class="overlay hidden">
-          <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
-          <p class="overlay-text">
-            Pontuação: <strong id="final-score">0</strong><br />
-            Recorde: <strong id="final-high-score">0</strong>
-          </p>
-          <button id="restart-btn-overlay" class="btn btn-primary" type="button">Jogar Novamente</button>
+        <button id="btn-start" class="btn-primary" type="button">Começar</button>
+
+        <div class="mini-rules">
+          <div class="mini-rule"><span class="mini-tile mini-tile-correct" aria-hidden="true">A</span> Letra certa, posição certa</div>
+          <div class="mini-rule"><span class="mini-tile mini-tile-present" aria-hidden="true">A</span> Letra certa, posição errada</div>
+          <div class="mini-rule"><span class="mini-tile mini-tile-absent" aria-hidden="true">A</span> Letra não está na palavra</div>
         </div>
-      </main>
+      </section>
 
-      <!-- Painel direito: controles + ações -->
-      <aside class="panel panel-right" aria-label="Controles do jogo">
-        <section class="panel-box controls-box">
-          <h2 class="panel-title">Controles</h2>
-          <ul class="key-list">
-            <li><kbd>&larr;</kbd><kbd>&rarr;</kbd> Mover</li>
-            <li><kbd>&uarr;</kbd> Rotacionar</li>
-            <li><kbd>&darr;</kbd> Descer rápido</li>
-            <li><kbd>Espaço</kbd> Queda instantânea</li>
-            <li><kbd>P</kbd> Pausar</li>
-            <li><kbd>R</kbd> Reiniciar</li>
-          </ul>
-        </section>
+      <!-- ==================== TELA DE JOGO ==================== -->
+      <section id="game-screen" class="screen game-screen hidden">
+        <div id="board" class="board" role="group" aria-label="Tabuleiro do jogo"></div>
+      </section>
+    </main>
 
-        <section class="panel-box action-box">
-          <button id="pause-btn" class="btn" type="button">Pausar</button>
-          <button id="restart-btn" class="btn" type="button">Reiniciar</button>
-        </section>
-      </aside>
-    </div>
+    <div id="keyboard" class="keyboard hidden" role="group" aria-label="Teclado virtual"></div>
+  </div>
 
-    <!-- Controles para toque (mobile) -->
-    <div class="mobile-controls" id="mobile-controls" aria-label="Controles de toque">
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
-        <button class="touch-btn" id="btn-rotate" type="button" aria-label="Rotacionar peça">&#8635;</button>
-        <button class="touch-btn" id="btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
-      </div>
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-down" type="button" aria-label="Descer rápido">&#9660;</button>
-        <button class="touch-btn" id="btn-drop" type="button" aria-label="Queda instantânea">&#10515;</button>
-        <button class="touch-btn" id="btn-pause" type="button" aria-label="Pausar jogo">&#10074;&#10074;</button>
+  <!-- ==================== RESULTADO DA PARTIDA ==================== -->
+  <div id="result-overlay" class="overlay hidden">
+    <div class="card result-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+      <p id="result-title" class="result-title"></p>
+      <p id="result-detail" class="result-detail"></p>
+      <div id="result-stats-mini" class="mini-stats"></div>
+      <div class="result-actions">
+        <button id="btn-play-again" class="btn-primary" type="button">Jogar novamente</button>
+        <button id="btn-change-settings" class="btn-text" type="button">Trocar tamanho / dificuldade</button>
       </div>
     </div>
   </div>
 
-  <noscript>
-    Este jogo precisa de JavaScript habilitado no navegador para funcionar.
-  </noscript>
+  <!-- ==================== ESTATÍSTICAS ==================== -->
+  <div id="stats-overlay" class="overlay hidden">
+    <div class="card stats-card" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+      <button id="btn-close-stats" class="icon-btn close-btn" type="button" aria-label="Fechar estatísticas">
+        <span aria-hidden="true">✕</span>
+      </button>
+      <h2 id="stats-title" class="stats-title">Estatísticas</h2>
+
+      <div class="stats-grid">
+        <div class="stat-box"><strong id="stat-played">0</strong><span>Partidas</span></div>
+        <div class="stat-box"><strong id="stat-wins">0</strong><span>Vitórias</span></div>
+        <div class="stat-box"><strong id="stat-losses">0</strong><span>Derrotas</span></div>
+        <div class="stat-box"><strong id="stat-winrate">0%</strong><span>Taxa de vitória</span></div>
+        <div class="stat-box"><strong id="stat-streak">0</strong><span>Sequência atual</span></div>
+        <div class="stat-box"><strong id="stat-best">0</strong><span>Melhor sequência</span></div>
+      </div>
+
+      <h3 class="stats-subtitle">Distribuição de tentativas</h3>
+      <div id="distribution" class="distribution"></div>
+
+      <h3 class="stats-subtitle">Últimas partidas</h3>
+      <ul id="history-list" class="history-list"></ul>
+    </div>
+  </div>
+
+  <noscript>Este jogo precisa de JavaScript habilitado no navegador para funcionar.</noscript>
 
   <script>
     /* =========================================================
-       Tetris Classic — lógica do jogo
-       JavaScript puro (ES6+), encapsulado numa IIFE para evitar
-       variáveis globais.
+       Palavra Certa — lógica do jogo
+       JavaScript puro (ES6+), sem dependências externas,
+       encapsulado numa IIFE para evitar variáveis globais.
        ========================================================= */
     (function () {
       "use strict";
 
       /* ---------------------------------------------------------
-       * Constantes
+       * Banco de palavras (português brasileiro, sem acentos,
+       * organizado por tamanho e por dificuldade)
        * ------------------------------------------------------- */
-      const COLS = 10;
-      const ROWS = 20;
-      const BASE_CELL = 28; // px por célula (resolução interna do canvas do tabuleiro)
-      const BOARD_PX_W = COLS * BASE_CELL; // 280
-      const BOARD_PX_H = ROWS * BASE_CELL; // 560
-
-      const NEXT_CELL = 20; // px por célula na prévia da próxima peça
-      const NEXT_GRID = 4; // prévia comporta uma matriz até 4x4
-      const NEXT_PX = NEXT_CELL * NEXT_GRID; // 80
-
-      const BASE_DROP_INTERVAL = 1000; // ms — velocidade de queda no nível 1
-      const SPEED_STEP = 70; // ms reduzidos a cada nível
-      const MIN_DROP_INTERVAL = 120; // ms — velocidade máxima
-
-      const LINE_POINTS = { 1: 100, 2: 300, 3: 500, 4: 800 };
-      const COMBO_LABELS = { 1: "Linha!", 2: "Duplo!", 3: "Triplo!", 4: "TETRIS!" };
-      const LEVEL_UP_EVERY = 10; // linhas por nível
-
-      const CLEAR_ANIMATION_MS = 300; // duração do flash ao limpar linhas
-      const LOCK_FLASH_MS = 150; // duração do feedback ao encaixar peça
-
-      const HIGH_SCORE_KEY = "tetrisClassicHighScore";
-
-      // Formas dos tetrominós representadas em matrizes quadradas,
-      // prontas para rotação por transformação de matriz.
-      const SHAPES = {
-        I: [
-          [0, 0, 0, 0],
-          [1, 1, 1, 1],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-        ],
-        O: [
-          [1, 1],
-          [1, 1],
-        ],
-        T: [
-          [0, 1, 0],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
-        S: [
-          [0, 1, 1],
-          [1, 1, 0],
-          [0, 0, 0],
-        ],
-        Z: [
-          [1, 1, 0],
-          [0, 1, 1],
-          [0, 0, 0],
-        ],
-        J: [
-          [1, 0, 0],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
-        L: [
-          [0, 0, 1],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
+      const WORD_BANK = {
+        4: {
+          facil: ["CASA","MESA","BOLA","GATO","PATO","FACA","BOCA","DEDO","FOGO","AGUA","FLOR","GELO","NEVE","MOTO","TREM","ANEL","VIDA","HORA","NOTA","VACA","GALO","URSO","LOBO","SUCO","DATA","DOCE","ROXO","AZUL"],
+          normal: ["RATO","SAPO","MALA","SOFA","VASO","TETO","MURO","OSSO","LUVA","LUAR","BOTE","PESO","RISO","FILA","CEIA","LUTA","FADA","PIPA","CAIS","NOME","TIME","BASE","CAJU","LEAO","PERA","COPO","ILHA","RAIZ"],
+          dificil: ["ODIO","ALVO","AGIL","ELMO","OVAL","SISO","VIGA","FENO","ORLA","AURA","LODO","TOCA","CERA","EIXO"]
+        },
+        5: {
+          facil: ["LIVRO","PORTA","CARRO","FESTA","LEITE","CHUVA","TEMPO","AMIGO","FILME","ALUNO","PEIXE","FRUTA","VERDE","PRETO","PRATO","CHAVE","NOITE","TARDE","MANHA","GARFO","NADAR","OLHAR","FALAR","ANDAR","MANGA","FOGAO"],
+          normal: ["PROVA","CURSO","FOLHA","CORDA","NAVIO","BARCO","LETRA","FRASE","TEXTO","LAPIS","REGUA","PONTE","TIGRE","COBRA","CABRA","PORCO","NUVEM","CINZA","MOEDA","BANCO","BOLSA","GRAMA","GALHO","FRUTO","VERAO","ARROZ"],
+          dificil: ["PRECO","TROCO","FORNO","SABAO","PENTE","CALCA","AZEDO","FOSSO","ARDIL","AMENO","UMIDO","TEDIO","OCASO"]
+        },
+        6: {
+          facil: ["JANELA","PAREDE","QUARTO","JARDIM","ESCOLA","CIDADE","CANETA","CAVALO","BANANA","BATATA","TOMATE","CEBOLA","FEIJAO","QUEIJO","PANELA","COLHER","CAMISA","SAPATO","TOALHA","VIAGEM"],
+          normal: ["BRANCO","ARVORE","PLANTA","TRONCO","OUTONO","SEMANA","MINUTO","ESCOVA","PORTAO","NUMERO","MUSICA","TEATRO","JORNAL","MESTRE","GIRAFA","MACACO","COELHO","BALEIA","ALFACE","GAVETA"],
+          dificil: ["NASCER","MORDER","CORRER","SALTAR","VOLTAR","CHEGAR","LENCOL","TAPETE","XICARA","TREINO"]
+        },
+        7: {
+          facil: ["FAMILIA","PALAVRA","ESTRELA","PLANETA","CADEIRA","COZINHA","GARRAFA","FUTEBOL","ESPELHO","CORTINA"],
+          normal: ["RELOGIO","PASSARO","GALINHA","TUBARAO","CADERNO","MOCHILA","ESTRADA","ABACAXI","LARANJA","ABACATE","CENOURA","PASSEIO","FERIADO","ARMARIO","CORRIDA"],
+          dificil: ["FOGUETE","NOTICIA","REVISTA","DIRETOR","SEMENTE","INVERNO","SEGUNDO","IOGURTE","SORVETE","NATACAO","GINASIO","VITORIA","DERROTA","CAMPEAO"]
+        }
       };
-
-      const COLORS = {
-        I: "#4fd1ff",
-        O: "#f5d300",
-        T: "#b06cff",
-        S: "#3ddc84",
-        Z: "#ff4d5e",
-        J: "#3d7bff",
-        L: "#ff9f40",
-      };
-
-      // Deslocamentos tentados ao rotacionar, para permitir "wall kicks" simples.
-      const ROTATION_KICKS = [0, 1, -1, 2, -2];
 
       /* ---------------------------------------------------------
-       * Preparado para efeitos sonoros futuros (audio.enabled = false)
+       * Constantes gerais
        * ------------------------------------------------------- */
-      const SOUND_ENABLED = false;
-      const Sound = {
-        play(name) {
-          if (!SOUND_ENABLED) return;
-          // Espaço reservado: ex. new Audio(`sfx/${name}.mp3`).play().catch(() => {});
-        },
-      };
+      const MAX_ATTEMPTS = 6;
+      const LENGTHS = [4, 5, 6, 7];
+      const DIFFICULTIES = ["facil", "normal", "dificil"];
+      const STORAGE_KEYS = { STATS: "palavraCertaStats", SETTINGS: "palavraCertaSettings" };
+      const ANIM = { FLIP_MS: 300, FLIP_STAGGER_MS: 200 };
+      const STATE_PRIORITY = { correct: 3, present: 2, absent: 1 };
+      const KEYBOARD_ROWS = [
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+        ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"]
+      ];
+      const DEFAULT_STATS = { gamesPlayed: 0, wins: 0, losses: 0, currentStreak: 0, bestStreak: 0, distribution: [0, 0, 0, 0, 0, 0], history: [] };
+      const DEFAULT_SETTINGS = { theme: null, lastLength: 5, lastDifficulty: "normal" };
 
       /* ---------------------------------------------------------
        * Referências DOM
        * ------------------------------------------------------- */
       const $ = (id) => document.getElementById(id);
 
-      const boardCanvas = $("board-canvas");
-      const boardCtx = boardCanvas.getContext("2d");
-      const nextCanvas = $("next-canvas");
-      const nextCtx = nextCanvas.getContext("2d");
+      const toastEl = $("toast");
+      const srAnnouncer = $("sr-announcer");
+      const metaThemeColor = $("meta-theme-color");
 
-      const boardWrapper = $("board-wrapper");
-      const comboToast = $("combo-toast");
-      const srStatus = $("sr-status");
+      const btnNewGame = $("btn-new");
+      const btnStats = $("btn-stats");
+      const btnTheme = $("btn-theme");
+      const themeIcon = $("theme-icon");
 
-      const startScreen = $("start-screen");
-      const pauseOverlay = $("pause-overlay");
-      const gameOverOverlay = $("game-over-overlay");
+      const setupScreen = $("setup-screen");
+      const gameScreen = $("game-screen");
+      const lengthButtons = Array.from(document.querySelectorAll("#length-options .pill"));
+      const difficultyButtons = Array.from(document.querySelectorAll("#difficulty-options .pill"));
+      const btnStart = $("btn-start");
 
-      const scoreEl = $("score");
-      const highScoreEl = $("high-score");
-      const levelEl = $("level");
-      const linesEl = $("lines");
-      const finalScoreEl = $("final-score");
-      const finalHighScoreEl = $("final-high-score");
+      const boardEl = $("board");
+      const keyboardEl = $("keyboard");
 
-      const playBtn = $("play-btn");
-      const resumeBtn = $("resume-btn");
-      const pauseBtn = $("pause-btn");
-      const restartBtn = $("restart-btn");
-      const restartBtnOverlay = $("restart-btn-overlay");
+      const resultOverlay = $("result-overlay");
+      const resultTitle = $("result-title");
+      const resultDetail = $("result-detail");
+      const resultStatsMini = $("result-stats-mini");
+      const btnPlayAgain = $("btn-play-again");
+      const btnChangeSettings = $("btn-change-settings");
 
-      const btnLeft = $("btn-left");
-      const btnRight = $("btn-right");
-      const btnRotate = $("btn-rotate");
-      const btnDown = $("btn-down");
-      const btnDrop = $("btn-drop");
-      const btnPause = $("btn-pause");
+      const statsOverlay = $("stats-overlay");
+      const btnCloseStats = $("btn-close-stats");
+      const statPlayed = $("stat-played");
+      const statWins = $("stat-wins");
+      const statLosses = $("stat-losses");
+      const statWinrate = $("stat-winrate");
+      const statStreak = $("stat-streak");
+      const statBest = $("stat-best");
+      const distributionEl = $("distribution");
+      const historyList = $("history-list");
 
       /* ---------------------------------------------------------
-       * Estado do jogo (evita variáveis globais soltas)
+       * Estado do jogo e dados persistidos
        * ------------------------------------------------------- */
       const state = {
-        board: createEmptyBoard(),
-        bag: [],
-        current: null,
-        next: null,
-        score: 0,
-        highScore: loadHighScore(),
-        level: 1,
-        lines: 0,
-        dropInterval: BASE_DROP_INTERVAL,
-        dropCounter: 0,
-        lastTime: 0,
-        phase: "start", // 'start' | 'playing' | 'paused' | 'gameover'
-        animating: false,
-        clearingRows: [],
-        clearFlashStart: 0,
-        lockFlash: null,
+        wordLength: 5,
+        difficulty: "normal",
+        secretWord: "",
+        currentGuess: "",
+        currentRow: 0,
+        gameOver: false,
+        locked: false,
+        keyboardState: {}
       };
 
-      /* ---------------------------------------------------------
-       * Tabuleiro
-       * ------------------------------------------------------- */
-      function createEmptyBoard() {
-        return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
-      }
-
-      function getFullRows() {
-        const rows = [];
-        for (let y = 0; y < ROWS; y++) {
-          if (state.board[y].every((cell) => cell !== 0)) rows.push(y);
-        }
-        return rows;
-      }
-
-      function removeRows(rows) {
-        const rowsSet = new Set(rows);
-        const remaining = state.board.filter((_, idx) => !rowsSet.has(idx));
-        const removedCount = ROWS - remaining.length;
-        const newRows = Array.from({ length: removedCount }, () => new Array(COLS).fill(0));
-        state.board = newRows.concat(remaining);
-      }
+      let stats = loadStats();
+      let settings = loadSettings();
+      const wordSets = buildWordSets();
+      const lastWordByKey = {};
+      let boardTiles = [];
+      let keyboardKeys = {};
+      let selectedLength = LENGTHS.includes(settings.lastLength) ? settings.lastLength : 5;
+      let selectedDifficulty = DIFFICULTIES.includes(settings.lastDifficulty) ? settings.lastDifficulty : "normal";
+      let toastTimer = null;
 
       /* ---------------------------------------------------------
-       * Peças
+       * Utilidades de texto
        * ------------------------------------------------------- */
-      function refillBag() {
-        const bag = ["I", "O", "T", "S", "Z", "J", "L"];
-        for (let i = bag.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [bag[i], bag[j]] = [bag[j], bag[i]];
+      function normalizeChar(ch) {
+        if (!ch) return "";
+        // NFD separa acentos/cedilha em letra-base + marca combinante
+        // (ex.: "Ç" -> "C" + U+0327). Descartamos as marcas (faixa Unicode
+        // 0x0300-0x036F, "Combining Diacritical Marks") comparando o código
+        // de cada caractere numericamente, para não depender de literais
+        // Unicode no código-fonte. Assim, letras acentuadas digitadas no
+        // teclado físico (á, ã, ç...) caem nas mesmas letras A-Z do banco
+        // de palavras.
+        let result = "";
+        const decomposed = ch.normalize("NFD");
+        for (let i = 0; i < decomposed.length; i++) {
+          const code = decomposed.charCodeAt(i);
+          if (code >= 0x0300 && code <= 0x036f) continue;
+          result += decomposed[i];
         }
-        return bag;
+        return result.toUpperCase();
       }
 
-      function nextTypeFromBag() {
-        if (state.bag.length === 0) state.bag = refillBag();
-        return state.bag.pop();
+      /* ---------------------------------------------------------
+       * Banco de palavras — seleção e validação
+       * ------------------------------------------------------- */
+      function getAllWordsForLength(length) {
+        const bank = WORD_BANK[length];
+        return [].concat(bank.facil, bank.normal, bank.dificil);
       }
 
-      function createPiece(type) {
-        const matrix = SHAPES[type].map((row) => row.slice());
-        return {
-          type,
-          matrix,
-          x: Math.floor((COLS - matrix[0].length) / 2),
-          y: 0,
-        };
+      function buildWordSets() {
+        const sets = {};
+        LENGTHS.forEach((len) => {
+          sets[len] = new Set(getAllWordsForLength(len));
+        });
+        return sets;
       }
 
-      // Rotação 90° horária de uma matriz quadrada NxN.
-      function rotateMatrix(matrix) {
-        const n = matrix.length;
-        const result = [];
-        for (let i = 0; i < n; i++) {
-          result.push([]);
-          for (let j = 0; j < n; j++) {
-            result[i][j] = matrix[n - 1 - j][i];
+      function getWordPool(length, difficulty) {
+        const bank = WORD_BANK[length];
+        const pool = bank && bank[difficulty];
+        // Segurança: se por algum motivo a categoria estiver vazia, usa todas as palavras do tamanho.
+        return pool && pool.length ? pool : getAllWordsForLength(length);
+      }
+
+      // Escolhe uma palavra aleatória do banco. Evita repetir imediatamente a
+      // última palavra usada nessa mesma combinação de tamanho + dificuldade,
+      // desde que existam outras opções disponíveis.
+      function generateWord(length, difficulty) {
+        const pool = getWordPool(length, difficulty);
+        const key = length + "-" + difficulty;
+        const last = lastWordByKey[key];
+        const candidates = pool.length > 1 && last ? pool.filter((w) => w !== last) : pool;
+        const word = candidates[Math.floor(Math.random() * candidates.length)];
+        lastWordByKey[key] = word;
+        return word;
+      }
+
+      function isValidGuess(word, length) {
+        const set = wordSets[length];
+        return !!set && set.has(word);
+      }
+
+      /* ---------------------------------------------------------
+       * Comparação da tentativa com a palavra secreta
+       * Algoritmo de duas passagens: primeiro marca as letras
+       * corretas (verde) e contabiliza as letras restantes da
+       * palavra secreta; depois marca presentes (amarelo) ou
+       * ausentes (cinza) respeitando a quantidade real de
+       * ocorrências de cada letra — nunca usa includes() puro.
+       * ------------------------------------------------------- */
+      function checkGuess(guess, secret) {
+        const secretArr = secret.split("");
+        const guessArr = guess.split("");
+        const result = new Array(guessArr.length).fill("absent");
+        const remaining = {};
+
+        secretArr.forEach((ch) => {
+          remaining[ch] = (remaining[ch] || 0) + 1;
+        });
+
+        guessArr.forEach((ch, i) => {
+          if (ch === secretArr[i]) {
+            result[i] = "correct";
+            remaining[ch]--;
           }
-        }
+        });
+
+        guessArr.forEach((ch, i) => {
+          if (result[i] === "correct") return;
+          if (remaining[ch] > 0) {
+            result[i] = "present";
+            remaining[ch]--;
+          }
+        });
+
         return result;
       }
 
       /* ---------------------------------------------------------
-       * Colisão
+       * Fluxo da partida
        * ------------------------------------------------------- */
-      function collide(board, piece, offsetX, offsetY, matrix) {
-        const m = matrix || piece.matrix;
-        for (let y = 0; y < m.length; y++) {
-          for (let x = 0; x < m[y].length; x++) {
-            if (!m[y][x]) continue;
-            const boardX = piece.x + x + offsetX;
-            const boardY = piece.y + y + offsetY;
-            if (boardX < 0 || boardX >= COLS || boardY >= ROWS) return true;
-            if (boardY >= 0 && board[boardY][boardX]) return true;
-          }
+      function resetGame() {
+        state.currentGuess = "";
+        state.currentRow = 0;
+        state.gameOver = false;
+        state.locked = false;
+        state.keyboardState = {};
+        resetKeyboardVisual();
+      }
+
+      function startGame(length, difficulty) {
+        state.wordLength = length;
+        state.difficulty = difficulty;
+        state.secretWord = generateWord(length, difficulty);
+        resetGame();
+
+        settings.lastLength = length;
+        settings.lastDifficulty = difficulty;
+        saveSettings();
+
+        renderBoard(length);
+        showGameScreen();
+        announce("Nova partida iniciada. Palavra de " + length + " letras.");
+      }
+
+      function handleKey(key) {
+        if (state.gameOver || state.locked) return;
+        if (key === "ENTER") { submitGuess(); return; }
+        if (key === "BACKSPACE") { removeLetter(); return; }
+        if (/^[A-Z]$/.test(key)) { addLetter(key); }
+      }
+
+      function addLetter(letter) {
+        if (state.gameOver || state.locked) return;
+        if (state.currentGuess.length >= state.wordLength) return;
+        state.currentGuess += letter;
+        updateCurrentRowDisplay();
+      }
+
+      function removeLetter() {
+        if (state.gameOver || state.locked) return;
+        if (state.currentGuess.length === 0) return;
+        state.currentGuess = state.currentGuess.slice(0, -1);
+        updateCurrentRowDisplay();
+      }
+
+      async function submitGuess() {
+        if (state.gameOver || state.locked) return;
+        const guess = state.currentGuess;
+
+        if (guess.length < state.wordLength) {
+          showToast("Faltam letras.");
+          shakeRow(state.currentRow);
+          return;
         }
-        return false;
-      }
-
-      function computeGhostY() {
-        let offset = 0;
-        while (!collide(state.board, state.current, 0, offset + 1)) offset++;
-        return state.current.y + offset;
-      }
-
-      /* ---------------------------------------------------------
-       * Movimentos e ações do jogador
-       * ------------------------------------------------------- */
-      function canAct() {
-        return state.phase === "playing" && !state.animating;
-      }
-
-      function moveHorizontal(dir) {
-        if (!canAct()) return;
-        if (!collide(state.board, state.current, dir, 0)) {
-          state.current.x += dir;
-          Sound.play("move");
+        if (!isValidGuess(guess, state.wordLength)) {
+          showToast("Palavra não encontrada.");
+          shakeRow(state.currentRow);
+          return;
         }
-      }
 
-      function softDrop() {
-        if (!canAct()) return;
-        if (!collide(state.board, state.current, 0, 1)) {
-          state.current.y += 1;
-          state.score += 1;
-          updateHUD();
-          Sound.play("move");
+        state.locked = true;
+        const result = checkGuess(guess, state.secretWord);
+        announceGuessResult(guess, result);
+        await updateBoard(state.currentRow, guess, result);
+        state.locked = false;
+
+        const won = guess === state.secretWord;
+        const isLastAttempt = state.currentRow + 1 >= MAX_ATTEMPTS;
+
+        if (won) {
+          endGame(true);
+        } else if (isLastAttempt) {
+          endGame(false);
         } else {
-          lockPiece();
+          state.currentRow++;
+          state.currentGuess = "";
         }
-        state.dropCounter = 0;
       }
 
-      function hardDrop() {
-        if (!canAct()) return;
-        let dist = 0;
-        while (!collide(state.board, state.current, 0, dist + 1)) dist++;
-        state.current.y += dist;
-        state.score += dist * 2;
-        updateHUD();
-        Sound.play("drop");
-        lockPiece();
-      }
+      function endGame(won) {
+        state.gameOver = true;
+        const attempts = state.currentRow + 1;
 
-      function rotatePiece() {
-        if (!canAct()) return;
-        const rotated = rotateMatrix(state.current.matrix);
-        for (const kick of ROTATION_KICKS) {
-          if (!collide(state.board, state.current, kick, 0, rotated)) {
-            state.current.matrix = rotated;
-            state.current.x += kick;
-            Sound.play("rotate");
-            return;
-          }
-        }
-        // Nenhum kick funcionou: rotação bloqueada, peça permanece como está.
-      }
+        updateStats(won, attempts);
+        saveStats();
 
-      // Queda automática (gravidade), chamada pelo loop principal.
-      function dropPiece() {
-        if (!collide(state.board, state.current, 0, 1)) {
-          state.current.y += 1;
+        if (won) {
+          bounceRow(state.currentRow);
+          announce("Você acertou a palavra " + state.secretWord + " em " + attempts + " tentativas.");
+          setTimeout(() => showResultPanel(true, attempts), 550);
         } else {
-          lockPiece();
+          announce("Fim de jogo. A palavra era " + state.secretWord + ".");
+          setTimeout(() => showResultPanel(false, attempts), 350);
         }
-        state.dropCounter = 0;
+      }
+
+      function playAgain() {
+        hideResultPanel();
+        startGame(state.wordLength, state.difficulty);
+      }
+
+      function changeSettings() {
+        hideResultPanel();
+        showSetupScreen();
       }
 
       /* ---------------------------------------------------------
-       * Fixação da peça, limpeza de linhas e pontuação
+       * Tabuleiro (renderização e atualização)
        * ------------------------------------------------------- */
-      function mergePieceToBoard() {
-        const { matrix, x, y, type } = state.current;
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (!matrix[ry][rx]) continue;
-            const boardY = y + ry;
-            const boardX = x + rx;
-            if (boardY < 0) continue; // acima da área visível (área de spawn)
-            state.board[boardY][boardX] = type;
+      function renderBoard(length) {
+        boardEl.innerHTML = "";
+        boardEl.style.setProperty("--cols", length);
+        boardTiles = [];
+
+        for (let r = 0; r < MAX_ATTEMPTS; r++) {
+          const rowTiles = [];
+          for (let c = 0; c < length; c++) {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.dataset.state = "empty";
+            boardEl.appendChild(tile);
+            rowTiles.push(tile);
+          }
+          boardTiles.push(rowTiles);
+        }
+      }
+
+      // Dispara uma classe de animação CSS num tile e a remove sozinha quando a
+      // animação termina (evento "animationend"). Isso é essencial: como várias
+      // classes de tile (pop/flip/bounce/shake) definem a propriedade "animation",
+      // uma classe que ficasse "presa" no elemento venceria a cascata sobre uma
+      // classe futura e impediria a nova animação — e o respectivo "animationend"
+      // — de disparar. `onEnd` roda depois da limpeza (opcional).
+      function triggerAnim(tile, className, onEnd) {
+        tile.classList.remove(className);
+        void tile.offsetWidth; // força reflow para poder reiniciar a mesma animação
+        tile.classList.add(className);
+        tile.addEventListener(
+          "animationend",
+          () => {
+            tile.classList.remove(className);
+            if (onEnd) onEnd();
+          },
+          { once: true }
+        );
+      }
+
+      function updateCurrentRowDisplay() {
+        const row = boardTiles[state.currentRow];
+        if (!row) return;
+        for (let i = 0; i < row.length; i++) {
+          const tile = row[i];
+          const letter = state.currentGuess[i] || "";
+          const hadLetter = tile.textContent !== "";
+          tile.textContent = letter;
+          if (letter) {
+            tile.dataset.state = "filled";
+            if (!hadLetter) triggerAnim(tile, "pop");
+          } else {
+            tile.dataset.state = "empty";
           }
         }
       }
 
-      function triggerLockFlash() {
-        const { matrix, x, y } = state.current;
-        const cells = [];
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (matrix[ry][rx]) cells.push([x + rx, y + ry]);
-          }
-        }
-        state.lockFlash = { cells, start: performance.now() };
+      // Revela o resultado de uma tentativa com animação de "flip" escalonada,
+      // ladrilho por ladrilho, e atualiza o teclado virtual em sincronia.
+      // Retorna uma Promise resolvida quando a última letra termina de virar.
+      function updateBoard(row, guess, result) {
+        return new Promise((resolve) => {
+          const tiles = boardTiles[row];
+          const letters = guess.split("");
+
+          letters.forEach((letter, i) => {
+            setTimeout(() => {
+              const tile = tiles[i];
+
+              setTimeout(() => {
+                tile.dataset.state = result[i];
+                updateKeyboardForLetter(letter, result[i]);
+              }, ANIM.FLIP_MS / 2);
+
+              triggerAnim(tile, "flip", () => {
+                if (i === letters.length - 1) resolve();
+              });
+            }, i * ANIM.FLIP_STAGGER_MS);
+          });
+        });
       }
 
-      function lockPiece() {
-        mergePieceToBoard();
-        triggerLockFlash();
-        Sound.play("lock");
-
-        const fullRows = getFullRows();
-        if (fullRows.length > 0) {
-          state.animating = true;
-          state.clearingRows = fullRows;
-          state.clearFlashStart = performance.now();
-          showCombo(fullRows.length);
-          Sound.play("clear");
-          setTimeout(() => {
-            removeRows(fullRows);
-            applyScore(fullRows.length);
-            state.clearingRows = [];
-            state.animating = false;
-            spawnNext();
-          }, CLEAR_ANIMATION_MS);
-        } else {
-          spawnNext();
-        }
+      function shakeRow(row) {
+        const tiles = boardTiles[row];
+        if (!tiles) return;
+        tiles.forEach((tile) => triggerAnim(tile, "shake"));
       }
 
-      function applyScore(lineCount) {
-        state.score += LINE_POINTS[lineCount] || 0;
-        state.lines += lineCount;
-
-        const newLevel = Math.floor(state.lines / LEVEL_UP_EVERY) + 1;
-        if (newLevel !== state.level) {
-          state.level = newLevel;
-          state.dropInterval = Math.max(MIN_DROP_INTERVAL, BASE_DROP_INTERVAL - (newLevel - 1) * SPEED_STEP);
-          announce(`Nível ${state.level}!`);
-        }
-        updateHUD();
-      }
-
-      function spawnNext() {
-        state.current = state.next;
-        state.next = createPiece(nextTypeFromBag());
-        drawNextPreview();
-
-        if (collide(state.board, state.current, 0, 0)) {
-          triggerGameOver();
-        }
+      function bounceRow(row) {
+        const tiles = boardTiles[row];
+        if (!tiles) return;
+        tiles.forEach((tile, i) => {
+          setTimeout(() => triggerAnim(tile, "bounce"), i * 80);
+        });
       }
 
       /* ---------------------------------------------------------
-       * Estados do jogo: início, pausa, reinício, game over
+       * Teclado virtual
        * ------------------------------------------------------- */
-      function resetState() {
-        state.board = createEmptyBoard();
-        state.bag = [];
-        state.current = createPiece(nextTypeFromBag());
-        state.next = createPiece(nextTypeFromBag());
-        state.score = 0;
-        state.level = 1;
-        state.lines = 0;
-        state.dropInterval = BASE_DROP_INTERVAL;
-        state.dropCounter = 0;
-        state.animating = false;
-        state.clearingRows = [];
-        state.lockFlash = null;
-        state.lastTime = performance.now();
-        drawNextPreview();
-        updateHUD();
+      function renderKeyboard() {
+        keyboardEl.innerHTML = "";
+        keyboardKeys = {};
+
+        KEYBOARD_ROWS.forEach((rowKeys) => {
+          const rowEl = document.createElement("div");
+          rowEl.className = "keyboard-row";
+
+          rowKeys.forEach((key) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.dataset.key = key;
+            btn.dataset.state = "default";
+
+            if (key === "ENTER") {
+              btn.className = "key key-wide";
+              btn.textContent = "Enviar";
+              btn.setAttribute("aria-label", "Enviar tentativa");
+            } else if (key === "BACKSPACE") {
+              btn.className = "key key-wide";
+              btn.textContent = "⌫";
+              btn.setAttribute("aria-label", "Apagar letra");
+            } else {
+              btn.className = "key";
+              btn.textContent = key;
+              btn.setAttribute("aria-label", "Letra " + key);
+              keyboardKeys[key] = btn;
+            }
+
+            rowEl.appendChild(btn);
+          });
+
+          keyboardEl.appendChild(rowEl);
+        });
       }
 
-      function startGame() {
-        resetState();
-        state.phase = "playing";
-        startScreen.classList.add("hidden");
-        pauseOverlay.classList.add("hidden");
-        gameOverOverlay.classList.add("hidden");
-        announce("Jogo iniciado");
+      function resetKeyboardVisual() {
+        Object.values(keyboardKeys).forEach((btn) => { btn.dataset.state = "default"; });
       }
 
-      function restartGame() {
-        startGame();
-      }
-
-      function togglePause() {
-        if (state.phase === "playing") {
-          state.phase = "paused";
-          pauseOverlay.classList.remove("hidden");
-          announce("Jogo pausado");
-        } else if (state.phase === "paused") {
-          state.phase = "playing";
-          pauseOverlay.classList.add("hidden");
-          state.lastTime = performance.now();
-          announce("Jogo retomado");
-        }
-      }
-
-      function triggerGameOver() {
-        state.phase = "gameover";
-
-        if (state.score > state.highScore) {
-          state.highScore = state.score;
-          saveHighScore(state.highScore);
-        }
-
-        finalScoreEl.textContent = state.score;
-        finalHighScoreEl.textContent = state.highScore;
-        updateHUD();
-
-        gameOverOverlay.classList.remove("hidden");
-        boardWrapper.classList.add("flash-gameover");
-        setTimeout(() => boardWrapper.classList.remove("flash-gameover"), 600);
-
-        Sound.play("gameover");
-        announce(`Fim de jogo. Pontuação ${state.score}.`);
+      // Atualiza o estado visual de uma letra no teclado respeitando a
+      // prioridade VERDE > AMARELO > CINZA — uma letra já marcada como
+      // correta nunca regride para presente ou ausente.
+      function updateKeyboardForLetter(letter, status) {
+        const current = state.keyboardState[letter];
+        if (current && STATE_PRIORITY[current] >= STATE_PRIORITY[status]) return;
+        state.keyboardState[letter] = status;
+        const keyEl = keyboardKeys[letter];
+        if (keyEl) keyEl.dataset.state = status;
       }
 
       /* ---------------------------------------------------------
-       * HUD, recorde (localStorage) e acessibilidade
+       * Estatísticas (localStorage)
        * ------------------------------------------------------- */
-      function updateHUD() {
-        scoreEl.textContent = state.score;
-        highScoreEl.textContent = state.highScore;
-        levelEl.textContent = state.level;
-        linesEl.textContent = state.lines;
-      }
-
-      function loadHighScore() {
+      function loadStats() {
         try {
-          const value = localStorage.getItem(HIGH_SCORE_KEY);
-          return value ? parseInt(value, 10) || 0 : 0;
+          const raw = localStorage.getItem(STORAGE_KEYS.STATS);
+          if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATS));
+          return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATS)), JSON.parse(raw));
         } catch (err) {
-          return 0;
+          return JSON.parse(JSON.stringify(DEFAULT_STATS));
         }
       }
 
-      function saveHighScore(value) {
+      function saveStats() {
         try {
-          localStorage.setItem(HIGH_SCORE_KEY, String(value));
+          localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(stats));
         } catch (err) {
           // localStorage indisponível (ex.: modo privado) — ignora silenciosamente.
         }
       }
 
-      function announce(message) {
-        srStatus.textContent = message;
-      }
-
-      function showCombo(lineCount) {
-        const label = COMBO_LABELS[lineCount];
-        if (!label) return;
-        comboToast.textContent = label;
-        comboToast.classList.remove("show");
-        void comboToast.offsetWidth; // força reflow para reiniciar a animação
-        comboToast.classList.add("show");
-        announce(`${label} +${LINE_POINTS[lineCount]} pontos`);
-      }
-
-      /* ---------------------------------------------------------
-       * Renderização (Canvas)
-       * ------------------------------------------------------- */
-      function setupHiDPICanvas(canvas, ctx, width, height) {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      function drawCellAt(ctx, px, py, size, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(px, py, size, size);
-
-        // Realce sutil no topo (efeito de bloco/bisel suave).
-        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
-        ctx.fillRect(px, py, size, Math.max(2, size * 0.12));
-
-        // Sombra sutil na base.
-        ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
-        ctx.fillRect(px, py + size - Math.max(2, size * 0.12), size, Math.max(2, size * 0.12));
-
-        // Borda discreta.
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
-      }
-
-      function drawBoardBackground() {
-        boardCtx.fillStyle = "#02030a";
-        boardCtx.fillRect(0, 0, BOARD_PX_W, BOARD_PX_H);
-      }
-
-      function drawGrid() {
-        boardCtx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-        boardCtx.lineWidth = 1;
-        boardCtx.beginPath();
-        for (let x = 1; x < COLS; x++) {
-          boardCtx.moveTo(x * BASE_CELL + 0.5, 0);
-          boardCtx.lineTo(x * BASE_CELL + 0.5, BOARD_PX_H);
+      function updateStats(won, attempts) {
+        stats.gamesPlayed++;
+        if (won) {
+          stats.wins++;
+          stats.currentStreak++;
+          stats.bestStreak = Math.max(stats.bestStreak, stats.currentStreak);
+          stats.distribution[attempts - 1]++;
+        } else {
+          stats.losses++;
+          stats.currentStreak = 0;
         }
-        for (let y = 1; y < ROWS; y++) {
-          boardCtx.moveTo(0, y * BASE_CELL + 0.5);
-          boardCtx.lineTo(BOARD_PX_W, y * BASE_CELL + 0.5);
-        }
-        boardCtx.stroke();
-      }
 
-      function drawLockedCells() {
-        for (let y = 0; y < ROWS; y++) {
-          for (let x = 0; x < COLS; x++) {
-            const cell = state.board[y][x];
-            if (cell) drawCellAt(boardCtx, x * BASE_CELL, y * BASE_CELL, BASE_CELL, COLORS[cell]);
-          }
-        }
-      }
-
-      function drawPieceMatrix(ctx, matrix, x, y, color, cellSize) {
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (!matrix[ry][rx]) continue;
-            const py = y + ry;
-            if (py < 0) continue;
-            drawCellAt(ctx, (x + rx) * cellSize, py * cellSize, cellSize, color);
-          }
-        }
-      }
-
-      function drawGhost() {
-        const ghostY = computeGhostY();
-        if (ghostY === state.current.y) return; // peça já está apoiada, sem necessidade de fantasma
-        boardCtx.save();
-        boardCtx.globalAlpha = 0.22;
-        drawPieceMatrix(boardCtx, state.current.matrix, state.current.x, ghostY, COLORS[state.current.type], BASE_CELL);
-        boardCtx.restore();
-      }
-
-      function drawClearFlash() {
-        const elapsed = performance.now() - state.clearFlashStart;
-        const alpha = Math.max(0, 0.45 + 0.45 * Math.sin(elapsed / 40));
-        boardCtx.save();
-        boardCtx.globalAlpha = alpha;
-        boardCtx.fillStyle = "#ffffff";
-        state.clearingRows.forEach((y) => {
-          boardCtx.fillRect(0, y * BASE_CELL, BOARD_PX_W, BASE_CELL);
+        stats.history.unshift({
+          word: state.secretWord,
+          length: state.wordLength,
+          difficulty: state.difficulty,
+          won: won,
+          attempts: won ? attempts : null,
+          date: Date.now()
         });
-        boardCtx.restore();
+        stats.history = stats.history.slice(0, 20);
       }
 
-      function drawLockFlash() {
-        const elapsed = performance.now() - state.lockFlash.start;
-        if (elapsed >= LOCK_FLASH_MS) {
-          state.lockFlash = null;
+      function renderMiniStats() {
+        const winRate = stats.gamesPlayed ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
+        resultStatsMini.innerHTML =
+          statBlock(stats.gamesPlayed, "Partidas") +
+          statBlock(winRate + "%", "Vitórias") +
+          statBlock(stats.currentStreak, "Sequência") +
+          statBlock(stats.bestStreak, "Melhor");
+      }
+
+      function statBlock(value, label) {
+        return "<div><strong>" + value + "</strong><span>" + label + "</span></div>";
+      }
+
+      function renderStats() {
+        const winRate = stats.gamesPlayed ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
+        statPlayed.textContent = stats.gamesPlayed;
+        statWins.textContent = stats.wins;
+        statLosses.textContent = stats.losses;
+        statWinrate.textContent = winRate + "%";
+        statStreak.textContent = stats.currentStreak;
+        statBest.textContent = stats.bestStreak;
+
+        renderDistribution();
+        renderHistory();
+      }
+
+      function renderDistribution() {
+        const maxDist = Math.max(1, ...stats.distribution);
+        distributionEl.innerHTML = "";
+
+        stats.distribution.forEach((count, idx) => {
+          const row = document.createElement("div");
+          row.className = "dist-row";
+
+          const label = document.createElement("span");
+          label.className = "dist-label";
+          label.textContent = String(idx + 1);
+
+          const barWrap = document.createElement("div");
+          barWrap.className = "dist-bar-wrap";
+          const bar = document.createElement("div");
+          bar.className = "dist-bar";
+          const pct = count > 0 ? Math.max((count / maxDist) * 100, 6) : 0;
+          bar.style.width = pct + "%";
+          barWrap.appendChild(bar);
+
+          const countEl = document.createElement("span");
+          countEl.className = "dist-count";
+          countEl.textContent = String(count);
+
+          row.appendChild(label);
+          row.appendChild(barWrap);
+          row.appendChild(countEl);
+          distributionEl.appendChild(row);
+        });
+      }
+
+      function renderHistory() {
+        historyList.innerHTML = "";
+
+        if (stats.history.length === 0) {
+          const li = document.createElement("li");
+          li.className = "history-empty";
+          li.textContent = "Nenhuma partida ainda.";
+          historyList.appendChild(li);
           return;
         }
-        const alpha = 0.35 * (1 - elapsed / LOCK_FLASH_MS);
-        boardCtx.save();
-        boardCtx.globalAlpha = alpha;
-        boardCtx.fillStyle = "#ffffff";
-        state.lockFlash.cells.forEach(([x, y]) => {
-          if (y < 0) return;
-          boardCtx.fillRect(x * BASE_CELL, y * BASE_CELL, BASE_CELL, BASE_CELL);
-        });
-        boardCtx.restore();
-      }
 
-      function render() {
-        drawBoardBackground();
-        drawGrid();
-        drawLockedCells();
-
-        if (state.current && state.phase === "playing" && !state.animating) {
-          drawGhost();
-          drawPieceMatrix(boardCtx, state.current.matrix, state.current.x, state.current.y, COLORS[state.current.type], BASE_CELL);
-        }
-
-        if (state.animating && state.clearingRows.length) {
-          drawClearFlash();
-        }
-
-        if (state.lockFlash) {
-          drawLockFlash();
-        }
-      }
-
-      function drawNextPreview() {
-        nextCtx.clearRect(0, 0, NEXT_PX, NEXT_PX);
-        if (!state.next) return;
-        const { matrix, type } = state.next;
-        const size = matrix.length;
-        const offset = ((NEXT_GRID - size) / 2) * NEXT_CELL;
-        for (let y = 0; y < size; y++) {
-          for (let x = 0; x < size; x++) {
-            if (!matrix[y][x]) continue;
-            drawCellAt(nextCtx, offset + x * NEXT_CELL, offset + y * NEXT_CELL, NEXT_CELL, COLORS[type]);
-          }
-        }
-      }
-
-      /* ---------------------------------------------------------
-       * Loop principal
-       * ------------------------------------------------------- */
-      function loop(time) {
-        const delta = time - state.lastTime;
-        state.lastTime = time;
-
-        if (state.phase === "playing" && !state.animating) {
-          state.dropCounter += delta;
-          if (state.dropCounter >= state.dropInterval) {
-            dropPiece();
-          }
-        }
-
-        render();
-        requestAnimationFrame(loop);
-      }
-
-      /* ---------------------------------------------------------
-       * Entrada: teclado
-       * ------------------------------------------------------- */
-      const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space", "KeyP", "KeyR"]);
-
-      window.addEventListener(
-        "keydown",
-        (e) => {
-          if (GAME_KEYS.has(e.code)) e.preventDefault();
-
-          switch (e.code) {
-            case "KeyR":
-              if (e.repeat) return;
-              restartGame();
-              return;
-            case "KeyP":
-              if (e.repeat) return;
-              togglePause();
-              return;
-            case "ArrowLeft":
-              moveHorizontal(-1);
-              return;
-            case "ArrowRight":
-              moveHorizontal(1);
-              return;
-            case "ArrowUp":
-              if (e.repeat) return;
-              rotatePiece();
-              return;
-            case "ArrowDown":
-              softDrop();
-              return;
-            case "Space":
-              if (e.repeat) return;
-              hardDrop();
-              return;
-            default:
-              return;
-          }
-        },
-        { passive: false }
-      );
-
-      // Evita que o toque na área do jogo role a página durante a partida.
-      document.addEventListener(
-        "touchmove",
-        (e) => {
-          if (state.phase === "playing") e.preventDefault();
-        },
-        { passive: false }
-      );
-
-      /* ---------------------------------------------------------
-       * Entrada: botões (clique e toque)
-       * ------------------------------------------------------- */
-      function bindTap(el, handler) {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          handler();
-          el.blur();
+        stats.history.forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "history-item";
+          const icon = item.won ? "🟩" : "⬜";
+          const detail = item.won ? item.attempts + "/" + MAX_ATTEMPTS : "X/" + MAX_ATTEMPTS;
+          li.innerHTML =
+            '<span class="history-icon" aria-hidden="true">' + icon + "</span>" +
+            '<span class="history-word">' + item.word + "</span>" +
+            '<span class="history-meta">' + item.length + " letras · " + detail + "</span>";
+          historyList.appendChild(li);
         });
       }
 
-      // Botões que repetem a ação enquanto pressionados (mover/descer).
-      function bindHold(el, handler, interval) {
-        let timer = null;
-        const start = (e) => {
-          e.preventDefault();
-          handler();
-          clearInterval(timer);
-          timer = setInterval(handler, interval);
-        };
-        const stop = () => {
-          clearInterval(timer);
-          timer = null;
-        };
-        el.addEventListener("touchstart", start, { passive: false });
-        el.addEventListener("touchend", stop);
-        el.addEventListener("touchcancel", stop);
-        el.addEventListener("mousedown", start);
-        el.addEventListener("mouseup", stop);
-        el.addEventListener("mouseleave", stop);
-        el.addEventListener("contextmenu", (e) => e.preventDefault());
+      /* ---------------------------------------------------------
+       * Configurações e tema (localStorage)
+       * ------------------------------------------------------- */
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+          if (!raw) return Object.assign({}, DEFAULT_SETTINGS);
+          return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+        } catch (err) {
+          return Object.assign({}, DEFAULT_SETTINGS);
+        }
       }
 
-      bindTap(playBtn, startGame);
-      bindTap(resumeBtn, togglePause);
-      bindTap(pauseBtn, togglePause);
-      bindTap(restartBtn, restartGame);
-      bindTap(restartBtnOverlay, restartGame);
+      function saveSettings() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+        } catch (err) {
+          // localStorage indisponível — ignora silenciosamente.
+        }
+      }
 
-      bindHold(btnLeft, () => moveHorizontal(-1), 110);
-      bindHold(btnRight, () => moveHorizontal(1), 110);
-      bindHold(btnDown, softDrop, 90);
-      bindTap(btnRotate, rotatePiece);
-      bindTap(btnDrop, hardDrop);
-      bindTap(btnPause, togglePause);
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        const isDark = theme === "dark";
+        themeIcon.textContent = isDark ? "☀️" : "🌙";
+        btnTheme.setAttribute("aria-label", isDark ? "Mudar para tema claro" : "Mudar para tema escuro");
+        metaThemeColor.setAttribute("content", isDark ? "#101114" : "#f6f7f9");
+        settings.theme = theme;
+        saveSettings();
+      }
+
+      function toggleTheme() {
+        const current = document.documentElement.getAttribute("data-theme");
+        applyTheme(current === "dark" ? "light" : "dark");
+      }
+
+      /* ---------------------------------------------------------
+       * Telas e overlays
+       * ------------------------------------------------------- */
+      function renderSetupSelection() {
+        lengthButtons.forEach((btn) => {
+          const active = Number(btn.dataset.length) === selectedLength;
+          btn.classList.toggle("selected", active);
+          btn.setAttribute("aria-pressed", String(active));
+        });
+        difficultyButtons.forEach((btn) => {
+          const active = btn.dataset.difficulty === selectedDifficulty;
+          btn.classList.toggle("selected", active);
+          btn.setAttribute("aria-pressed", String(active));
+        });
+      }
+
+      function showSetupScreen() {
+        setupScreen.classList.remove("hidden");
+        gameScreen.classList.add("hidden");
+        keyboardEl.classList.add("hidden");
+        btnNewGame.classList.add("hidden");
+        renderSetupSelection();
+      }
+
+      function showGameScreen() {
+        setupScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+        keyboardEl.classList.remove("hidden");
+        btnNewGame.classList.remove("hidden");
+      }
+
+      function showOverlay(overlayEl) {
+        overlayEl.classList.remove("hidden");
+        requestAnimationFrame(() => overlayEl.classList.add("show"));
+      }
+
+      function hideOverlay(overlayEl) {
+        overlayEl.classList.remove("show");
+        setTimeout(() => overlayEl.classList.add("hidden"), 200);
+      }
+
+      function showResultPanel(won, attempts) {
+        resultTitle.textContent = won ? "Você acertou! 🎉" : "Fim de jogo!";
+        resultTitle.classList.toggle("result-title-win", won);
+        resultTitle.classList.toggle("result-title-lose", !won);
+
+        if (won) {
+          resultDetail.innerHTML =
+            "Você acertou <strong>" + state.secretWord + "</strong> em <strong>" + attempts + "</strong> " +
+            (attempts === 1 ? "tentativa" : "tentativas") + ".";
+        } else {
+          resultDetail.innerHTML = "A palavra era <strong>" + state.secretWord + "</strong>.";
+        }
+
+        renderMiniStats();
+        showOverlay(resultOverlay);
+      }
+
+      function hideResultPanel() { hideOverlay(resultOverlay); }
+
+      function showStatsPanel() {
+        renderStats();
+        showOverlay(statsOverlay);
+      }
+
+      function hideStatsPanel() { hideOverlay(statsOverlay); }
+
+      /* ---------------------------------------------------------
+       * Toast e anúncios para leitores de tela
+       * ------------------------------------------------------- */
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1700);
+      }
+
+      function announce(message) {
+        srAnnouncer.textContent = "";
+        requestAnimationFrame(() => { srAnnouncer.textContent = message; });
+      }
+
+      function announceGuessResult(guess, result) {
+        const labels = { correct: "correta", present: "presente, posição errada", absent: "ausente" };
+        const parts = guess.split("").map((letter, i) => letter + " " + labels[result[i]]);
+        announce("Tentativa: " + parts.join(", ") + ".");
+      }
+
+      /* ---------------------------------------------------------
+       * Eventos
+       * ------------------------------------------------------- */
+      function bindEvents() {
+        lengthButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            selectedLength = Number(btn.dataset.length);
+            renderSetupSelection();
+          });
+        });
+
+        difficultyButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            selectedDifficulty = btn.dataset.difficulty;
+            renderSetupSelection();
+          });
+        });
+
+        btnStart.addEventListener("click", () => startGame(selectedLength, selectedDifficulty));
+        btnNewGame.addEventListener("click", showSetupScreen);
+
+        keyboardEl.addEventListener("click", (e) => {
+          const btn = e.target.closest(".key");
+          if (btn) handleKey(btn.dataset.key);
+        });
+
+        btnPlayAgain.addEventListener("click", playAgain);
+        btnChangeSettings.addEventListener("click", changeSettings);
+
+        btnStats.addEventListener("click", showStatsPanel);
+        btnCloseStats.addEventListener("click", hideStatsPanel);
+
+        btnTheme.addEventListener("click", toggleTheme);
+
+        resultOverlay.addEventListener("click", (e) => { if (e.target === resultOverlay) hideResultPanel(); });
+        statsOverlay.addEventListener("click", (e) => { if (e.target === statsOverlay) hideStatsPanel(); });
+
+        document.addEventListener("keydown", onKeyDown);
+      }
+
+      function onKeyDown(e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        if (e.key === "Escape") {
+          if (!statsOverlay.classList.contains("hidden")) hideStatsPanel();
+          else if (!resultOverlay.classList.contains("hidden")) hideResultPanel();
+          return;
+        }
+
+        if (!statsOverlay.classList.contains("hidden")) return;
+
+        if (!resultOverlay.classList.contains("hidden")) {
+          if (e.key === "Enter") { e.preventDefault(); playAgain(); }
+          return;
+        }
+
+        if (gameScreen.classList.contains("hidden")) return;
+
+        if (e.key === "Enter") { e.preventDefault(); handleKey("ENTER"); return; }
+        if (e.key === "Backspace") { e.preventDefault(); handleKey("BACKSPACE"); return; }
+
+        const normalized = normalizeChar(e.key);
+        if (/^[A-Z]$/.test(normalized)) handleKey(normalized);
+      }
 
       /* ---------------------------------------------------------
        * Inicialização
        * ------------------------------------------------------- */
-      function setupCanvases() {
-        setupHiDPICanvas(boardCanvas, boardCtx, BOARD_PX_W, BOARD_PX_H);
-        setupHiDPICanvas(nextCanvas, nextCtx, NEXT_PX, NEXT_PX);
-        render();
-        drawNextPreview();
-      }
-
       function init() {
-        setupCanvases();
-        resetState();
-        updateHUD();
-        window.addEventListener("resize", setupCanvases);
-        state.lastTime = performance.now();
-        requestAnimationFrame(loop);
+        const theme = settings.theme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        applyTheme(theme);
+
+        renderKeyboard();
+        bindEvents();
+        showSetupScreen();
       }
 
       init();
