@@ -64,6 +64,8 @@
       --c-word-soft: #fbf1dc;
       --c-city: #ea580c;
       --c-city-soft: #fdece0;
+      --c-meteor: #0891b2;
+      --c-meteor-soft: #e0f7fb;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1184,6 +1186,135 @@
         gap: clamp(16px, 9vw, 40px);
       }
     }
+
+    /* =========================================================
+       Meteor Destroyer Infinite — vista de jogo (overlay em tela cheia)
+       Tema neon escuro próprio, isolado sob #game-meteor. O jogo
+       original vive inteiro num <canvas> (HUD e menus desenhados nele);
+       aqui só embrulhamos numa casca com uma barra "Voltar" no topo —
+       o palco original (fixo à viewport inteira) vira um preenchimento
+       flex abaixo dessa barra.
+       ========================================================= */
+    #game-meteor {
+      --vazio: #05060f;
+      --vazio-alto: #0b0d1c;
+      --ion: #5fe6ff;
+      --ouro: #ffc648;
+      color-scheme: dark;
+
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      background: var(--vazio);
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #game-meteor .game-topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      flex-shrink: 0;
+      width: 100%;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--vazio-alto);
+      border-bottom: 1px solid #1b2145;
+      box-sizing: border-box;
+    }
+    #game-meteor .game-back-btn {
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid #1b2145;
+      color: #9fb3d9;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    #game-meteor .game-back-btn:hover { color: #d8faff; border-color: var(--ion); }
+    #game-meteor .game-back-btn:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
+    #game-meteor .game-topbar-spacer { justify-self: end; }
+
+    #game-meteor .game-title {
+      font-family: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      font-size: clamp(0.7rem, 3vw, 1rem);
+      color: var(--ion);
+      text-shadow: 0 0 8px rgba(95, 230, 255, 0.5);
+      margin: 0;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #meteor-palco {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(120% 90% at 50% 0%, #12162e 0%, #05060f 62%, #03030a 100%);
+    }
+
+    #meteor-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 560px;
+      background: var(--vazio);
+      /* pixel art nítida quando o canvas é escalado pelo CSS */
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      touch-action: none;
+      cursor: crosshair;
+      outline: none;
+    }
+
+    /* Em telas largas o canvas vira uma "tela" com brilho ao redor */
+    @media (min-width: 620px) {
+      #meteor-canvas {
+        box-shadow:
+          0 0 0 2px #1b2145,
+          0 0 60px rgba(95, 230, 255, 0.14),
+          0 24px 70px rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    /* Scanlines: sutis, decorativas, sem capturar cliques */
+    #meteor-crt {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0px,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0.16) 3px,
+        rgba(0, 0, 0, 0.16) 4px
+      );
+      mix-blend-mode: multiply;
+      opacity: 0.55;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #meteor-crt { opacity: 0.25; }
+    }
   </style>
 </head>
 <body>
@@ -1225,6 +1356,7 @@
           <span class="hero-icon" style="--delay:.3s">🧱</span>
           <span class="hero-icon" style="--delay:.45s">📝</span>
           <span class="hero-icon" style="--delay:.6s">🏙️</span>
+          <span class="hero-icon" style="--delay:.75s">☄️</span>
         </div>
       </div>
     </section>
@@ -1285,6 +1417,16 @@
             <h3 class="game-card-title">Evolução das Cidades</h3>
             <p class="game-card-desc">Comece com uma vila pequena e transforme-a em uma grande metrópole.</p>
             <button type="button" class="btn btn-soon btn-block" onclick="openGame('city')">🚧 Em breve</button>
+          </article>
+
+          <article class="game-card reveal">
+            <div class="game-card-top">
+              <div class="game-icon" style="--icon-bg:var(--c-meteor-soft)" aria-hidden="true">☄️</div>
+              <span class="badge badge-medium">Médio</span>
+            </div>
+            <h3 class="game-card-title">Meteor Destroyer</h3>
+            <p class="game-card-desc">Pilote a nave, destrua meteoros e sobreviva o mais longe possível num shoot'em up infinito.</p>
+            <button type="button" class="btn btn-primary pixel-corners btn-block" onclick="openGame('meteor')">Jogar</button>
           </article>
         </div>
       </div>
@@ -1363,6 +1505,12 @@
             <span class="rank-value" id="rank-city">—</span>
             <span class="rank-label">Maior cidade construída</span>
             <span class="rank-note">Em breve</span>
+          </div>
+          <div class="rank-card reveal">
+            <span class="rank-icon" aria-hidden="true">☄️</span>
+            <span class="rank-value" id="rank-meteor">0</span>
+            <span class="rank-label">Maior pontuação — Meteor Destroyer</span>
+            <span class="rank-note" id="rank-meteor-note">Jogue para pontuar</span>
           </div>
         </div>
       </div>
@@ -1616,6 +1764,21 @@
     </div>
   </div>
 
+  <!-- ================= Vista de jogo: Meteor Destroyer Infinite ================= -->
+  <div id="game-meteor" class="hidden" role="region" aria-label="Meteor Destroyer Infinite">
+    <header class="game-topbar">
+      <button type="button" class="game-back-btn" onclick="closeGame('meteor')">
+        <span aria-hidden="true">←</span> Voltar
+      </button>
+      <h1 class="game-title">METEOR DESTROYER</h1>
+      <span class="game-topbar-spacer" aria-hidden="true"></span>
+    </header>
+    <div id="meteor-palco">
+      <canvas id="meteor-canvas" tabindex="0" aria-label="Meteor Destroyer Infinite"></canvas>
+      <div id="meteor-crt"></div>
+    </div>
+  </div>
+
   <noscript>
     Este site precisa de JavaScript habilitado no navegador para funcionar.
   </noscript>
@@ -1645,6 +1808,7 @@
       function getGameController(id) {
         if (id === "tetris") return window.TetrisGame;
         if (id === "snake") return window.SnakeGame;
+        if (id === "meteor") return window.MeteorGame;
         return null;
       }
 
@@ -1665,10 +1829,22 @@
           return;
         }
         lastFocused = document.activeElement;
-        const controller = getGameController(id);
-        if (controller && !controller.started) controller.init();
+        // A vista precisa ficar visível ANTES do init: alguns jogos (ex.:
+        // Meteor Destroyer) medem o tamanho real do canvas via
+        // getBoundingClientRect, e isso dá 0x0 enquanto o elemento ainda
+        // está com "hidden" (display:none).
         overlay.classList.remove("hidden");
         document.documentElement.classList.add("no-scroll");
+        const controller = getGameController(id);
+        if (controller && !controller.started) {
+          controller.init();
+        } else if (controller && controller.onShow) {
+          // Roda a cada reabertura (não só na primeira vez), para jogos
+          // que precisam reagir a algo que mudou enquanto estavam escondidos
+          // — ex.: o Meteor Destroyer reajustando o canvas se a janela foi
+          // redimensionada com a vista fechada.
+          controller.onShow();
+        }
         const backBtn = overlay.querySelector(".game-back-btn");
         if (backBtn) backBtn.focus();
       };
@@ -1682,10 +1858,14 @@
         if (controller) controller.pauseIfPlaying();
         if (id === "tetris") loadTetrisRanking();
         if (id === "snake") loadSnakeRanking();
+        if (id === "meteor") loadMeteorRanking();
         if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
       };
 
       // Fecha a vista de jogo aberta ao pressionar Esc.
+      // O Meteor Destroyer fica de fora dessa lista de propósito: lá
+      // dentro Esc já é o atalho de pausa do próprio jogo, então
+      // deixamos essa tecla para ele e o "Voltar" como única saída.
       window.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
         ["tetris", "snake"].forEach((id) => {
@@ -1720,6 +1900,19 @@
         if (noteEl) noteEl.textContent = high > 0 ? "Recorde local" : "Jogue para pontuar";
       }
 
+      function loadMeteorRanking() {
+        let high = 0;
+        try {
+          high = parseInt(localStorage.getItem("meteorDestroyerInfinite.recorde"), 10) || 0;
+        } catch (err) {
+          high = 0;
+        }
+        const valueEl = document.getElementById("rank-meteor");
+        const noteEl = document.getElementById("rank-meteor-note");
+        if (valueEl) valueEl.textContent = high.toLocaleString("pt-BR");
+        if (noteEl) noteEl.textContent = high > 0 ? "Recorde local" : "Jogue para pontuar";
+      }
+
       function setupReveal() {
         const targets = document.querySelectorAll(".reveal");
         [".game-grid .game-card", ".cartridge-row .cartridge", ".rank-grid .rank-card"].forEach((sel) => {
@@ -1747,6 +1940,7 @@
 
       loadTetrisRanking();
       loadSnakeRanking();
+      loadMeteorRanking();
       setupReveal();
     })();
   </script>
@@ -3138,6 +3332,1524 @@
         pauseIfPlaying() {
           if (state.phase === "playing") togglePause();
         },
+      };
+    })();
+  </script>
+
+  <!-- Motor do jogo: Meteor Destroyer Infinite -->
+  <script>
+    /* =========================================================
+       Meteor Destroyer Infinite — lógica do jogo
+       Adaptado do arquivo enviado: canvas e id do palco renomeados
+       (#meteor-canvas / #game-meteor), entrada de teclado agora só
+       processa quando a vista está aberta, e a inicialização virou
+       preguiçosa — exposta como window.MeteorGame para o roteador
+       da landing page.
+       ========================================================= */
+    (function () {
+      'use strict';
+
+      /* ================================================================
+         METEOR DESTROYER INFINITE
+         Shoot'em up vertical infinito, arquivo único, sem bibliotecas.
+
+         Sumário do código:
+           1. Fonte bitmap 5x7 (desenhada no canvas)
+           2. Utilidades (RNG com semente, clamp, pools)
+           3. Áudio 100% gerado por código (WebAudio)
+           4. Sprites pixel art gerados em runtime
+           5. Estado do jogo e constantes de balanceamento
+           6. Entrada: teclado, mouse e toque
+           7. Lógica (update)
+           8. Desenho (render)
+           9. Loop principal
+         ================================================================ */
+
+      /* ================================================================
+         1. FONTE BITMAP 5x7
+         Cada glifo são 7 linhas de 5 bits. Escrever em binário deixa o
+         desenho legível direto no código-fonte.
+         ================================================================ */
+      var FONTE = {
+        'A': [0b01110,0b10001,0b10001,0b11111,0b10001,0b10001,0b10001],
+        'B': [0b11110,0b10001,0b10001,0b11110,0b10001,0b10001,0b11110],
+        'C': [0b01110,0b10001,0b10000,0b10000,0b10000,0b10001,0b01110],
+        'D': [0b11110,0b10001,0b10001,0b10001,0b10001,0b10001,0b11110],
+        'E': [0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b11111],
+        'F': [0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b10000],
+        'G': [0b01110,0b10001,0b10000,0b10111,0b10001,0b10001,0b01111],
+        'H': [0b10001,0b10001,0b10001,0b11111,0b10001,0b10001,0b10001],
+        'I': [0b11111,0b00100,0b00100,0b00100,0b00100,0b00100,0b11111],
+        'J': [0b00111,0b00010,0b00010,0b00010,0b00010,0b10010,0b01100],
+        'K': [0b10001,0b10010,0b10100,0b11000,0b10100,0b10010,0b10001],
+        'L': [0b10000,0b10000,0b10000,0b10000,0b10000,0b10000,0b11111],
+        'M': [0b10001,0b11011,0b10101,0b10101,0b10001,0b10001,0b10001],
+        'N': [0b10001,0b11001,0b10101,0b10011,0b10001,0b10001,0b10001],
+        'O': [0b01110,0b10001,0b10001,0b10001,0b10001,0b10001,0b01110],
+        'P': [0b11110,0b10001,0b10001,0b11110,0b10000,0b10000,0b10000],
+        'Q': [0b01110,0b10001,0b10001,0b10001,0b10101,0b10010,0b01101],
+        'R': [0b11110,0b10001,0b10001,0b11110,0b10100,0b10010,0b10001],
+        'S': [0b01110,0b10001,0b10000,0b01110,0b00001,0b10001,0b01110],
+        'T': [0b11111,0b00100,0b00100,0b00100,0b00100,0b00100,0b00100],
+        'U': [0b10001,0b10001,0b10001,0b10001,0b10001,0b10001,0b01110],
+        'V': [0b10001,0b10001,0b10001,0b10001,0b10001,0b01010,0b00100],
+        'W': [0b10001,0b10001,0b10001,0b10101,0b10101,0b11011,0b10001],
+        'X': [0b10001,0b10001,0b01010,0b00100,0b01010,0b10001,0b10001],
+        'Y': [0b10001,0b10001,0b01010,0b00100,0b00100,0b00100,0b00100],
+        'Z': [0b11111,0b00001,0b00010,0b00100,0b01000,0b10000,0b11111],
+        '0': [0b01110,0b10001,0b10011,0b10101,0b11001,0b10001,0b01110],
+        '1': [0b00100,0b01100,0b00100,0b00100,0b00100,0b00100,0b01110],
+        '2': [0b01110,0b10001,0b00001,0b00010,0b00100,0b01000,0b11111],
+        '3': [0b11111,0b00010,0b00100,0b00010,0b00001,0b10001,0b01110],
+        '4': [0b00010,0b00110,0b01010,0b10010,0b11111,0b00010,0b00010],
+        '5': [0b11111,0b10000,0b11110,0b00001,0b00001,0b10001,0b01110],
+        '6': [0b00110,0b01000,0b10000,0b11110,0b10001,0b10001,0b01110],
+        '7': [0b11111,0b00001,0b00010,0b00100,0b01000,0b01000,0b01000],
+        '8': [0b01110,0b10001,0b10001,0b01110,0b10001,0b10001,0b01110],
+        '9': [0b01110,0b10001,0b10001,0b01111,0b00001,0b00010,0b01100],
+        ' ': [0,0,0,0,0,0,0],
+        ':': [0b00000,0b00100,0b00100,0b00000,0b00100,0b00100,0b00000],
+        '-': [0b00000,0b00000,0b00000,0b11111,0b00000,0b00000,0b00000],
+        '.': [0b00000,0b00000,0b00000,0b00000,0b00000,0b01100,0b01100],
+        ',': [0b00000,0b00000,0b00000,0b00000,0b01100,0b00100,0b01000],
+        '!': [0b00100,0b00100,0b00100,0b00100,0b00100,0b00000,0b00100],
+        '?': [0b01110,0b10001,0b00001,0b00110,0b00100,0b00000,0b00100],
+        '/': [0b00001,0b00001,0b00010,0b00100,0b01000,0b10000,0b10000],
+        '+': [0b00000,0b00100,0b00100,0b11111,0b00100,0b00100,0b00000],
+        '*': [0b00000,0b10101,0b01110,0b11111,0b01110,0b10101,0b00000],
+        '(': [0b00010,0b00100,0b01000,0b01000,0b01000,0b00100,0b00010],
+        ')': [0b01000,0b00100,0b00010,0b00010,0b00010,0b00100,0b01000],
+        '>': [0b01000,0b00100,0b00010,0b00001,0b00010,0b00100,0b01000],
+        '<': [0b00010,0b00100,0b01000,0b10000,0b01000,0b00100,0b00010]
+      };
+
+      var GLIFO_L = 5, GLIFO_A = 7, GLIFO_ESPACO = 1;
+
+      /** Largura em pixels de um texto num dado tamanho de pixel. */
+      function larguraTexto(txt, s) {
+        if (!txt.length) return 0;
+        return txt.length * (GLIFO_L + GLIFO_ESPACO) * s - GLIFO_ESPACO * s;
+      }
+
+      /**
+       * Desenha texto com a fonte bitmap.
+       * @param {string} align 'left' | 'center' | 'right'
+       * @param {string|null} sombra cor da sombra deslocada (opcional)
+       */
+      function texto(txt, x, y, s, cor, align, sombra) {
+        txt = String(txt).toUpperCase();
+        var larg = larguraTexto(txt, s);
+        var px = align === 'center' ? x - larg / 2 : align === 'right' ? x - larg : x;
+        px = Math.round(px);
+        y = Math.round(y);
+
+        if (sombra) desenhaGlifos(txt, px + s, y + s, s, sombra);
+        desenhaGlifos(txt, px, y, s, cor);
+      }
+
+      function desenhaGlifos(txt, px, y, s, cor) {
+        ctx.fillStyle = cor;
+        for (var i = 0; i < txt.length; i++) {
+          var g = FONTE[txt.charAt(i)];
+          if (g) {
+            for (var r = 0; r < GLIFO_A; r++) {
+              var bits = g[r];
+              if (!bits) continue;
+              for (var c = 0; c < GLIFO_L; c++) {
+                if (bits & (1 << (GLIFO_L - 1 - c))) {
+                  ctx.fillRect(px + c * s, y + r * s, s, s);
+                }
+              }
+            }
+          }
+          px += (GLIFO_L + GLIFO_ESPACO) * s;
+        }
+      }
+
+      /* ================================================================
+         2. UTILIDADES
+         ================================================================ */
+
+      function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+      function aleatorio(a, b) { return a + Math.random() * (b - a); }
+      function escolher(arr) { return arr[(Math.random() * arr.length) | 0]; }
+      function zeros(n) { return String(n).length >= 6 ? String(n) : ('000000' + n).slice(-6); }
+
+      /** PRNG com semente (mulberry32) — sprites determinísticos. */
+      function comSemente(s) {
+        return function () {
+          s |= 0; s = (s + 0x6D2B79F5) | 0;
+          var t = Math.imul(s ^ (s >>> 15), 1 | s);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      /**
+       * Pool de objetos: evita alocação (e coleta de lixo) no meio do jogo,
+       * que é o que causa engasgos com muitos objetos na tela.
+       */
+      function criarPool(fabrica) {
+        var livres = [];
+        return {
+          pegar: function () { return livres.length ? livres.pop() : fabrica(); },
+          devolver: function (o) { if (livres.length < 512) livres.push(o); }
+        };
+      }
+
+      /** Remoção O(1): troca com o último e corta o fim. */
+      function removerEm(arr, i, pool) {
+        if (pool) pool.devolver(arr[i]);
+        arr[i] = arr[arr.length - 1];
+        arr.pop();
+      }
+
+      /* ================================================================
+         3. ÁUDIO GERADO POR CÓDIGO
+         Nenhum arquivo externo: osciladores + um buffer de ruído branco.
+         ================================================================ */
+      var Som = (function () {
+        var ac = null, master = null, bufRuido = null, mudo = false;
+
+        function garantir() {
+          if (ac) return ac;
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          try { ac = new AC(); } catch (e) { return null; }
+
+          master = ac.createGain();
+          master.gain.value = 0.45;
+          master.connect(ac.destination);
+
+          // Um único buffer de ruído reaproveitado por explosões e impactos.
+          var n = Math.floor(ac.sampleRate * 0.7);
+          bufRuido = ac.createBuffer(1, n, ac.sampleRate);
+          var d = bufRuido.getChannelData(0);
+          for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+          return ac;
+        }
+
+        // Navegadores só liberam áudio após um gesto do usuário.
+        function acordar() {
+          var a = garantir();
+          if (a && a.state === 'suspended') a.resume();
+        }
+
+        function tom(f0, f1, dur, tipo, vol, atraso) {
+          var a = garantir();
+          if (!a || mudo) return;
+          var t = a.currentTime + (atraso || 0);
+          var osc = a.createOscillator(), g = a.createGain();
+          osc.type = tipo;
+          osc.frequency.setValueAtTime(f0, t);
+          osc.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.006);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          osc.connect(g); g.connect(master);
+          osc.start(t); osc.stop(t + dur + 0.03);
+        }
+
+        function ruido(dur, f0, f1, vol, q) {
+          var a = garantir();
+          if (!a || mudo) return;
+          var t = a.currentTime;
+          var src = a.createBufferSource();
+          src.buffer = bufRuido;
+          src.playbackRate.value = 0.8 + Math.random() * 0.4;
+
+          var flt = a.createBiquadFilter();
+          flt.type = 'lowpass';
+          flt.Q.value = q || 1;
+          flt.frequency.setValueAtTime(f0, t);
+          flt.frequency.exponentialRampToValueAtTime(Math.max(40, f1), t + dur);
+
+          var g = a.createGain();
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+          src.connect(flt); flt.connect(g); g.connect(master);
+          src.start(t); src.stop(t + dur + 0.03);
+        }
+
+        return {
+          acordar: acordar,
+          mudo: function () { return mudo; },
+          alternarMudo: function () { mudo = !mudo; if (!mudo) acordar(); return mudo; },
+
+          tiro: function () {
+            tom(1250, 300, 0.085, 'square', 0.06);
+            ruido(0.05, 3800, 900, 0.025);
+          },
+          explosao: function (tam) {
+            var k = tam === 'large' ? 1.5 : tam === 'medium' ? 1.1 : 0.8;
+            ruido(0.16 + 0.12 * k, 2400 / k, 90, 0.17 * Math.min(k, 1.3), 1.2);
+            tom(200 / k, 45, 0.18 + 0.1 * k, 'sawtooth', 0.05);
+          },
+          dano: function () {
+            tom(440, 55, 0.45, 'sawtooth', 0.15);
+            ruido(0.35, 1400, 90, 0.16, 2);
+          },
+          fimDeJogo: function () {
+            var notas = [659, 523, 415, 311, 208];
+            for (var i = 0; i < notas.length; i++) {
+              tom(notas[i], notas[i] * 0.98, 0.26, 'square', 0.09, i * 0.17);
+            }
+          },
+          powerup: function () {
+            var notas = [523, 659, 784, 1047];
+            for (var i = 0; i < notas.length; i++) {
+              tom(notas[i], notas[i] * 1.01, 0.11, 'square', 0.08, i * 0.065);
+            }
+          },
+          nivel: function () {
+            tom(880, 1320, 0.13, 'square', 0.05);
+            tom(1320, 1760, 0.12, 'square', 0.04, 0.1);
+          }
+        };
+      })();
+
+      /* ================================================================
+         4. SPRITES PIXEL ART
+         Tudo é gerado em canvases fora da tela na inicialização (e a cada
+         redimensionamento), então o loop só faz drawImage.
+         ================================================================ */
+
+      // A nave: 13x12 pixels de arte. Legenda das cores abaixo.
+      var NAVE = [
+        '......Y......',
+        '.....YoY.....',
+        '.....oBo.....',
+        '....YoBoY....',
+        '...YYoBoYY...',
+        '..YYooBooYY..',
+        '.YYoooBoooYY.',
+        'YYoooooooooYY',
+        'YoorrrorrrooY',
+        'Yo.rrrorrr.oY',
+        '.o..rr.rr..o.',
+        '....r.W.r....'
+      ];
+
+      var PALETA_NAVE = {
+        'Y': '#ffc648', // casco dourado
+        'o': '#e8862a', // laranja médio
+        'r': '#c2401a', // brasa
+        'B': '#5fe6ff', // cabine íon
+        'W': '#ffffff'  // ponto quente do motor
+      };
+
+      // Coração do power-up de vida extra (7x7)
+      var CORACAO = [
+        '.RR.RR.',
+        'RWRRRRR',
+        'RWRRRRR',
+        'RRRRRRs',
+        '.RRRRs.',
+        '..RRs..',
+        '...s...'
+      ];
+
+      var PALETA_CORACAO = {
+        'R': '#ff3d7f',
+        's': '#a3134a',
+        'W': '#ffd9e6'
+      };
+
+      /** Converte uma matriz de caracteres num canvas pixel art. */
+      function spriteDeMatriz(linhas, paleta, escala) {
+        var l = linhas[0].length, a = linhas.length;
+        var c = document.createElement('canvas');
+        c.width = l * escala; c.height = a * escala;
+        var g = c.getContext('2d');
+        for (var y = 0; y < a; y++) {
+          for (var x = 0; x < l; x++) {
+            var cor = paleta[linhas[y].charAt(x)];
+            if (!cor) continue;
+            g.fillStyle = cor;
+            g.fillRect(x * escala, y * escala, escala, escala);
+          }
+        }
+        return c;
+      }
+
+      /**
+       * Gera uma rocha procedural: contorno irregular (soma de senos),
+       * iluminação vinda do canto superior esquerdo e algumas crateras.
+       */
+      function spriteMeteoro(tam, escala, semente, paleta) {
+        var rnd = comSemente(semente);
+        var c = document.createElement('canvas');
+        c.width = tam * escala; c.height = tam * escala;
+        var g = c.getContext('2d');
+
+        var cx = (tam - 1) / 2, cy = (tam - 1) / 2;
+        var a1 = rnd() * 6.283, a2 = rnd() * 6.283, a3 = rnd() * 6.283;
+        var rBase = tam * 0.46;
+
+        var crateras = [];
+        var nC = 2 + ((rnd() * 3) | 0);
+        for (var i = 0; i < nC; i++) {
+          crateras.push({
+            x: cx + (rnd() - 0.5) * tam * 0.55,
+            y: cy + (rnd() - 0.5) * tam * 0.55,
+            r: tam * (0.09 + rnd() * 0.10)
+          });
+        }
+
+        for (var y = 0; y < tam; y++) {
+          for (var x = 0; x < tam; x++) {
+            var dx = x - cx, dy = y - cy;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            var ang = Math.atan2(dy, dx);
+            var r = rBase * (1 + 0.13 * Math.sin(ang * 3 + a1)
+                               + 0.09 * Math.sin(ang * 5 + a2)
+                               + 0.06 * Math.sin(ang * 7 + a3));
+            if (d > r) continue;
+
+            var cor;
+            if (d > r - 1.15) {
+              cor = paleta.contorno;
+            } else {
+              var luz = (-dx - dy) / (rBase * 2) + 0.5;
+              cor = luz > 0.68 ? paleta.claro : luz > 0.40 ? paleta.medio : paleta.escuro;
+              for (var k = 0; k < crateras.length; k++) {
+                var cr = crateras[k];
+                var ddx = x - cr.x, ddy = y - cr.y;
+                if (ddx * ddx + ddy * ddy < cr.r * cr.r) { cor = paleta.escuro; break; }
+              }
+            }
+            g.fillStyle = cor;
+            g.fillRect(x * escala, y * escala, escala, escala);
+          }
+        }
+        return c;
+      }
+
+      // Rochas claras o bastante para se destacarem do vazio quase preto —
+      // o contorno é escuro, mas nunca tão escuro quanto o fundo.
+      var PALETA_ROCHA = [
+        { contorno: '#241d2e', escuro: '#4a3f58', medio: '#6d5f7d', claro: '#9c8fad' }, // malva
+        { contorno: '#241d16', escuro: '#4f4234', medio: '#78654d', claro: '#a68f6e' }, // ocre
+        { contorno: '#18222a', escuro: '#3a4c58', medio: '#57707f', claro: '#8099ab' }  // ardósia
+      ];
+
+      /**
+       * Laser com brilho. O blur é caro, então é aplicado UMA vez aqui,
+       * na criação do sprite, e nunca dentro do loop de desenho.
+       */
+      function spriteLaser(escala) {
+        var c = document.createElement('canvas');
+        c.width = 9 * escala; c.height = 13 * escala;
+        var g = c.getContext('2d');
+        g.shadowColor = '#5fe6ff';
+        g.shadowBlur = 3.5 * escala;
+        g.fillStyle = '#2fb8ff';
+        for (var i = 0; i < 3; i++) g.fillRect(4 * escala, 3 * escala, escala, 7 * escala);
+        g.shadowBlur = 0;
+        g.fillStyle = '#d8faff';
+        g.fillRect(4 * escala, 4 * escala, escala, 5 * escala);
+        return c;
+      }
+
+      /* ================================================================
+         5. ESTADO E BALANCEAMENTO
+         ================================================================ */
+
+      var canvas = document.getElementById('meteor-canvas');
+      var ctx = canvas.getContext('2d', { alpha: false });
+      var gameRoot = document.getElementById('game-meteor');
+
+      var W = 0, H = 0, DPR = 1;
+      var PX = 3;   // tamanho de um "pixel de arte" em pixels de tela
+      var FS = 2;   // escala da fonte bitmap
+      var MARGEM_TOPO = 60; // área reservada ao HUD
+
+      // Estados de tela
+      var INICIO = 0, JOGANDO = 1, PAUSADO = 2, FIM = 3;
+      var estado = INICIO;
+
+      var CHAVE_RECORDE = 'meteorDestroyerInfinite.recorde';
+      var recorde = 0;
+      try { recorde = parseInt(localStorage.getItem(CHAVE_RECORDE), 10) || 0; } catch (e) { recorde = 0; }
+
+      var VIDAS_INICIAIS = 3;
+      var MAX_VIDAS = 5;
+      var PONTOS_POR_METEORO = 10;
+      var PONTOS_POR_NIVEL = 100;   // dificuldade sobe a cada 100 pontos
+      var MULT_VELOCIDADE = 1.10;   // x1.1 por nível
+      var MULT_SPAWN = 1.05;        // x1.05 por nível
+      var TETO_VELOCIDADE = 3.2;    // travas para o jogo continuar jogável
+      var TETO_SPAWN = 5.0;
+      var MAX_METEOROS = 64;        // teto de segurança para performance
+      var CADENCIA = 0.17;          // segundos entre tiros
+      var CHANCE_VIDA_EXTRA = 0.012; // 1,2% por meteoro destruído (raro)
+
+      // Velocidades expressas em "pixels de arte por segundo" e depois
+      // multiplicadas por PX — assim o jogo tem o mesmo ritmo em qualquer tela.
+      var VEL_NAVE_ART = 92;
+      var VEL_TIRO_ART = 210;
+      var VEL_METEORO_ART = 34;
+      var VEL_POWERUP_ART = 26;
+
+      var TIPOS = {
+        small:  { art: 8,  vida: 1, velK: 1.35, giro: 2.4 },
+        medium: { art: 13, vida: 2, velK: 1.00, giro: 1.5 },
+        large:  { art: 19, vida: 3, velK: 0.78, giro: 0.9 }
+      };
+
+      // Sprites (regerados no resize)
+      var sprNave = null, sprNaveIcone = null, sprLaser = null, sprCoracao = null;
+      var sprMeteoro = { small: [], medium: [], large: [] };
+
+      // Entidades
+      var jogador = {
+        x: 0, y: 0, raio: 0, vidas: VIDAS_INICIAIS,
+        cd: 0, invul: 0, chama: 0
+      };
+      var meteoros = [], tiros = [], particulas = [], powerups = [], estrelas = [];
+
+      var poolMeteoro   = criarPool(function () { return {}; });
+      var poolTiro      = criarPool(function () { return {}; });
+      var poolParticula = criarPool(function () { return {}; });
+      var poolPowerup   = criarPool(function () { return {}; });
+
+      // Progressão
+      var pontos = 0, nivel = 0, timerSpawn = 0, tempoVivo = 0;
+      var tremor = 0, flash = 0;
+      var msgFlash = null; // { txt, t }
+      var botoes = [];     // áreas clicáveis reconstruídas a cada frame
+
+      /* ================================================================
+         REDIMENSIONAMENTO
+         ================================================================ */
+      function redimensionar() {
+        var r = canvas.getBoundingClientRect();
+        W = Math.max(240, Math.round(r.width));
+        H = Math.max(320, Math.round(r.height));
+        DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = Math.round(W * DPR);
+        canvas.height = Math.round(H * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+
+        var pxAntes = PX, fsAntes = FS;
+        PX = clamp(Math.round(W / 120), 2, 6);
+        FS = clamp(Math.round(W / 180), 2, 5);
+        // Faixa reservada ao HUD: score + medidor de vidas (ver desenharHUD)
+        MARGEM_TOPO = 28 + 31 * FS;
+
+        // Regerar sprites é caro e o resize dispara em rajada ao arrastar
+        // a janela — só refaz quando a escala realmente mudou.
+        if (!sprNave || pxAntes !== PX || fsAntes !== FS) gerarSprites();
+        gerarEstrelas();
+
+        jogador.raio = 4.6 * PX;
+        if (estado === INICIO) posicionarNave();
+        jogador.x = clamp(jogador.x, jogador.raio, W - jogador.raio);
+        jogador.y = clamp(jogador.y, MARGEM_TOPO + jogador.raio, H - jogador.raio);
+      }
+
+      function gerarSprites() {
+        sprNave = spriteDeMatriz(NAVE, PALETA_NAVE, PX);
+        sprNaveIcone = spriteDeMatriz(NAVE, PALETA_NAVE, Math.max(1, FS));
+        sprLaser = spriteLaser(PX);
+        sprCoracao = spriteDeMatriz(CORACAO, PALETA_CORACAO, PX);
+
+        for (var tipo in TIPOS) {
+          sprMeteoro[tipo] = [];
+          for (var v = 0; v < 3; v++) {
+            sprMeteoro[tipo].push(
+              spriteMeteoro(TIPOS[tipo].art, PX, (tipo.length * 977 + v * 5231) | 0, PALETA_ROCHA[v])
+            );
+          }
+        }
+      }
+
+      /** Três camadas de estrelas, com paralaxe e cores levemente distintas. */
+      function gerarEstrelas() {
+        estrelas.length = 0;
+        var n = clamp(Math.round((W * H) / 2400), 60, 220);
+        var cores = ['#ffffff', '#cfe4ff', '#ffe6b8', '#ffc7e6', '#b8f0ff'];
+        for (var i = 0; i < n; i++) {
+          var camada = i % 3;
+          estrelas.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            camada: camada,
+            cor: camada === 2 ? escolher(cores) : (camada === 1 ? '#cfe4ff' : '#7f8aa8'),
+            fase: Math.random() * 6.283,
+            tam: camada === 2 ? 2 : 1
+          });
+        }
+      }
+
+      /* ================================================================
+         6. ENTRADA
+         ================================================================ */
+      var teclas = { esq: false, dir: false, cima: false, baixo: false, fogo: false };
+      var alvoPonteiro = null;   // {x, y} destino da nave quando arrastando
+      var idArraste = null;      // pointerId que controla o movimento
+      var idFogo = null;         // pointerId segurando o botão de fogo
+      var usouToque = false;     // revela o botão de fogo na tela
+
+      function mapaTecla(cod) {
+        switch (cod) {
+          case 'ArrowLeft': case 'KeyA': return 'esq';
+          case 'ArrowRight': case 'KeyD': return 'dir';
+          case 'ArrowUp': case 'KeyW': return 'cima';
+          case 'ArrowDown': case 'KeyS': return 'baixo';
+          case 'Space': return 'fogo';
+        }
+        return null;
+      }
+
+      window.addEventListener('keydown', function (e) {
+        // Só processa teclas do jogo quando a vista do Meteor Destroyer está
+        // aberta, para não bloquear rolagem/atalhos da landing page.
+        if (gameRoot.classList.contains('hidden')) return;
+
+        var k = mapaTecla(e.code);
+        if (k) {
+          e.preventDefault();
+          teclas[k] = true;
+          Som.acordar();
+          // Espaço também confirma nas telas de início e fim
+          if (k === 'fogo') {
+            if (estado === INICIO) iniciarPartida();
+            else if (estado === FIM) iniciarPartida();
+          }
+        }
+        if (e.code === 'Enter') {
+          e.preventDefault();
+          Som.acordar();
+          if (estado === INICIO || estado === FIM) iniciarPartida();
+          else alternarPausa();
+        }
+        if (e.code === 'KeyP' || e.code === 'Escape') {
+          e.preventDefault();
+          alternarPausa();
+        }
+        if (e.code === 'KeyM') Som.alternarMudo();
+      }, { passive: false });
+
+      window.addEventListener('keyup', function (e) {
+        if (gameRoot.classList.contains('hidden')) return;
+        var k = mapaTecla(e.code);
+        if (k) { e.preventDefault(); teclas[k] = false; }
+      }, { passive: false });
+
+      function posDoEvento(e) {
+        var r = canvas.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+      }
+
+      function dentro(p, b) {
+        return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+      }
+
+      function areaBotaoFogo() {
+        var r = 13 * FS;
+        return { x: W - r * 2 - 12, y: H - r * 2 - 12, w: r * 2, h: r * 2 };
+      }
+
+      canvas.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        canvas.focus();
+        Som.acordar();
+        if (e.pointerType === 'touch') usouToque = true;
+
+        var p = posDoEvento(e);
+
+        // 1) Botões da interface têm prioridade
+        for (var i = 0; i < botoes.length; i++) {
+          if (dentro(p, botoes[i])) { acionar(botoes[i].id); return; }
+        }
+
+        // 2) Botão de fogo virtual (só existe durante a partida no toque)
+        if (estado === JOGANDO && usouToque) {
+          var bf = areaBotaoFogo();
+          var cxb = bf.x + bf.w / 2, cyb = bf.y + bf.h / 2;
+          if (Math.hypot(p.x - cxb, p.y - cyb) <= bf.w / 2 + 6) {
+            idFogo = e.pointerId;
+            try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+            return;
+          }
+        }
+
+        // 3) Caso contrário, começa a arrastar a nave (arraste relativo:
+        //    a nave não "pula" para o dedo, ela acompanha o deslocamento)
+        if (estado === JOGANDO && idArraste === null) {
+          idArraste = e.pointerId;
+          alvoPonteiro = {
+            x: jogador.x, y: jogador.y,
+            offX: jogador.x - p.x, offY: jogador.y - p.y
+          };
+          try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+        } else if (estado === INICIO || estado === FIM) {
+          iniciarPartida();
+        }
+      });
+
+      canvas.addEventListener('pointermove', function (e) {
+        if (e.pointerId !== idArraste || !alvoPonteiro) return;
+        e.preventDefault();
+        var p = posDoEvento(e);
+        alvoPonteiro.x = p.x + alvoPonteiro.offX;
+        alvoPonteiro.y = p.y + alvoPonteiro.offY;
+      });
+
+      function soltarPonteiro(e) {
+        if (e.pointerId === idArraste) { idArraste = null; alvoPonteiro = null; }
+        if (e.pointerId === idFogo) idFogo = null;
+      }
+      canvas.addEventListener('pointerup', soltarPonteiro);
+      canvas.addEventListener('pointercancel', soltarPonteiro);
+      canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+      /** Executa a ação de um botão da interface. */
+      function acionar(id) {
+        switch (id) {
+          case 'iniciar':
+          case 'reiniciar': iniciarPartida(); break;
+          case 'pausar':
+          case 'continuar': alternarPausa(); break;
+          case 'sair': voltarAoInicio(); break;
+          case 'som': Som.alternarMudo(); break;
+        }
+      }
+
+      function alternarPausa() {
+        if (estado === JOGANDO) { estado = PAUSADO; idArraste = null; alvoPonteiro = null; idFogo = null; }
+        else if (estado === PAUSADO) { estado = JOGANDO; Som.acordar(); }
+      }
+
+      // Pausa sozinho se a aba perder o foco
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden && estado === JOGANDO) alternarPausa();
+      });
+      window.addEventListener('blur', function () {
+        if (estado === JOGANDO) alternarPausa();
+      });
+
+      /* ================================================================
+         7. LÓGICA
+         ================================================================ */
+
+      function posicionarNave() {
+        jogador.x = W / 2;
+        jogador.y = H - 100;
+      }
+
+      function iniciarPartida() {
+        Som.acordar();
+        meteoros.length = 0; tiros.length = 0; particulas.length = 0; powerups.length = 0;
+        pontos = 0; nivel = 0; timerSpawn = 0.6; tempoVivo = 0;
+        tremor = 0; flash = 0; msgFlash = null;
+        jogador.vidas = VIDAS_INICIAIS;
+        jogador.cd = 0;
+        jogador.invul = 1.2;
+        posicionarNave();
+        alvoPonteiro = null; idArraste = null; idFogo = null;
+        estado = JOGANDO;
+      }
+
+      function voltarAoInicio() {
+        salvarRecorde();
+        estado = INICIO;
+        meteoros.length = 0; tiros.length = 0; particulas.length = 0; powerups.length = 0;
+        posicionarNave();
+      }
+
+      function salvarRecorde() {
+        if (pontos > recorde) {
+          recorde = pontos;
+          try { localStorage.setItem(CHAVE_RECORDE, String(recorde)); } catch (e) {}
+        }
+      }
+
+      function multVelocidade() { return Math.min(Math.pow(MULT_VELOCIDADE, nivel), TETO_VELOCIDADE); }
+      function multSpawn() { return Math.min(Math.pow(MULT_SPAWN, nivel), TETO_SPAWN); }
+      function intervaloSpawn() { return Math.max(0.16, 0.95 / multSpawn()); }
+
+      function pontuar(p) {
+        pontos += p;
+        var novo = Math.floor(pontos / PONTOS_POR_NIVEL);
+        if (novo > nivel) {
+          nivel = novo;
+          Som.nivel();
+          msgFlash = { txt: 'NIVEL ' + (nivel + 1), t: 1.6 };
+        }
+      }
+
+      function sacudir(v) { tremor = Math.min(tremor + v, 22); }
+
+      /* ---------- Criação de entidades ---------- */
+
+      function nascerMeteoro(forcarTipo) {
+        if (meteoros.length >= MAX_METEOROS) return;
+
+        // A distribuição pende para rochas maiores conforme o nível sobe.
+        var tipo = forcarTipo;
+        if (!tipo) {
+          var r = Math.random();
+          var pGrande = Math.min(0.10 + nivel * 0.03, 0.38);
+          var pMedio = Math.min(0.32 + nivel * 0.02, 0.42);
+          tipo = r < pGrande ? 'large' : r < pGrande + pMedio ? 'medium' : 'small';
+        }
+
+        var t = TIPOS[tipo];
+        var raio = t.art * 0.42 * PX;
+        var m = poolMeteoro.pegar();
+        m.tipo = tipo;
+        m.raio = raio;
+        m.vida = t.vida;
+        m.x = aleatorio(raio, W - raio);
+        m.y = -raio - 4;
+        m.vy = VEL_METEORO_ART * PX * t.velK * multVelocidade() * aleatorio(0.88, 1.14);
+        m.vx = m.vy * aleatorio(-0.28, 0.28);
+        m.ang = Math.random() * 6.283;
+        m.vang = aleatorio(-t.giro, t.giro);
+        m.variante = (Math.random() * 3) | 0;
+        m.piscar = 0;
+        meteoros.push(m);
+      }
+
+      function fragmentar(m, tipoFilho, qtd) {
+        for (var i = 0; i < qtd; i++) {
+          if (meteoros.length >= MAX_METEOROS) return;
+          var t = TIPOS[tipoFilho];
+          var raio = t.art * 0.42 * PX;
+          var f = poolMeteoro.pegar();
+          f.tipo = tipoFilho;
+          f.raio = raio;
+          f.vida = t.vida;
+          f.x = clamp(m.x + aleatorio(-m.raio, m.raio), raio, W - raio);
+          f.y = m.y + aleatorio(-m.raio * 0.4, m.raio * 0.4);
+          f.vy = Math.abs(m.vy) * aleatorio(0.95, 1.25);
+          f.vx = m.vx + (i === 0 ? -1 : 1) * f.vy * aleatorio(0.18, 0.42);
+          f.ang = Math.random() * 6.283;
+          f.vang = aleatorio(-t.giro, t.giro);
+          f.variante = (Math.random() * 3) | 0;
+          f.piscar = 0;
+          meteoros.push(f);
+        }
+      }
+
+      function atirar() {
+        var t = poolTiro.pegar();
+        t.x = jogador.x;
+        t.y = jogador.y - 7 * PX;
+        t.vy = -VEL_TIRO_ART * PX;
+        t.raio = 1.6 * PX;
+        tiros.push(t);
+        Som.tiro();
+
+        // Fumacinha do cano
+        for (var i = 0; i < 3; i++) {
+          criarParticula(t.x, t.y, aleatorio(-30, 30), aleatorio(-60, 20), 0.18, '#5fe6ff', PX * 0.7);
+        }
+      }
+
+      function criarParticula(x, y, vx, vy, vida, cor, tam) {
+        if (particulas.length > 620) return;
+        var p = poolParticula.pegar();
+        p.x = x; p.y = y; p.vx = vx; p.vy = vy;
+        p.vida = vida; p.max = vida; p.cor = cor; p.tam = tam;
+        particulas.push(p);
+      }
+
+      var CORES_EXPLOSAO = ['#ffffff', '#ffe9a8', '#ffc648', '#ff8a2b', '#e0521f', '#8c2b12'];
+
+      function explodir(x, y, forca, cores) {
+        var n = Math.round(forca * 14);
+        var pal = cores || CORES_EXPLOSAO;
+        for (var i = 0; i < n; i++) {
+          var a = Math.random() * 6.283;
+          var v = aleatorio(30, 190) * forca * 0.55;
+          criarParticula(
+            x, y,
+            Math.cos(a) * v, Math.sin(a) * v,
+            aleatorio(0.22, 0.62),
+            pal[(Math.random() * pal.length) | 0],
+            PX * aleatorio(0.7, 1.7)
+          );
+        }
+      }
+
+      function criarPowerup(x, y) {
+        var p = poolPowerup.pegar();
+        p.x = x; p.y = y;
+        p.vy = VEL_POWERUP_ART * PX;
+        p.vx = aleatorio(-20, 20);
+        p.raio = 5 * PX;
+        p.t = 0;
+        powerups.push(p);
+      }
+
+      /* ---------- Destruição / dano ---------- */
+
+      function destruirMeteoro(i, comPontos) {
+        var m = meteoros[i];
+        var forca = m.tipo === 'large' ? 1.6 : m.tipo === 'medium' ? 1.15 : 0.8;
+
+        explodir(m.x, m.y, forca);
+        Som.explosao(m.tipo);
+        sacudir(m.tipo === 'large' ? 7 : m.tipo === 'medium' ? 4 : 2.2);
+
+        if (comPontos) {
+          pontuar(PONTOS_POR_METEORO);
+          // Rochas grandes se partem — é o que dá sentido aos tamanhos.
+          if (m.tipo === 'large') fragmentar(m, 'medium', 2);
+          else if (m.tipo === 'medium') fragmentar(m, 'small', 2);
+
+          // Vida extra: rara, e só se ainda houver espaço no medidor.
+          if (jogador.vidas < MAX_VIDAS && Math.random() < CHANCE_VIDA_EXTRA) {
+            criarPowerup(m.x, m.y);
+          }
+        }
+        removerEm(meteoros, i, poolMeteoro);
+      }
+
+      function danificarJogador() {
+        jogador.vidas--;
+        jogador.invul = 2.0;
+        Som.dano();
+        sacudir(14);
+        flash = 0.35;
+        explodir(jogador.x, jogador.y, 1.4, ['#ffffff', '#ffc648', '#ff3d7f', '#5fe6ff']);
+
+        if (jogador.vidas <= 0) {
+          jogador.vidas = 0;
+          fimDeJogo();
+        }
+      }
+
+      function fimDeJogo() {
+        explodir(jogador.x, jogador.y, 2.6);
+        sacudir(20);
+        salvarRecorde();
+        Som.fimDeJogo();
+        estado = FIM;
+        idArraste = null; alvoPonteiro = null; idFogo = null;
+      }
+
+      /* ---------- Update ---------- */
+
+      function atualizar(dt) {
+        // Estrelas correm sempre — o fundo nunca "morre"
+        var velFundo = estado === JOGANDO ? multVelocidade() : 0.45;
+        for (var i = 0; i < estrelas.length; i++) {
+          var s = estrelas[i];
+          s.y += (10 + s.camada * 16) * velFundo * dt;
+          if (s.y > H) { s.y = -2; s.x = Math.random() * W; }
+          s.fase += dt * (1 + s.camada);
+        }
+
+        if (tremor > 0) tremor = Math.max(0, tremor - dt * 42);
+        if (flash > 0) flash = Math.max(0, flash - dt * 1.6);
+        if (msgFlash) { msgFlash.t -= dt; if (msgFlash.t <= 0) msgFlash = null; }
+
+        // Partículas e rochas continuam animando em todas as telas (menos
+        // pausado): o fundo dos menus fica vivo em vez de congelado.
+        atualizarParticulas(dt);
+        atualizarMeteoros(dt);
+
+        timerSpawn -= dt;
+
+        if (estado !== JOGANDO) {
+          // Repovoamento lento e discreto para as telas de menu
+          if (timerSpawn <= 0) {
+            if (meteoros.length < 6) nascerMeteoro();
+            timerSpawn = 1.4;
+          }
+          return;
+        }
+
+        tempoVivo += dt;
+        atualizarJogador(dt);
+        atualizarTiros(dt);
+        atualizarPowerups(dt);
+        colisoes();
+
+        if (timerSpawn <= 0) {
+          nascerMeteoro();
+          // Rajadas ocasionais em níveis altos
+          if (nivel >= 4 && Math.random() < 0.18) nascerMeteoro();
+          timerSpawn = intervaloSpawn() * aleatorio(0.8, 1.2);
+        }
+      }
+
+      function atualizarJogador(dt) {
+        var p = jogador;
+        var vel = VEL_NAVE_ART * PX;
+
+        var dx = (teclas.dir ? 1 : 0) - (teclas.esq ? 1 : 0);
+        var dy = (teclas.baixo ? 1 : 0) - (teclas.cima ? 1 : 0);
+
+        if (dx || dy) {
+          var m = Math.sqrt(dx * dx + dy * dy);
+          p.x += (dx / m) * vel * dt;
+          p.y += (dy / m) * vel * dt;
+          alvoPonteiro = null; // o teclado retoma o controle do arraste
+          idArraste = null;
+        }
+
+        if (alvoPonteiro) {
+          var k = Math.min(1, dt * 22);
+          p.x += (alvoPonteiro.x - p.x) * k;
+          p.y += (alvoPonteiro.y - p.y) * k;
+        }
+
+        p.x = clamp(p.x, p.raio, W - p.raio);
+        p.y = clamp(p.y, MARGEM_TOPO + p.raio, H - p.raio);
+        if (alvoPonteiro) {
+          alvoPonteiro.x = clamp(alvoPonteiro.x, p.raio, W - p.raio);
+          alvoPonteiro.y = clamp(alvoPonteiro.y, MARGEM_TOPO + p.raio, H - p.raio);
+        }
+
+        if (p.invul > 0) p.invul -= dt;
+        p.chama += dt * 24;
+
+        // Tiro: nunca automático — precisa de espaço ou do botão de fogo
+        p.cd -= dt;
+        if ((teclas.fogo || idFogo !== null) && p.cd <= 0) {
+          atirar();
+          p.cd = CADENCIA;
+        }
+
+        // Rastro do motor
+        if (Math.random() < 0.7) {
+          criarParticula(
+            p.x + aleatorio(-1.4 * PX, 1.4 * PX), p.y + 6 * PX,
+            aleatorio(-14, 14), aleatorio(70, 150),
+            aleatorio(0.12, 0.26),
+            Math.random() < 0.5 ? '#ffc648' : '#e0521f',
+            PX * 0.8
+          );
+        }
+      }
+
+      function atualizarTiros(dt) {
+        for (var i = tiros.length - 1; i >= 0; i--) {
+          var t = tiros[i];
+          t.y += t.vy * dt;
+          if (t.y < -20) removerEm(tiros, i, poolTiro);
+        }
+      }
+
+      function atualizarMeteoros(dt) {
+        for (var i = meteoros.length - 1; i >= 0; i--) {
+          var m = meteoros[i];
+          m.x += m.vx * dt;
+          m.y += m.vy * dt;
+          m.ang += m.vang * dt;
+          if (m.piscar > 0) m.piscar -= dt;
+
+          // Rebate nas laterais em vez de sumir de lado
+          if (m.x < m.raio) { m.x = m.raio; m.vx = Math.abs(m.vx); }
+          else if (m.x > W - m.raio) { m.x = W - m.raio; m.vx = -Math.abs(m.vx); }
+
+          if (m.y - m.raio > H + 8) removerEm(meteoros, i, poolMeteoro);
+        }
+      }
+
+      function atualizarPowerups(dt) {
+        for (var i = powerups.length - 1; i >= 0; i--) {
+          var p = powerups[i];
+          p.t += dt;
+          p.y += p.vy * dt;
+          p.x = clamp(p.x + p.vx * dt, p.raio, W - p.raio);
+          // Faíscas rosadas para chamar atenção
+          if (Math.random() < 0.4) {
+            criarParticula(p.x + aleatorio(-6, 6), p.y + aleatorio(-6, 6), 0, aleatorio(-30, -10), 0.35, '#ff3d7f', PX * 0.7);
+          }
+          if (p.y - p.raio > H + 8) removerEm(powerups, i, poolPowerup);
+        }
+      }
+
+      function atualizarParticulas(dt) {
+        for (var i = particulas.length - 1; i >= 0; i--) {
+          var p = particulas[i];
+          p.vida -= dt;
+          if (p.vida <= 0) { removerEm(particulas, i, poolParticula); continue; }
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          // Arrasto: as faíscas desaceleram em vez de voar reto
+          p.vx *= 1 - Math.min(1, dt * 3.2);
+          p.vy *= 1 - Math.min(1, dt * 3.2);
+        }
+      }
+
+      function colisoes() {
+        var i, j, m, t;
+
+        // Tiro x meteoro
+        for (i = tiros.length - 1; i >= 0; i--) {
+          t = tiros[i];
+          for (j = meteoros.length - 1; j >= 0; j--) {
+            m = meteoros[j];
+            var dx = t.x - m.x, dy = t.y - m.y;
+            var rr = m.raio + t.raio;
+            if (dx * dx + dy * dy > rr * rr) continue;
+
+            removerEm(tiros, i, poolTiro);
+            m.vida--;
+            m.piscar = 0.09;
+            // Estilhaços no ponto de impacto
+            for (var k = 0; k < 6; k++) {
+              criarParticula(t.x, t.y, aleatorio(-90, 90), aleatorio(-140, 30), 0.24, k < 3 ? '#d8faff' : '#867a92', PX * 0.8);
+            }
+            if (m.vida <= 0) destruirMeteoro(j, true);
+            else { sacudir(1); Som.explosao('small'); }
+            break;
+          }
+        }
+
+        if (estado !== JOGANDO) return;
+
+        // Meteoro x nave
+        for (j = meteoros.length - 1; j >= 0; j--) {
+          m = meteoros[j];
+          var ddx = m.x - jogador.x, ddy = m.y - jogador.y;
+          var r2 = m.raio + jogador.raio;
+          if (ddx * ddx + ddy * ddy > r2 * r2) continue;
+
+          // O meteoro é destruído no impacto (sem render pontos)
+          destruirMeteoro(j, false);
+          if (jogador.invul <= 0) danificarJogador();
+          if (estado !== JOGANDO) return;
+        }
+
+        // Power-up x nave
+        for (i = powerups.length - 1; i >= 0; i--) {
+          var p = powerups[i];
+          var pdx = p.x - jogador.x, pdy = p.y - jogador.y;
+          var pr = p.raio + jogador.raio;
+          if (pdx * pdx + pdy * pdy > pr * pr) continue;
+
+          if (jogador.vidas < MAX_VIDAS) jogador.vidas++;
+          Som.powerup();
+          msgFlash = { txt: 'VIDA EXTRA', t: 1.6 };
+          explodir(p.x, p.y, 1.0, ['#ffffff', '#ff3d7f', '#ffd9e6']);
+          removerEm(powerups, i, poolPowerup);
+        }
+      }
+
+      /* ================================================================
+         8. DESENHO
+         ================================================================ */
+
+      function desenhar(dt) {
+        botoes.length = 0;
+
+        ctx.fillStyle = '#05060f';
+        ctx.fillRect(0, 0, W, H);
+
+        desenharEstrelas();
+
+        // Tremor de tela aplicado só ao "mundo", nunca ao HUD
+        ctx.save();
+        if (tremor > 0.2) {
+          ctx.translate(aleatorio(-tremor, tremor) * 0.5, aleatorio(-tremor, tremor) * 0.5);
+        }
+
+        desenharPowerups();
+        desenharMeteoros();
+        desenharTiros();
+        if (estado === JOGANDO || estado === PAUSADO) desenharNave();
+        desenharParticulas();
+
+        ctx.restore();
+
+        // Clarão vermelho ao levar dano
+        if (flash > 0) {
+          ctx.fillStyle = 'rgba(255, 61, 127, ' + (flash * 0.45).toFixed(3) + ')';
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        if (estado === JOGANDO || estado === PAUSADO) desenharHUD();
+
+        if (estado === INICIO) telaInicio();
+        else if (estado === PAUSADO) telaPausa();
+        else if (estado === FIM) telaFim();
+      }
+
+      function desenharEstrelas() {
+        for (var i = 0; i < estrelas.length; i++) {
+          var s = estrelas[i];
+          // Cintilar: só as estrelas da camada próxima piscam
+          var a = s.camada === 2 ? 0.55 + 0.45 * Math.sin(s.fase) : (s.camada === 1 ? 0.7 : 0.4);
+          ctx.globalAlpha = a;
+          ctx.fillStyle = s.cor;
+          ctx.fillRect(s.x | 0, s.y | 0, s.tam, s.tam);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function desenharMeteoros() {
+        for (var i = 0; i < meteoros.length; i++) {
+          var m = meteoros[i];
+          var spr = sprMeteoro[m.tipo][m.variante];
+          ctx.save();
+          ctx.translate(m.x, m.y);
+          ctx.rotate(m.ang);
+          ctx.drawImage(spr, -spr.width / 2, -spr.height / 2);
+          ctx.restore();
+
+          // Clarão branco no frame do impacto
+          if (m.piscar > 0) {
+            ctx.globalAlpha = 0.55;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.raio, 0, 6.283);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+
+      function desenharTiros() {
+        var w = sprLaser.width, h = sprLaser.height;
+        for (var i = 0; i < tiros.length; i++) {
+          ctx.drawImage(sprLaser, Math.round(tiros[i].x - w / 2), Math.round(tiros[i].y - h / 2));
+        }
+      }
+
+      function desenharNave() {
+        var p = jogador;
+        // Pisca durante a invulnerabilidade
+        if (p.invul > 0 && Math.floor(p.invul * 12) % 2 === 0) return;
+
+        var w = sprNave.width, h = sprNave.height;
+        var x = Math.round(p.x - w / 2), y = Math.round(p.y - h / 2);
+
+        // Chama do motor, animada em 3 quadros
+        var q = Math.floor(p.chama) % 3;
+        var alturas = [2, 3, 4][q];
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + 6 * PX, y + h, PX, alturas * PX * 0.5);
+        ctx.fillStyle = '#ffc648';
+        ctx.fillRect(x + 6 * PX, y + h + alturas * PX * 0.5, PX, alturas * PX * 0.5);
+        ctx.fillStyle = '#e0521f';
+        ctx.fillRect(x + 6 * PX, y + h + alturas * PX, PX, PX);
+
+        ctx.drawImage(sprNave, x, y);
+
+        // Escudo tênue enquanto está invulnerável
+        if (p.invul > 0) {
+          ctx.globalAlpha = 0.35 + 0.25 * Math.sin(p.invul * 18);
+          ctx.strokeStyle = '#5fe6ff';
+          ctx.lineWidth = Math.max(1, PX * 0.5);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.raio + 4 * PX, 0, 6.283);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function desenharPowerups() {
+        var w = sprCoracao.width, h = sprCoracao.height;
+        for (var i = 0; i < powerups.length; i++) {
+          var p = powerups[i];
+          var pulso = 1 + 0.12 * Math.sin(p.t * 8);
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.scale(pulso, pulso);
+          // Halo
+          ctx.globalAlpha = 0.22 + 0.12 * Math.sin(p.t * 8);
+          ctx.fillStyle = '#ff3d7f';
+          ctx.beginPath();
+          ctx.arc(0, 0, p.raio * 1.9, 0, 6.283);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.drawImage(sprCoracao, -w / 2, -h / 2);
+          ctx.restore();
+        }
+      }
+
+      function desenharParticulas() {
+        for (var i = 0; i < particulas.length; i++) {
+          var p = particulas[i];
+          var a = p.vida / p.max;
+          ctx.globalAlpha = a > 1 ? 1 : a;
+          ctx.fillStyle = p.cor;
+          var s = Math.max(1, p.tam * (0.4 + a * 0.6));
+          ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      /* ---------- HUD ---------- */
+
+      function desenharHUD() {
+        var m = 10;
+        var linha = GLIFO_A * FS;
+
+        // Coluna esquerda: pontuação e vidas
+        texto('SCORE', m, m, FS, '#5fe6ff', 'left');
+        texto(zeros(pontos), m, m + linha + 4 * FS, FS + 1, '#ffc648', 'left', '#3a2200');
+
+        var iy = m + linha + 4 * FS + GLIFO_A * (FS + 1) + 6;
+        var iw = sprNaveIcone.width, ih = sprNaveIcone.height;
+        for (var i = 0; i < MAX_VIDAS; i++) {
+          var ativo = i < jogador.vidas;
+          ctx.globalAlpha = ativo ? 1 : 0.16;
+          ctx.drawImage(sprNaveIcone, m + i * (iw + 4 * FS), iy);
+          ctx.globalAlpha = 1;
+        }
+
+        // Coluna direita: botões e recorde. O vão de 16px entre eles é o
+        // dobro da folga do hit-test, então as áreas encostam sem sobrepor.
+        var bs = 12 * FS; // lado dos botões quadrados
+        botaoIcone('pausar', W - m - bs, m, bs, 'pausa');
+        botaoIcone('som', W - m - bs * 2 - 16, m, bs, Som.mudo() ? 'mudo' : 'som');
+
+        texto('HI ' + zeros(recorde), W - m, m + bs + 6, FS, pontos > recorde ? '#ffc648' : '#6d8a9c', 'right');
+
+        // Selo de nível
+        texto('LV ' + (nivel + 1), W - m, m + bs + 6 + linha + 3 * FS, FS, '#867a92', 'right');
+
+        // Mensagem temporária no centro
+        if (msgFlash) {
+          var a = Math.min(1, msgFlash.t / 0.4);
+          ctx.globalAlpha = a;
+          texto(msgFlash.txt, W / 2, H * 0.32, FS + 1, '#ff3d7f', 'center', '#2a0011');
+          ctx.globalAlpha = 1;
+        }
+
+        // Botão de fogo virtual (aparece assim que o jogador usa o toque)
+        if (usouToque && estado === JOGANDO) {
+          var bf = areaBotaoFogo();
+          var cx = bf.x + bf.w / 2, cy = bf.y + bf.h / 2, r = bf.w / 2;
+          ctx.globalAlpha = idFogo !== null ? 0.9 : 0.5;
+          ctx.strokeStyle = '#5fe6ff';
+          ctx.lineWidth = Math.max(2, PX * 0.7);
+          ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.stroke();
+          ctx.fillStyle = 'rgba(95, 230, 255, 0.12)';
+          ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fill();
+          texto('FIRE', cx, cy - GLIFO_A * FS / 2, FS, '#d8faff', 'center');
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      /** Botões quadrados do HUD, desenhados com retângulos (nada de fontes). */
+      function botaoIcone(id, x, y, s, icone) {
+        // A área clicável é maior que a moldura: um ícone de 26px é pequeno
+        // demais para o dedo, mas uma moldura maior pesaria no HUD.
+        var folga = 8;
+        botoes.push({ id: id, x: x - folga, y: y - folga, w: s + folga * 2, h: s + folga * 2 });
+        var b = Math.max(2, Math.round(FS * 0.9));
+
+        ctx.fillStyle = 'rgba(11, 13, 28, 0.75)';
+        ctx.fillRect(x, y, s, s);
+        ctx.fillStyle = '#2a3566';
+        ctx.fillRect(x, y, s, b); ctx.fillRect(x, y + s - b, s, b);
+        ctx.fillRect(x, y, b, s); ctx.fillRect(x + s - b, y, b, s);
+
+        ctx.fillStyle = '#5fe6ff';
+        var u = s / 11; // unidade interna do ícone
+        if (icone === 'pausa') {
+          ctx.fillRect(x + u * 3, y + u * 3, u * 1.8, u * 5);
+          ctx.fillRect(x + u * 6.2, y + u * 3, u * 1.8, u * 5);
+        } else {
+          // Alto-falante
+          ctx.fillRect(x + u * 2.5, y + u * 4.2, u * 1.6, u * 2.6);
+          ctx.beginPath();
+          ctx.moveTo(x + u * 4.1, y + u * 5.5);
+          ctx.lineTo(x + u * 6.4, y + u * 2.6);
+          ctx.lineTo(x + u * 6.4, y + u * 8.4);
+          ctx.closePath();
+          ctx.fill();
+          if (icone === 'mudo') {
+            ctx.strokeStyle = '#ff3d7f';
+            ctx.lineWidth = Math.max(2, u * 0.9);
+            ctx.beginPath();
+            ctx.moveTo(x + u * 7.2, y + u * 3.4);
+            ctx.lineTo(x + u * 9.2, y + u * 7.6);
+            ctx.stroke();
+          } else {
+            ctx.strokeStyle = '#5fe6ff';
+            ctx.lineWidth = Math.max(1.5, u * 0.7);
+            ctx.beginPath();
+            ctx.arc(x + u * 6.6, y + u * 5.5, u * 1.6, -0.9, 0.9);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x + u * 6.6, y + u * 5.5, u * 2.8, -0.9, 0.9);
+            ctx.stroke();
+          }
+        }
+      }
+
+      /** Botão retangular com moldura pixelada. */
+      function botao(id, x, y, w, h, rotulo, corBorda, corTexto, s) {
+        botoes.push({ id: id, x: x, y: y, w: w, h: h });
+        var b = Math.max(2, Math.round(FS));
+
+        ctx.fillStyle = 'rgba(11, 13, 28, 0.9)';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = corBorda;
+        ctx.fillRect(x, y, w, b); ctx.fillRect(x, y + h - b, w, b);
+        ctx.fillRect(x, y, b, h); ctx.fillRect(x + w - b, y, b, h);
+
+        texto(rotulo, x + w / 2, y + (h - GLIFO_A * s) / 2, s, corTexto, 'center');
+      }
+
+      function veu(alpha) {
+        ctx.fillStyle = 'rgba(3, 4, 12, ' + alpha + ')';
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      /* ---------- Telas ---------- */
+
+      function telaInicio() {
+        veu(0.55);
+
+        var cy = H * 0.26;
+        var flut = Math.sin(tempoAnim * 2) * 3;
+
+        texto('METEOR', W / 2, cy + flut, FS + 3, '#ffc648', 'center', '#5a2a00');
+        texto('DESTROYER', W / 2, cy + GLIFO_A * (FS + 3) + 8 * FS + flut, FS + 3, '#ffc648', 'center', '#5a2a00');
+        texto('* INFINITE *', W / 2, cy + GLIFO_A * (FS + 3) * 2 + 18 * FS + flut, FS, '#5fe6ff', 'center');
+
+        // Nave de vitrine, flutuando
+        var w = sprNave.width, h = sprNave.height;
+        ctx.drawImage(sprNave, Math.round(W / 2 - w / 2), Math.round(H * 0.5 + Math.sin(tempoAnim * 3) * 5));
+
+        var bw = Math.min(W - 60, 240), bh = 18 * FS;
+        var by = H * 0.66;
+        var pisca = 0.6 + 0.4 * Math.sin(tempoAnim * 5);
+        ctx.globalAlpha = pisca;
+        botao('iniciar', W / 2 - bw / 2, by, bw, bh, 'START', '#5fe6ff', '#d8faff', FS + 1);
+        ctx.globalAlpha = 1;
+
+        // Instruções e recorde só entram se realmente couberem: em telas
+        // baixas (celular deitado) o rodapé é sacrificado, não sobreposto.
+        var ly = by + bh + 14 * FS;
+        var lh = GLIFO_A * FS + 5 * FS;
+        var rodape = recorde > 0 ? 18 * FS : 8;
+
+        if (ly + lh * 4 < H - rodape) {
+          texto('MOVE   W A S D  /  ARROWS', W / 2, ly, FS, '#6d8a9c', 'center');
+          texto('FIRE   SPACE', W / 2, ly + lh, FS, '#6d8a9c', 'center');
+          texto('PAUSE  P  /  ESC', W / 2, ly + lh * 2, FS, '#6d8a9c', 'center');
+          texto('TOUCH  DRAG TO MOVE', W / 2, ly + lh * 3, FS, '#6d8a9c', 'center');
+        } else if (ly + lh < H - rodape) {
+          texto('WASD / ARROWS  +  SPACE', W / 2, ly, FS, '#6d8a9c', 'center');
+        }
+
+        if (recorde > 0) {
+          texto('BEST  ' + zeros(recorde), W / 2, H - 18 * FS, FS, '#ffc648', 'center');
+        }
+      }
+
+      function telaPausa() {
+        veu(0.68);
+        texto('PAUSED', W / 2, H * 0.34, FS + 3, '#5fe6ff', 'center', '#00303a');
+
+        var bw = Math.min(W - 60, 220), bh = 17 * FS;
+        var by = H * 0.46;
+        botao('continuar', W / 2 - bw / 2, by, bw, bh, 'RESUME', '#5fe6ff', '#d8faff', FS + 1);
+        botao('reiniciar', W / 2 - bw / 2, by + bh + 10 * FS, bw, bh, 'RESTART', '#ffc648', '#ffe9a8', FS + 1);
+        botao('sair', W / 2 - bw / 2, by + (bh + 10 * FS) * 2, bw, bh, 'BACK', '#6d8a9c', '#a9c0cc', FS + 1);
+
+        texto('SCORE ' + zeros(pontos), W / 2, by + (bh + 10 * FS) * 3 + 8 * FS, FS, '#867a92', 'center');
+      }
+
+      function telaFim() {
+        veu(0.72);
+
+        texto('GAME', W / 2, H * 0.24, FS + 3, '#ff3d7f', 'center', '#3a0016');
+        texto('OVER', W / 2, H * 0.24 + GLIFO_A * (FS + 3) + 8 * FS, FS + 3, '#ff3d7f', 'center', '#3a0016');
+
+        var y = H * 0.44;
+        var lh = GLIFO_A * (FS + 1) + 7 * FS;
+
+        texto('SCORE', W / 2, y, FS, '#5fe6ff', 'center');
+        texto(zeros(pontos), W / 2, y + GLIFO_A * FS + 4 * FS, FS + 2, '#ffc648', 'center', '#5a2a00');
+
+        var yr = y + GLIFO_A * FS + 4 * FS + GLIFO_A * (FS + 2) + 10 * FS;
+        if (pontos >= recorde && pontos > 0) {
+          ctx.globalAlpha = 0.6 + 0.4 * Math.sin(tempoAnim * 6);
+          texto('NEW RECORD!', W / 2, yr, FS + 1, '#ff3d7f', 'center');
+          ctx.globalAlpha = 1;
+        } else {
+          texto('BEST  ' + zeros(recorde), W / 2, yr, FS, '#6d8a9c', 'center');
+        }
+
+        var stats = 'METEORS ' + Math.floor(pontos / PONTOS_POR_METEORO) + '   LV ' + (nivel + 1);
+        texto(stats, W / 2, yr + lh, FS, '#867a92', 'center');
+
+        var bw = Math.min(W - 60, 220), bh = 17 * FS;
+        var by = H * 0.72;
+        botao('reiniciar', W / 2 - bw / 2, by, bw, bh, 'PLAY AGAIN', '#ffc648', '#ffe9a8', FS + 1);
+        botao('sair', W / 2 - bw / 2, by + bh + 10 * FS, bw, bh, 'BACK', '#6d8a9c', '#a9c0cc', FS + 1);
+      }
+
+      /* ================================================================
+         9. LOOP PRINCIPAL
+         ================================================================ */
+      var tempoAnim = 0;
+      var ultimo = 0;
+
+      function loop(agora) {
+        requestAnimationFrame(loop);
+
+        if (!ultimo) ultimo = agora;
+        var dt = (agora - ultimo) / 1000;
+        ultimo = agora;
+        // Trava o passo: aba em segundo plano não deve teletransportar meteoros
+        if (dt > 0.05) dt = 0.05;
+
+        tempoAnim += dt;
+
+        if (estado !== PAUSADO) atualizar(dt);
+        desenhar(dt);
+      }
+
+      /* ---------- Inicialização ---------- */
+      // Preguiçosa: nada disto roda enquanto a vista estiver escondida — o
+      // roteador da landing page chama window.MeteorGame.init() na primeira
+      // vez que o card "Jogar" é clicado.
+      window.addEventListener('resize', function () {
+        if (!gameRoot.classList.contains('hidden')) redimensionar();
+      });
+      window.addEventListener('orientationchange', function () {
+        setTimeout(function () {
+          if (!gameRoot.classList.contains('hidden')) redimensionar();
+        }, 150);
+      });
+
+      function iniciar() {
+        redimensionar();
+        posicionarNave();
+
+        // Alguns meteoros já caindo na tela de início, como vitrine
+        for (var n = 0; n < 5; n++) {
+          nascerMeteoro();
+          if (meteoros.length) meteoros[meteoros.length - 1].y = Math.random() * H;
+        }
+
+        requestAnimationFrame(loop);
+      }
+
+      // Exposto para o roteador da landing page (init preguiçoso + pausa ao
+      // fechar + onShow a cada reabertura, para recalcular o tamanho do
+      // canvas caso a janela tenha sido redimensionada enquanto escondido).
+      window.MeteorGame = {
+        started: false,
+        init: function () {
+          if (window.MeteorGame.started) return;
+          window.MeteorGame.started = true;
+          iniciar();
+        },
+        onShow: function () {
+          redimensionar();
+        },
+        pauseIfPlaying: function () {
+          if (estado === JOGANDO) alternarPausa();
+        }
       };
     })();
   </script>
