@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img">
+<defs>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0F0F0F"/><stop offset="1" stop-color="#050505"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.15" r="0.8">
+    <stop offset="0" stop-color="#E8DFC9" stop-opacity="0.10"/>
+    <stop offset="1" stop-color="#E8DFC9" stop-opacity="0"/>
+  </radialGradient>
+  
+</defs>
+<rect width="1600" height="1000" fill="url(#g)"/>
+<rect width="1600" height="1000" fill="url(#glow)"/>
+<rect x="0" y="0" width="1600" height="64" rx="0" fill="#E8DFC9" opacity="0.05"/>
+<text x="80" y="40" fill="#E8DFC9" fill-opacity="0.45" font-size="16" text-anchor="start" style="font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:6">INSTITUCIONAL</text>
+<text x="1520" y="40" fill="#BFAE8C" fill-opacity="0.6" font-size="16" text-anchor="end" style="font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:6">IDENTIDADE</text>
+<text x="800.0" y="380" fill="#E8DFC9" fill-opacity="0.9" font-size="190" text-anchor="middle" style="font-style:italic;font-family:Georgia,serif">Studio</text>
+<rect x="640.0" y="430" width="320" height="1" rx="0" fill="#E8DFC9" opacity="0.3"/>
+<text x="800.0" y="490" fill="#E8DFC9" fill-opacity="0.4" font-size="17" text-anchor="middle" style="font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:6">ARQUITETURA · INTERIORES · CONSULTORIA</text>
+<rect x="140" y="600" width="380" height="280" rx="2" fill="#E8DFC9" opacity="0.05"/>
+<rect x="172" y="820" width="140" height="8" rx="4" fill="#BFAE8C" opacity="0.22"/>
+<line x1="140" y1="780" x2="520" y2="780" stroke="#E8DFC9" stroke-opacity="0.08" stroke-width="1"/>
+<rect x="580" y="600" width="380" height="280" rx="2" fill="#E8DFC9" opacity="0.05"/>
+<rect x="612" y="820" width="140" height="8" rx="4" fill="#BFAE8C" opacity="0.22"/>
+<line x1="580" y1="780" x2="960" y2="780" stroke="#E8DFC9" stroke-opacity="0.08" stroke-width="1"/>
+<rect x="1020" y="600" width="380" height="280" rx="2" fill="#E8DFC9" opacity="0.05"/>
+<rect x="1052" y="820" width="140" height="8" rx="4" fill="#BFAE8C" opacity="0.22"/>
+<line x1="1020" y1="780" x2="1400" y2="780" stroke="#E8DFC9" stroke-opacity="0.08" stroke-width="1"/>
+</svg>

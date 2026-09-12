@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#050505" />
+
+<title>Davi Guedes — Web Developer & Automation Specialist</title>
+<meta name="description" content="Davi Guedes — desenvolvedor web e especialista em automação. Interfaces de alto padrão, back-end sólido e automações que economizam horas de trabalho." />
+<meta name="author" content="Davi Guedes" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://guedes1818.github.io/html-css/portfolio/" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:title" content="Davi Guedes — Web Developer & Automation Specialist" />
+<meta property="og:description" content="Interfaces de alto padrão, back-end sólido e automações que economizam horas de trabalho." />
+<meta property="og:image" content="assets/hero.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050505'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-style='italic' font-size='19' fill='%23E8DFC9' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400;1,500&display=swap" />
+<link rel="stylesheet" href="styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Davi Guedes",
+  "jobTitle": "Web Developer & Automation Specialist",
+  "email": "mailto:daviguedescontato17@gmail.com",
+  "knowsAbout": ["Frontend Development", "Backend Development", "Automação", "Landing Pages", "Performance Web"]
+}
+</script>
+
+<script>document.documentElement.classList.add('js');</script>
+</head>
+
+<body>
+<a class="sr-only" href="#about">Pular para o conteúdo</a>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="nav__mark" href="#top" aria-label="Davi Guedes — início">Davi&nbsp;Guedes</a>
+  <nav class="nav__links label" aria-label="Navegação principal">
+    <a href="#about">Sobre</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#projects">Projetos</a>
+    <a href="#process">Processo</a>
+    <a class="nav__links-cta" href="#contact">Contato</a>
+  </nav>
+</header>
+
+<!-- ======================================================================
+     SEÇÃO 01 — HERO
+     ====================================================================== -->
+<section class="hero" id="top">
+  <div class="hero__type" aria-hidden="true">
+    <div class="hero__word" data-hero-word>DEVELOPER</div>
+  </div>
+
+  <div class="hero__beam" aria-hidden="true" data-hero-beam></div>
+
+  <figure class="hero__figure" data-hero-figure>
+    <img class="hero__img" src="assets/hero.jpg" alt="Retrato de Davi Guedes" width="1600" height="2000" fetchpriority="high" />
+    <div class="hero__fallback" aria-hidden="true"></div>
+  </figure>
+
+  <div class="hero__meta">
+    <div class="hero__tl">
+      <span class="label">Web Developer</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="hero__tr">
+      <ul class="label hero__disciplines">
+        <li>Frontend</li>
+        <li>Backend</li>
+        <li>Automation</li>
+      </ul>
+      <span class="hero__arrow" aria-hidden="true"></span>
+    </div>
+
+    <div class="hero__cta-wrap">
+      <a class="cta" href="#projects" data-scroll>
+        <span class="cta__dot" aria-hidden="true"></span>
+        View Projects
+      </a>
+    </div>
+
+    <div class="hero__bl">
+      <h1 class="hero__headline" lang="en">Building<br />Digital Solutions<br />That Matter.</h1>
+      <span class="rule"></span>
+    </div>
+
+    <div class="hero__br">
+      <span class="rule"></span>
+      <span class="label">Portfólio</span>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ======================================================================
+     SEÇÃO 02 — SOBRE
+     ====================================================================== -->
+<section class="section" id="about">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">01</span>
+      <span class="label">Sobre</span>
+    </div>
+
+    <div class="about__grid">
+      <figure class="about__portrait" data-parallax-wrap>
+        <!-- Reaproveita a mesma foto do hero; troque por um segundo retrato se preferir. -->
+        <img src="assets/hero.jpg" alt="Davi Guedes em estúdio" loading="lazy" decoding="async" width="1200" height="1600" data-parallax="0.16" />
+        <div class="about__ph" aria-hidden="true" hidden></div>
+      </figure>
+
+      <div class="about__body">
+        <h2 class="display about__title" data-reveal lang="en">Crafting <em>Experiences.</em></h2>
+
+        <div data-fade>
+          <p class="body-copy">
+            Sou Davi Guedes, desenvolvedor web e especialista em automação. Trabalho na
+            fronteira entre design e engenharia: interfaces que carregam rápido, back-ends
+            que não quebram sob carga e rotinas automatizadas que devolvem horas de trabalho
+            para quem contrata.
+          </p>
+          <p class="body-copy">
+            Cada projeto começa pela pergunta certa — o que este produto precisa provar? — e
+            termina em código legível, versionado e pronto para escalar. Sem template,
+            sem atalho, sem página que parece todas as outras.
+          </p>
+        </div>
+
+        <ul class="about__stats" data-fade>
+          <li class="about__stat"><b>100%</b><span>Código próprio</span></li>
+          <li class="about__stat"><b>&lt;1s</b><span>Meta de carregamento</span></li>
+          <li class="about__stat"><b>95+</b><span>Alvo no Lighthouse</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 03 — EXPERTISE (scroll horizontal)
+     ====================================================================== -->
+<section class="section expertise is-native" id="expertise" data-expertise>
+  <div class="expertise__viewport">
+    <div class="section__head expertise__head">
+      <span class="section__index">02</span>
+      <span class="label">Expertise</span>
+    </div>
+
+    <div class="exp-track" data-exp-track>
+      <article class="exp-card">
+        <span class="exp-card__n">01</span>
+        <div>
+          <h3 class="exp-card__title">Frontend<br />Development</h3>
+          <p class="exp-card__txt">
+            Interfaces construídas do zero, com atenção a tipografia, ritmo e movimento.
+            Acessíveis, responsivas e fiéis ao design em qualquer tela.
+          </p>
+          <ul class="exp-card__tags">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>React</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">02</span>
+        <div>
+          <h3 class="exp-card__title">Backend<br />Development</h3>
+          <p class="exp-card__txt">
+            APIs, banco de dados e integrações. Estrutura pensada para crescer sem
+            reescrever tudo a cada nova funcionalidade.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Node.js</li><li>REST</li><li>SQL</li><li>Auth</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">03</span>
+        <div>
+          <h3 class="exp-card__title">Automation</h3>
+          <p class="exp-card__txt">
+            Processos manuais viram rotinas automáticas: relatórios, disparos, sincronização
+            entre sistemas e tudo aquilo que consome tempo sem gerar valor.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Scripts</li><li>Webhooks</li><li>Integrações</li><li>Bots</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">04</span>
+        <div>
+          <h3 class="exp-card__title">Landing<br />Pages</h3>
+          <p class="exp-card__txt">
+            Páginas de campanha com hierarquia clara, copy respirando e um único caminho
+            até a conversão. Rápidas por construção, não por plugin.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Copy</li><li>UI</li><li>SEO</li><li>Analytics</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">05</span>
+        <div>
+          <h3 class="exp-card__title">Performance<br />Optimization</h3>
+          <p class="exp-card__txt">
+            Auditoria de Core Web Vitals, corte de peso desnecessário e ajuste fino de
+            renderização até a página responder no primeiro toque.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Lighthouse</li><li>Core Web Vitals</li><li>Cache</li><li>Build</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <div class="expertise__progress" aria-hidden="true"><i data-exp-progress></i></div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 04 — PROJETOS EM DESTAQUE (pinado)
+
+     ATENÇÃO COPY/CONTEÚDO:
+     Apenas "Tetris Classic" é um projeto real deste repositório.
+     Os demais cards são estruturas prontas — troque título, texto, stack,
+     ano, imagem (assets/) e link pelos seus projetos reais antes de publicar.
+     ====================================================================== -->
+<section class="section projects" id="projects" data-projects>
+  <div class="projects__stage">
+    <div class="projects__inner">
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-tetris.jpg" alt="Tela do jogo Tetris Classic" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 01</span>
+          <h3 class="display project__title">Tetris Classic</h3>
+          <p class="project__txt">
+            O clássico de blocos reconstruído em HTML, CSS e JavaScript puro — sem
+            framework, sem dependência. Loop de jogo próprio, sistema de rotação,
+            pontuação, níveis e controles de toque para celular.
+          </p>
+          <ul class="project__stack">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Canvas UI</li>
+          </ul>
+          <a class="cta" href="../index.html">
+            <span class="cta__dot" aria-hidden="true"></span>
+            Ver projeto
+          </a>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-02.svg" alt="Prévia do projeto de landing page" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 02</span>
+          <h3 class="display project__title">Landing de Campanha</h3>
+          <p class="project__txt">
+            Página única de lançamento: narrativa em blocos, prova social, formulário
+            integrado ao CRM e monitoramento de conversão. Estrutura leve, estática e
+            publicada em CDN.
+          </p>
+          <ul class="project__stack">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Analytics</li>
+          </ul>
+          <a class="cta" href="#contact" data-scroll>
+            <span class="cta__dot" aria-hidden="true"></span>
+            Case study
+          </a>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-03.svg" alt="Prévia do painel de automação" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 03</span>
+          <h3 class="display project__title">Painel de Automação</h3>
+          <p class="project__txt">
+            Rotinas que coletam dados de várias fontes, tratam e devolvem relatórios
+            prontos. O que antes era uma planilha preenchida à mão virou um painel
+            atualizado sozinho.
+          </p>
+          <ul class="project__stack">
+            <li>Node.js</li><li>API REST</li><li>Webhooks</li><li>Cron</li>
+          </ul>
+          <a class="cta" href="#contact" data-scroll>
+            <span class="cta__dot" aria-hidden="true"></span>
+            Case study
+          </a>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="projects__counter" aria-hidden="true">
+      <b data-proj-current>01</b><span class="rule"></span><span data-proj-total>03</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     ARQUIVO — sites anteriores (imagem segue o cursor)
+     Troque heading/subheading/href/imagem pelos seus trabalhos reais.
+     ====================================================================== -->
+<section class="section" id="archive">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">03</span>
+      <span class="label">Arquivo — trabalhos anteriores</span>
+    </div>
+
+    <div class="archive__list" data-archive>
+      <a class="arch-link" href="../index.html">
+        <div>
+          <span class="arch-link__head" data-split>Tetris Classic</span>
+          <span class="arch-link__sub">Jogo em JavaScript puro · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-tetris.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Landing de Campanha</span>
+          <span class="arch-link__sub">Página de lançamento · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-02.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Painel de Automação</span>
+          <span class="arch-link__sub">Relatórios automatizados · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-03.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Site Institucional</span>
+          <span class="arch-link__sub">Identidade e conteúdo · 2024</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-04.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Experimentos</span>
+          <span class="arch-link__sub">Interações e protótipos · em curso</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-05.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 05 — PROCESSO
+     ====================================================================== -->
+<section class="section" id="process">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">04</span>
+      <span class="label">Processo</span>
+    </div>
+
+    <div class="process__list" data-process>
+      <div class="process__line" aria-hidden="true"><i data-process-line></i></div>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Discover <em>01</em></h3>
+        <p class="proc-step__txt">Conversa, contexto e objetivo. Antes de qualquer linha de código, entender o que precisa acontecer depois que o site estiver no ar.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Design <em>02</em></h3>
+        <p class="proc-step__txt">Estrutura, hierarquia e direção visual. Tipografia e espaço decidem o tom antes de qualquer efeito.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Develop <em>03</em></h3>
+        <p class="proc-step__txt">Código próprio, semântico e versionado. Componentes reutilizáveis, nada de peso morto herdado de template.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Optimize <em>04</em></h3>
+        <p class="proc-step__txt">Performance, acessibilidade e SEO medidos — não presumidos. Ajuste fino até os números fecharem.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Launch <em>05</em></h3>
+        <p class="proc-step__txt">Publicação, monitoramento e acompanhamento. O lançamento é o começo da leitura de dados, não o fim do projeto.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 06 — STACK (marquee infinito)
+     ====================================================================== -->
+<section class="section stack" id="stack">
+  <div class="section__head shell">
+    <span class="section__index">05</span>
+    <span class="label">Stack</span>
+  </div>
+
+  <div class="marquee" data-marquee aria-hidden="true">
+    <div class="marquee__row" data-marquee-row>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15"/></svg>HTML5 <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/></svg>CSS3 <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 20 19.5H4Z"/></svg>JavaScript <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/></svg>TypeScript <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20 8v8l-8 4.5L4 16V8Z"/></svg>React <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>Next.js <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>Tailwind <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/></svg>GSAP <i>/</i></span>
+    </div>
+  </div>
+
+  <div class="marquee marquee--rev" data-marquee aria-hidden="true">
+    <div class="marquee__row" data-marquee-row>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15"/></svg>Node.js <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/></svg>API REST <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 20 19.5H4Z"/></svg>SQL <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/></svg>Git <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20 8v8l-8 4.5L4 16V8Z"/></svg>Webhooks <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>Automação <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>SEO Técnico <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/></svg>Performance <i>/</i></span>
+    </div>
+  </div>
+
+  <p class="sr-only">Tecnologias: HTML5, CSS3, JavaScript, TypeScript, React, Next.js, Tailwind, GSAP, Node.js, API REST, SQL, Git, Webhooks, automação, SEO técnico e performance.</p>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 07 — DEPOIMENTOS
+
+     ATENÇÃO: textos de exemplo. Substitua por depoimentos reais
+     (com nome e autorização de quem falou) antes de publicar.
+     ====================================================================== -->
+<section class="section" id="testimonials">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">06</span>
+      <span class="label">Depoimentos</span>
+    </div>
+
+    <div class="quotes__grid">
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">Entregou exatamente o que combinamos, no prazo, e ainda explicou cada decisão técnica em português claro.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">A automação eliminou um trabalho manual que consumia várias horas por semana da equipe.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">O site ficou rápido e com uma identidade que não parece com a de mais ninguém no nosso mercado.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 08 — CONTATO
+     ====================================================================== -->
+<section class="section contact" id="contact">
+  <div class="shell">
+    <h2 class="display contact__title" data-reveal lang="en">Let's Build</h2>
+
+    <div class="contact__grid">
+      <div>
+        <p class="body-copy" data-fade>
+          Tem um projeto, uma ideia solta ou um processo que precisa parar de ser feito
+          na mão? Conte o contexto — respondo em até 24 horas úteis.
+        </p>
+
+        <ul class="contact__channels" style="margin-top: 2.4rem;" data-fade>
+          <li>
+            <a class="contact__channel" href="mailto:daviguedescontato17@gmail.com">
+              <b>daviguedescontato17@gmail.com</b><span>E-mail</span>
+            </a>
+          </li>
+          <li>
+            <!-- TODO: substituir pelo número real, formato https://wa.me/5511999999999 -->
+            <a class="contact__channel" href="https://wa.me/" target="_blank" rel="noopener noreferrer">
+              <b>WhatsApp</b><span>Mensagem direta</span>
+            </a>
+          </li>
+          <li>
+            <!-- TODO: substituir pelo perfil real -->
+            <a class="contact__channel" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
+              <b>LinkedIn</b><span>Rede profissional</span>
+            </a>
+          </li>
+          <li>
+            <a class="contact__channel" href="https://github.com/guedes1818" target="_blank" rel="noopener noreferrer">
+              <b>GitHub</b><span>Código</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Formulário sem back-end: abre o cliente de e-mail.
+           Para receber no servidor, troque por um endpoint (Formspree, API própria etc.). -->
+      <form class="form" data-form novalidate>
+        <div class="field">
+          <input type="text" id="f-name" name="name" placeholder=" " required autocomplete="name" />
+          <label for="f-name">Nome</label>
+        </div>
+        <div class="field">
+          <input type="email" id="f-mail" name="email" placeholder=" " required autocomplete="email" />
+          <label for="f-mail">E-mail</label>
+        </div>
+        <div class="field">
+          <textarea id="f-msg" name="message" placeholder=" " required rows="4"></textarea>
+          <label for="f-msg">Projeto</label>
+        </div>
+        <div class="form__foot">
+          <button class="cta" type="submit">
+            <span class="cta__dot" aria-hidden="true"></span>
+            Enviar mensagem
+          </button>
+          <span class="form__note">Resposta em até 24h</span>
+        </div>
+        <p class="form__status" data-form-status role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p class="footer__name" data-fade>Davi Guedes</p>
+  <div class="footer__bar label">
+    <span>© <span data-year>2026</span> — Todos os direitos reservados</span>
+    <span>Feito à mão · HTML, CSS &amp; JavaScript</span>
+    <button class="to-top label" type="button" data-top>Voltar ao topo <span class="rule"></span></button>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="script.js" defer></script>
+</body>
+</html>
