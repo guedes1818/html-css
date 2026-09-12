@@ -1,1414 +1,598 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#05070f" />
-  <meta name="description" content="Tetris Classic — o clássico jogo de blocos, feito em HTML, CSS e JavaScript puro." />
-  <title>Tetris Classic</title>
-  <style>
-    /* =========================================================
-       Tetris Classic — estilos
-       Tema escuro, arcade moderno, responsivo.
-       ========================================================= */
-
-    :root {
-      --bg-color: #05070f;
-      --panel-bg: #0c1120;
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --board-bg: #02030a;
-      --board-border: rgba(255, 255, 255, 0.14);
-      --text-primary: #e8ebf5;
-      --text-secondary: #8890a8;
-      --accent: #4fd1ff;
-      --accent-strong: #7fe0ff;
-      --danger: #ff4d5e;
-      --radius: 10px;
-      --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-      --mono: "Consolas", "SFMono-Regular", Menlo, "Courier New", monospace;
-    }
-
-    /* ---------- Reset básico ---------- */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100dvh;
-      background: var(--bg-color);
-      color: var(--text-primary);
-      font-family: var(--font);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(4px, 2vw, 10px);
-      overscroll-behavior: none;
-    }
-
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    button {
-      font: inherit;
-      color: inherit;
-    }
-
-    h1,
-    h2,
-    p {
-      margin: 0;
-    }
-
-    /* Utilitário para esconder elementos sem remover do fluxo de acessibilidade */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* ---------- Layout geral ---------- */
-    .game-container {
-      width: 100%;
-      max-width: 920px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(6px, 1.5vh, 12px);
-    }
-
-    .game-header {
-      text-align: center;
-    }
-
-    .game-title {
-      font-family: var(--mono);
-      font-weight: 900;
-      letter-spacing: 0.18em;
-      font-size: clamp(1.3rem, 5vw, 2.4rem);
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(79, 209, 255, 0.55), 0 0 22px rgba(79, 209, 255, 0.25);
-      margin: 0;
-    }
-
-    .game-layout {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(6px, 1.5vh, 12px);
-      width: 100%;
-    }
-
-    @media (min-width: 860px) {
-      .game-layout {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-      }
-
-      .panel {
-        width: 190px;
-      }
-    }
-
-    /* ---------- Painéis laterais ---------- */
-    .panel {
-      width: 100%;
-      max-width: 340px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .panel-box {
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-    }
-
-    .panel-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    .next-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #next-canvas {
-      display: block;
-      width: 80px;
-      height: 80px;
-      background: var(--board-bg);
-      border: 1px solid var(--board-border);
-      border-radius: 6px;
-    }
-
-    .stats-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .stat {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .stat-label {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-    }
-
-    .stat-value {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-primary);
-    }
-
-    .key-list li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      padding: 3px 0;
-    }
-
-    kbd {
-      background: #171d33;
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--text-primary);
-    }
-
-    .action-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* ---------- Tabuleiro ---------- */
-    .board-wrapper {
-      position: relative;
-      width: min(80vw, 320px, 40vh);
-      aspect-ratio: 1 / 2;
-      background: var(--board-bg);
-      border: 2px solid var(--board-border);
-      border-radius: 8px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    #board-canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    .board-wrapper.flash-gameover {
-      animation: flashRed 0.5s ease-in-out 2;
-    }
-
-    @keyframes flashRed {
-      0%,
-      100% {
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 30px rgba(0, 0, 0, 0.6);
-      }
-      50% {
-        box-shadow: 0 0 0 3px var(--danger), 0 0 40px rgba(255, 77, 94, 0.6);
-      }
-    }
-
-    /* ---------- Layout compacto para telas estreitas (tablet/mobile) ----------
-       Em vez do painel lateral empilhado, vira uma barra horizontal enxuta
-       acima do tabuleiro, e a legenda de teclado some (sem teclado no toque). */
-    @media (max-width: 859.98px) {
-      .panel {
-        max-width: 320px;
-      }
-
-      .panel-left {
-        flex-direction: row;
-        align-items: stretch;
-        gap: 8px;
-      }
-
-      .next-box {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-      }
-
-      .next-box .panel-title {
-        margin-bottom: 0;
-        writing-mode: vertical-rl;
-        font-size: 0.65rem;
-      }
-
-      #next-canvas {
-        width: 42px;
-        height: 42px;
-      }
-
-      .stats-box {
-        flex: 1;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: center;
-        justify-content: space-between;
-        gap: 2px 10px;
-        padding: 6px 10px;
-      }
-
-      .stat {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0;
-        min-width: 42px;
-      }
-
-      .stat-label {
-        font-size: 0.6rem;
-      }
-
-      .stat-value {
-        font-size: 0.85rem;
-      }
-
-      /* Legenda de teclado é irrelevante em telas de toque. */
-      .controls-box {
-        display: none;
-      }
-
-      .action-box {
-        flex-direction: row;
-        justify-content: center;
-        padding: 6px 10px;
-      }
-
-      /* O botão de pausa por toque já cobre essa função. */
-      #pause-btn {
-        display: none;
-      }
-
-      .action-box .btn {
-        padding: 8px 14px;
-        font-size: 0.82rem;
-      }
-
-      .panel-box {
-        padding: 6px 10px;
-      }
-
-      /* A altura do tabuleiro é 2x a largura (proporção 1:2), então a largura é
-         limitada a metade do espaço vertical restante após o resto da interface
-         (cabeçalho, HUD, ações, controles de toque e espaçamentos). */
-      .board-wrapper {
-        width: min(84vw, 300px, calc((100dvh - 356px) / 2));
-      }
-    }
-
-    /* ---------- Toast de combo (efeito ao limpar linhas) ---------- */
-    .combo-toast {
-      position: absolute;
-      top: 42%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: var(--mono);
-      font-weight: 900;
-      font-size: 1.5rem;
-      letter-spacing: 0.06em;
-      color: #ffffff;
-      text-shadow: 0 0 10px var(--accent), 0 0 26px var(--accent);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 6;
-      white-space: nowrap;
-    }
-
-    .combo-toast.show {
-      animation: comboPop 0.9s ease forwards;
-    }
-
-    @keyframes comboPop {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.6);
-      }
-      15% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1);
-      }
-      30% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-      75% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1) translateY(-14px);
-      }
-    }
-
-    /* ---------- Overlays (início, pausa, game over) ---------- */
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(2, 4, 10, 0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      text-align: center;
-      padding: 16px;
-      z-index: 5;
-      animation: fadeIn 0.25s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.96);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .overlay-title {
-      font-family: var(--mono);
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      font-size: 1.5rem;
-      color: var(--accent);
-      text-shadow: 0 0 8px rgba(79, 209, 255, 0.5);
-    }
-
-    .overlay-title-danger {
-      color: var(--danger);
-      text-shadow: 0 0 10px rgba(255, 77, 94, 0.55);
-    }
-
-    .overlay-text {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      max-width: 240px;
-    }
-
-    /* ---------- Botões ---------- */
-    .btn {
-      background: #141a2e;
-      color: var(--text-primary);
-      border: 1px solid var(--panel-border);
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-    }
-
-    .btn:hover {
-      background: #1c2440;
-      border-color: var(--accent);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #04121a;
-      border-color: var(--accent);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-strong);
-    }
-
-    /* ---------- Controles de toque (mobile) ---------- */
-    .mobile-controls {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    @media (max-width: 860px), (hover: none) and (pointer: coarse) {
-      .mobile-controls {
-        display: flex;
-      }
-    }
-
-    .mobile-controls-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .touch-btn {
-      flex: 1;
-      height: clamp(44px, 12vh, 58px);
-      font-size: 1.3rem;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      color: var(--text-primary);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      transition: background-color 0.15s ease, transform 0.1s ease;
-    }
-
-    .touch-btn:active {
-      background: #1c2440;
-      transform: scale(0.94);
-    }
-
-    .touch-btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* ---------- Ajustes finos para telas muito pequenas ---------- */
-    @media (max-width: 360px) {
-      .game-title {
-        letter-spacing: 0.1em;
-      }
-
-      .panel-box {
-        padding: 8px 10px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#050505" />
+
+<title>Davi Guedes — Web Developer & Automation Specialist</title>
+<meta name="description" content="Davi Guedes — desenvolvedor web e especialista em automação. Interfaces de alto padrão, back-end sólido e automações que economizam horas de trabalho." />
+<meta name="author" content="Davi Guedes" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://guedes1818.github.io/html-css/" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:title" content="Davi Guedes — Web Developer & Automation Specialist" />
+<meta property="og:description" content="Interfaces de alto padrão, back-end sólido e automações que economizam horas de trabalho." />
+<meta property="og:image" content="assets/hero.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050505'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-style='italic' font-size='19' fill='%23E8DFC9' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E" />
+
+<!-- Fontes auto-hospedadas: nenhuma requisição a servidor externo. -->
+<link rel="preload" href="assets/fonts/playfairdisplay-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="assets/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Davi Guedes",
+  "jobTitle": "Web Developer & Automation Specialist",
+  "email": "mailto:daviguedescontato17@gmail.com",
+  "knowsAbout": ["Frontend Development", "Backend Development", "Automação", "Landing Pages", "Performance Web"]
+}
+</script>
+
+<script>document.documentElement.classList.add('js');</script>
 </head>
+
 <body>
-  <!-- Região invisível para leitores de tela anunciarem eventos importantes -->
-  <div id="sr-status" class="sr-only" aria-live="polite"></div>
+<a class="sr-only" href="#about">Pular para o conteúdo</a>
 
-  <div class="game-container">
-    <header class="game-header">
-      <h1 class="game-title">TETRIS</h1>
-    </header>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
 
-    <div class="game-layout">
-      <!-- Painel esquerdo: próxima peça + estatísticas -->
-      <aside class="panel panel-left" aria-label="Informações da partida">
-        <section class="panel-box next-box">
-          <h2 class="panel-title">Próxima</h2>
-          <canvas id="next-canvas" width="80" height="80" role="img" aria-label="Prévia da próxima peça"></canvas>
-        </section>
+<header class="nav">
+  <a class="nav__mark" href="#top" aria-label="Davi Guedes — início">Davi&nbsp;Guedes</a>
+  <nav class="nav__links label" aria-label="Navegação principal">
+    <a href="#about">Sobre</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#projects">Projetos</a>
+    <a href="#process">Processo</a>
+    <a class="nav__links-cta" href="#contact">Contato</a>
+  </nav>
+</header>
 
-        <section class="panel-box stats-box">
-          <div class="stat">
-            <span class="stat-label">Pontuação</span>
-            <span id="score" class="stat-value">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Recorde</span>
-            <span id="high-score" class="stat-value">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Nível</span>
-            <span id="level" class="stat-value">1</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Linhas</span>
-            <span id="lines" class="stat-value">0</span>
-          </div>
-        </section>
-      </aside>
+<!-- ======================================================================
+     SEÇÃO 01 — HERO
+     ====================================================================== -->
+<section class="hero" id="top">
+  <div class="hero__type" aria-hidden="true">
+    <div class="hero__word" data-hero-word>DEVELOPER</div>
+  </div>
 
-      <!-- Tabuleiro principal -->
-      <main class="board-wrapper" id="board-wrapper">
-        <canvas id="board-canvas" width="280" height="560" role="img" aria-label="Tabuleiro do Tetris">
-          Seu navegador não tem suporte a Canvas, necessário para jogar Tetris Classic.
-        </canvas>
+  <div class="hero__beam" aria-hidden="true" data-hero-beam></div>
 
-        <div id="combo-toast" class="combo-toast" aria-hidden="true"></div>
+  <figure class="hero__figure" data-hero-figure>
+    <img class="hero__img" src="assets/hero.jpg" alt="Retrato de Davi Guedes" width="1600" height="2000" fetchpriority="high" />
+    <div class="hero__fallback" aria-hidden="true"></div>
+  </figure>
 
-        <!-- Tela inicial -->
-        <div id="start-screen" class="overlay">
-          <h2 class="overlay-title">TETRIS</h2>
-          <p class="overlay-text">
-            Encaixe as peças e complete linhas para pontuar.<br />
-            Use as setas para mover e girar, espaço para queda instantânea.
-          </p>
-          <button id="play-btn" class="btn btn-primary" type="button">Jogar</button>
-        </div>
-
-        <!-- Tela de pausa -->
-        <div id="pause-overlay" class="overlay hidden">
-          <h2 class="overlay-title">PAUSADO</h2>
-          <button id="resume-btn" class="btn btn-primary" type="button">Continuar</button>
-        </div>
-
-        <!-- Tela de game over -->
-        <div id="game-over-overlay" class="overlay hidden">
-          <h2 class="overlay-title overlay-title-danger">GAME OVER</h2>
-          <p class="overlay-text">
-            Pontuação: <strong id="final-score">0</strong><br />
-            Recorde: <strong id="final-high-score">0</strong>
-          </p>
-          <button id="restart-btn-overlay" class="btn btn-primary" type="button">Jogar Novamente</button>
-        </div>
-      </main>
-
-      <!-- Painel direito: controles + ações -->
-      <aside class="panel panel-right" aria-label="Controles do jogo">
-        <section class="panel-box controls-box">
-          <h2 class="panel-title">Controles</h2>
-          <ul class="key-list">
-            <li><kbd>&larr;</kbd><kbd>&rarr;</kbd> Mover</li>
-            <li><kbd>&uarr;</kbd> Rotacionar</li>
-            <li><kbd>&darr;</kbd> Descer rápido</li>
-            <li><kbd>Espaço</kbd> Queda instantânea</li>
-            <li><kbd>P</kbd> Pausar</li>
-            <li><kbd>R</kbd> Reiniciar</li>
-          </ul>
-        </section>
-
-        <section class="panel-box action-box">
-          <button id="pause-btn" class="btn" type="button">Pausar</button>
-          <button id="restart-btn" class="btn" type="button">Reiniciar</button>
-        </section>
-      </aside>
+  <div class="hero__meta">
+    <div class="hero__tl">
+      <span class="label">Web Developer</span>
+      <span class="rule"></span>
     </div>
 
-    <!-- Controles para toque (mobile) -->
-    <div class="mobile-controls" id="mobile-controls" aria-label="Controles de toque">
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-left" type="button" aria-label="Mover para esquerda">&#9664;</button>
-        <button class="touch-btn" id="btn-rotate" type="button" aria-label="Rotacionar peça">&#8635;</button>
-        <button class="touch-btn" id="btn-right" type="button" aria-label="Mover para direita">&#9654;</button>
-      </div>
-      <div class="mobile-controls-row">
-        <button class="touch-btn" id="btn-down" type="button" aria-label="Descer rápido">&#9660;</button>
-        <button class="touch-btn" id="btn-drop" type="button" aria-label="Queda instantânea">&#10515;</button>
-        <button class="touch-btn" id="btn-pause" type="button" aria-label="Pausar jogo">&#10074;&#10074;</button>
+    <div class="hero__tr">
+      <ul class="label hero__disciplines">
+        <li>Frontend</li>
+        <li>Backend</li>
+        <li>Automation</li>
+      </ul>
+      <span class="hero__arrow" aria-hidden="true"></span>
+    </div>
+
+    <div class="hero__cta-wrap">
+      <a class="cta" href="#projects" data-scroll>
+        <span class="cta__dot" aria-hidden="true"></span>
+        View Projects
+      </a>
+    </div>
+
+    <div class="hero__bl">
+      <h1 class="hero__headline" lang="en">Building<br />Digital Solutions<br />That Matter.</h1>
+      <span class="rule"></span>
+    </div>
+
+    <div class="hero__br">
+      <span class="rule"></span>
+      <span class="label">Portfólio</span>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ======================================================================
+     SEÇÃO 02 — SOBRE
+     ====================================================================== -->
+<section class="section" id="about">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">01</span>
+      <span class="label">Sobre</span>
+    </div>
+
+    <div class="about__grid">
+      <figure class="about__portrait" data-parallax-wrap>
+        <!-- Reaproveita a mesma foto do hero; troque por um segundo retrato se preferir. -->
+        <img src="assets/hero.jpg" alt="Davi Guedes em estúdio" loading="lazy" decoding="async" width="1200" height="1600" data-parallax="0.16" />
+        <div class="about__ph" aria-hidden="true" hidden></div>
+      </figure>
+
+      <div class="about__body">
+        <h2 class="display about__title" data-reveal lang="en">Crafting <em>Experiences.</em></h2>
+
+        <div data-fade>
+          <p class="body-copy">
+            Sou Davi Guedes, desenvolvedor web e especialista em automação. Trabalho na
+            fronteira entre design e engenharia: interfaces que carregam rápido, back-ends
+            que não quebram sob carga e rotinas automatizadas que devolvem horas de trabalho
+            para quem contrata.
+          </p>
+          <p class="body-copy">
+            Cada projeto começa pela pergunta certa — o que este produto precisa provar? — e
+            termina em código legível, versionado e pronto para escalar. Sem template,
+            sem atalho, sem página que parece todas as outras.
+          </p>
+        </div>
+
+        <ul class="about__stats" data-fade>
+          <li class="about__stat"><b>100%</b><span>Código próprio</span></li>
+          <li class="about__stat"><b>&lt;1s</b><span>Meta de carregamento</span></li>
+          <li class="about__stat"><b>95+</b><span>Alvo no Lighthouse</span></li>
+        </ul>
       </div>
     </div>
   </div>
-
-  <noscript>
-    Este jogo precisa de JavaScript habilitado no navegador para funcionar.
-  </noscript>
-
-  <script>
-    /* =========================================================
-       Tetris Classic — lógica do jogo
-       JavaScript puro (ES6+), encapsulado numa IIFE para evitar
-       variáveis globais.
-       ========================================================= */
-    (function () {
-      "use strict";
-
-      /* ---------------------------------------------------------
-       * Constantes
-       * ------------------------------------------------------- */
-      const COLS = 10;
-      const ROWS = 20;
-      const BASE_CELL = 28; // px por célula (resolução interna do canvas do tabuleiro)
-      const BOARD_PX_W = COLS * BASE_CELL; // 280
-      const BOARD_PX_H = ROWS * BASE_CELL; // 560
-
-      const NEXT_CELL = 20; // px por célula na prévia da próxima peça
-      const NEXT_GRID = 4; // prévia comporta uma matriz até 4x4
-      const NEXT_PX = NEXT_CELL * NEXT_GRID; // 80
-
-      const BASE_DROP_INTERVAL = 1000; // ms — velocidade de queda no nível 1
-      const SPEED_STEP = 70; // ms reduzidos a cada nível
-      const MIN_DROP_INTERVAL = 120; // ms — velocidade máxima
-
-      const LINE_POINTS = { 1: 100, 2: 300, 3: 500, 4: 800 };
-      const COMBO_LABELS = { 1: "Linha!", 2: "Duplo!", 3: "Triplo!", 4: "TETRIS!" };
-      const LEVEL_UP_EVERY = 10; // linhas por nível
-
-      const CLEAR_ANIMATION_MS = 300; // duração do flash ao limpar linhas
-      const LOCK_FLASH_MS = 150; // duração do feedback ao encaixar peça
-
-      const HIGH_SCORE_KEY = "tetrisClassicHighScore";
-
-      // Formas dos tetrominós representadas em matrizes quadradas,
-      // prontas para rotação por transformação de matriz.
-      const SHAPES = {
-        I: [
-          [0, 0, 0, 0],
-          [1, 1, 1, 1],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-        ],
-        O: [
-          [1, 1],
-          [1, 1],
-        ],
-        T: [
-          [0, 1, 0],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
-        S: [
-          [0, 1, 1],
-          [1, 1, 0],
-          [0, 0, 0],
-        ],
-        Z: [
-          [1, 1, 0],
-          [0, 1, 1],
-          [0, 0, 0],
-        ],
-        J: [
-          [1, 0, 0],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
-        L: [
-          [0, 0, 1],
-          [1, 1, 1],
-          [0, 0, 0],
-        ],
-      };
-
-      const COLORS = {
-        I: "#4fd1ff",
-        O: "#f5d300",
-        T: "#b06cff",
-        S: "#3ddc84",
-        Z: "#ff4d5e",
-        J: "#3d7bff",
-        L: "#ff9f40",
-      };
-
-      // Deslocamentos tentados ao rotacionar, para permitir "wall kicks" simples.
-      const ROTATION_KICKS = [0, 1, -1, 2, -2];
-
-      /* ---------------------------------------------------------
-       * Preparado para efeitos sonoros futuros (audio.enabled = false)
-       * ------------------------------------------------------- */
-      const SOUND_ENABLED = false;
-      const Sound = {
-        play(name) {
-          if (!SOUND_ENABLED) return;
-          // Espaço reservado: ex. new Audio(`sfx/${name}.mp3`).play().catch(() => {});
-        },
-      };
-
-      /* ---------------------------------------------------------
-       * Referências DOM
-       * ------------------------------------------------------- */
-      const $ = (id) => document.getElementById(id);
-
-      const boardCanvas = $("board-canvas");
-      const boardCtx = boardCanvas.getContext("2d");
-      const nextCanvas = $("next-canvas");
-      const nextCtx = nextCanvas.getContext("2d");
-
-      const boardWrapper = $("board-wrapper");
-      const comboToast = $("combo-toast");
-      const srStatus = $("sr-status");
-
-      const startScreen = $("start-screen");
-      const pauseOverlay = $("pause-overlay");
-      const gameOverOverlay = $("game-over-overlay");
-
-      const scoreEl = $("score");
-      const highScoreEl = $("high-score");
-      const levelEl = $("level");
-      const linesEl = $("lines");
-      const finalScoreEl = $("final-score");
-      const finalHighScoreEl = $("final-high-score");
-
-      const playBtn = $("play-btn");
-      const resumeBtn = $("resume-btn");
-      const pauseBtn = $("pause-btn");
-      const restartBtn = $("restart-btn");
-      const restartBtnOverlay = $("restart-btn-overlay");
-
-      const btnLeft = $("btn-left");
-      const btnRight = $("btn-right");
-      const btnRotate = $("btn-rotate");
-      const btnDown = $("btn-down");
-      const btnDrop = $("btn-drop");
-      const btnPause = $("btn-pause");
-
-      /* ---------------------------------------------------------
-       * Estado do jogo (evita variáveis globais soltas)
-       * ------------------------------------------------------- */
-      const state = {
-        board: createEmptyBoard(),
-        bag: [],
-        current: null,
-        next: null,
-        score: 0,
-        highScore: loadHighScore(),
-        level: 1,
-        lines: 0,
-        dropInterval: BASE_DROP_INTERVAL,
-        dropCounter: 0,
-        lastTime: 0,
-        phase: "start", // 'start' | 'playing' | 'paused' | 'gameover'
-        animating: false,
-        clearingRows: [],
-        clearFlashStart: 0,
-        lockFlash: null,
-      };
-
-      /* ---------------------------------------------------------
-       * Tabuleiro
-       * ------------------------------------------------------- */
-      function createEmptyBoard() {
-        return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
-      }
-
-      function getFullRows() {
-        const rows = [];
-        for (let y = 0; y < ROWS; y++) {
-          if (state.board[y].every((cell) => cell !== 0)) rows.push(y);
-        }
-        return rows;
-      }
-
-      function removeRows(rows) {
-        const rowsSet = new Set(rows);
-        const remaining = state.board.filter((_, idx) => !rowsSet.has(idx));
-        const removedCount = ROWS - remaining.length;
-        const newRows = Array.from({ length: removedCount }, () => new Array(COLS).fill(0));
-        state.board = newRows.concat(remaining);
-      }
-
-      /* ---------------------------------------------------------
-       * Peças
-       * ------------------------------------------------------- */
-      function refillBag() {
-        const bag = ["I", "O", "T", "S", "Z", "J", "L"];
-        for (let i = bag.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [bag[i], bag[j]] = [bag[j], bag[i]];
-        }
-        return bag;
-      }
-
-      function nextTypeFromBag() {
-        if (state.bag.length === 0) state.bag = refillBag();
-        return state.bag.pop();
-      }
-
-      function createPiece(type) {
-        const matrix = SHAPES[type].map((row) => row.slice());
-        return {
-          type,
-          matrix,
-          x: Math.floor((COLS - matrix[0].length) / 2),
-          y: 0,
-        };
-      }
-
-      // Rotação 90° horária de uma matriz quadrada NxN.
-      function rotateMatrix(matrix) {
-        const n = matrix.length;
-        const result = [];
-        for (let i = 0; i < n; i++) {
-          result.push([]);
-          for (let j = 0; j < n; j++) {
-            result[i][j] = matrix[n - 1 - j][i];
-          }
-        }
-        return result;
-      }
-
-      /* ---------------------------------------------------------
-       * Colisão
-       * ------------------------------------------------------- */
-      function collide(board, piece, offsetX, offsetY, matrix) {
-        const m = matrix || piece.matrix;
-        for (let y = 0; y < m.length; y++) {
-          for (let x = 0; x < m[y].length; x++) {
-            if (!m[y][x]) continue;
-            const boardX = piece.x + x + offsetX;
-            const boardY = piece.y + y + offsetY;
-            if (boardX < 0 || boardX >= COLS || boardY >= ROWS) return true;
-            if (boardY >= 0 && board[boardY][boardX]) return true;
-          }
-        }
-        return false;
-      }
-
-      function computeGhostY() {
-        let offset = 0;
-        while (!collide(state.board, state.current, 0, offset + 1)) offset++;
-        return state.current.y + offset;
-      }
-
-      /* ---------------------------------------------------------
-       * Movimentos e ações do jogador
-       * ------------------------------------------------------- */
-      function canAct() {
-        return state.phase === "playing" && !state.animating;
-      }
-
-      function moveHorizontal(dir) {
-        if (!canAct()) return;
-        if (!collide(state.board, state.current, dir, 0)) {
-          state.current.x += dir;
-          Sound.play("move");
-        }
-      }
-
-      function softDrop() {
-        if (!canAct()) return;
-        if (!collide(state.board, state.current, 0, 1)) {
-          state.current.y += 1;
-          state.score += 1;
-          updateHUD();
-          Sound.play("move");
-        } else {
-          lockPiece();
-        }
-        state.dropCounter = 0;
-      }
-
-      function hardDrop() {
-        if (!canAct()) return;
-        let dist = 0;
-        while (!collide(state.board, state.current, 0, dist + 1)) dist++;
-        state.current.y += dist;
-        state.score += dist * 2;
-        updateHUD();
-        Sound.play("drop");
-        lockPiece();
-      }
-
-      function rotatePiece() {
-        if (!canAct()) return;
-        const rotated = rotateMatrix(state.current.matrix);
-        for (const kick of ROTATION_KICKS) {
-          if (!collide(state.board, state.current, kick, 0, rotated)) {
-            state.current.matrix = rotated;
-            state.current.x += kick;
-            Sound.play("rotate");
-            return;
-          }
-        }
-        // Nenhum kick funcionou: rotação bloqueada, peça permanece como está.
-      }
-
-      // Queda automática (gravidade), chamada pelo loop principal.
-      function dropPiece() {
-        if (!collide(state.board, state.current, 0, 1)) {
-          state.current.y += 1;
-        } else {
-          lockPiece();
-        }
-        state.dropCounter = 0;
-      }
-
-      /* ---------------------------------------------------------
-       * Fixação da peça, limpeza de linhas e pontuação
-       * ------------------------------------------------------- */
-      function mergePieceToBoard() {
-        const { matrix, x, y, type } = state.current;
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (!matrix[ry][rx]) continue;
-            const boardY = y + ry;
-            const boardX = x + rx;
-            if (boardY < 0) continue; // acima da área visível (área de spawn)
-            state.board[boardY][boardX] = type;
-          }
-        }
-      }
-
-      function triggerLockFlash() {
-        const { matrix, x, y } = state.current;
-        const cells = [];
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (matrix[ry][rx]) cells.push([x + rx, y + ry]);
-          }
-        }
-        state.lockFlash = { cells, start: performance.now() };
-      }
-
-      function lockPiece() {
-        mergePieceToBoard();
-        triggerLockFlash();
-        Sound.play("lock");
-
-        const fullRows = getFullRows();
-        if (fullRows.length > 0) {
-          state.animating = true;
-          state.clearingRows = fullRows;
-          state.clearFlashStart = performance.now();
-          showCombo(fullRows.length);
-          Sound.play("clear");
-          setTimeout(() => {
-            removeRows(fullRows);
-            applyScore(fullRows.length);
-            state.clearingRows = [];
-            state.animating = false;
-            spawnNext();
-          }, CLEAR_ANIMATION_MS);
-        } else {
-          spawnNext();
-        }
-      }
-
-      function applyScore(lineCount) {
-        state.score += LINE_POINTS[lineCount] || 0;
-        state.lines += lineCount;
-
-        const newLevel = Math.floor(state.lines / LEVEL_UP_EVERY) + 1;
-        if (newLevel !== state.level) {
-          state.level = newLevel;
-          state.dropInterval = Math.max(MIN_DROP_INTERVAL, BASE_DROP_INTERVAL - (newLevel - 1) * SPEED_STEP);
-          announce(`Nível ${state.level}!`);
-        }
-        updateHUD();
-      }
-
-      function spawnNext() {
-        state.current = state.next;
-        state.next = createPiece(nextTypeFromBag());
-        drawNextPreview();
-
-        if (collide(state.board, state.current, 0, 0)) {
-          triggerGameOver();
-        }
-      }
-
-      /* ---------------------------------------------------------
-       * Estados do jogo: início, pausa, reinício, game over
-       * ------------------------------------------------------- */
-      function resetState() {
-        state.board = createEmptyBoard();
-        state.bag = [];
-        state.current = createPiece(nextTypeFromBag());
-        state.next = createPiece(nextTypeFromBag());
-        state.score = 0;
-        state.level = 1;
-        state.lines = 0;
-        state.dropInterval = BASE_DROP_INTERVAL;
-        state.dropCounter = 0;
-        state.animating = false;
-        state.clearingRows = [];
-        state.lockFlash = null;
-        state.lastTime = performance.now();
-        drawNextPreview();
-        updateHUD();
-      }
-
-      function startGame() {
-        resetState();
-        state.phase = "playing";
-        startScreen.classList.add("hidden");
-        pauseOverlay.classList.add("hidden");
-        gameOverOverlay.classList.add("hidden");
-        announce("Jogo iniciado");
-      }
-
-      function restartGame() {
-        startGame();
-      }
-
-      function togglePause() {
-        if (state.phase === "playing") {
-          state.phase = "paused";
-          pauseOverlay.classList.remove("hidden");
-          announce("Jogo pausado");
-        } else if (state.phase === "paused") {
-          state.phase = "playing";
-          pauseOverlay.classList.add("hidden");
-          state.lastTime = performance.now();
-          announce("Jogo retomado");
-        }
-      }
-
-      function triggerGameOver() {
-        state.phase = "gameover";
-
-        if (state.score > state.highScore) {
-          state.highScore = state.score;
-          saveHighScore(state.highScore);
-        }
-
-        finalScoreEl.textContent = state.score;
-        finalHighScoreEl.textContent = state.highScore;
-        updateHUD();
-
-        gameOverOverlay.classList.remove("hidden");
-        boardWrapper.classList.add("flash-gameover");
-        setTimeout(() => boardWrapper.classList.remove("flash-gameover"), 600);
-
-        Sound.play("gameover");
-        announce(`Fim de jogo. Pontuação ${state.score}.`);
-      }
-
-      /* ---------------------------------------------------------
-       * HUD, recorde (localStorage) e acessibilidade
-       * ------------------------------------------------------- */
-      function updateHUD() {
-        scoreEl.textContent = state.score;
-        highScoreEl.textContent = state.highScore;
-        levelEl.textContent = state.level;
-        linesEl.textContent = state.lines;
-      }
-
-      function loadHighScore() {
-        try {
-          const value = localStorage.getItem(HIGH_SCORE_KEY);
-          return value ? parseInt(value, 10) || 0 : 0;
-        } catch (err) {
-          return 0;
-        }
-      }
-
-      function saveHighScore(value) {
-        try {
-          localStorage.setItem(HIGH_SCORE_KEY, String(value));
-        } catch (err) {
-          // localStorage indisponível (ex.: modo privado) — ignora silenciosamente.
-        }
-      }
-
-      function announce(message) {
-        srStatus.textContent = message;
-      }
-
-      function showCombo(lineCount) {
-        const label = COMBO_LABELS[lineCount];
-        if (!label) return;
-        comboToast.textContent = label;
-        comboToast.classList.remove("show");
-        void comboToast.offsetWidth; // força reflow para reiniciar a animação
-        comboToast.classList.add("show");
-        announce(`${label} +${LINE_POINTS[lineCount]} pontos`);
-      }
-
-      /* ---------------------------------------------------------
-       * Renderização (Canvas)
-       * ------------------------------------------------------- */
-      function setupHiDPICanvas(canvas, ctx, width, height) {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      function drawCellAt(ctx, px, py, size, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(px, py, size, size);
-
-        // Realce sutil no topo (efeito de bloco/bisel suave).
-        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
-        ctx.fillRect(px, py, size, Math.max(2, size * 0.12));
-
-        // Sombra sutil na base.
-        ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
-        ctx.fillRect(px, py + size - Math.max(2, size * 0.12), size, Math.max(2, size * 0.12));
-
-        // Borda discreta.
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
-      }
-
-      function drawBoardBackground() {
-        boardCtx.fillStyle = "#02030a";
-        boardCtx.fillRect(0, 0, BOARD_PX_W, BOARD_PX_H);
-      }
-
-      function drawGrid() {
-        boardCtx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-        boardCtx.lineWidth = 1;
-        boardCtx.beginPath();
-        for (let x = 1; x < COLS; x++) {
-          boardCtx.moveTo(x * BASE_CELL + 0.5, 0);
-          boardCtx.lineTo(x * BASE_CELL + 0.5, BOARD_PX_H);
-        }
-        for (let y = 1; y < ROWS; y++) {
-          boardCtx.moveTo(0, y * BASE_CELL + 0.5);
-          boardCtx.lineTo(BOARD_PX_W, y * BASE_CELL + 0.5);
-        }
-        boardCtx.stroke();
-      }
-
-      function drawLockedCells() {
-        for (let y = 0; y < ROWS; y++) {
-          for (let x = 0; x < COLS; x++) {
-            const cell = state.board[y][x];
-            if (cell) drawCellAt(boardCtx, x * BASE_CELL, y * BASE_CELL, BASE_CELL, COLORS[cell]);
-          }
-        }
-      }
-
-      function drawPieceMatrix(ctx, matrix, x, y, color, cellSize) {
-        for (let ry = 0; ry < matrix.length; ry++) {
-          for (let rx = 0; rx < matrix[ry].length; rx++) {
-            if (!matrix[ry][rx]) continue;
-            const py = y + ry;
-            if (py < 0) continue;
-            drawCellAt(ctx, (x + rx) * cellSize, py * cellSize, cellSize, color);
-          }
-        }
-      }
-
-      function drawGhost() {
-        const ghostY = computeGhostY();
-        if (ghostY === state.current.y) return; // peça já está apoiada, sem necessidade de fantasma
-        boardCtx.save();
-        boardCtx.globalAlpha = 0.22;
-        drawPieceMatrix(boardCtx, state.current.matrix, state.current.x, ghostY, COLORS[state.current.type], BASE_CELL);
-        boardCtx.restore();
-      }
-
-      function drawClearFlash() {
-        const elapsed = performance.now() - state.clearFlashStart;
-        const alpha = Math.max(0, 0.45 + 0.45 * Math.sin(elapsed / 40));
-        boardCtx.save();
-        boardCtx.globalAlpha = alpha;
-        boardCtx.fillStyle = "#ffffff";
-        state.clearingRows.forEach((y) => {
-          boardCtx.fillRect(0, y * BASE_CELL, BOARD_PX_W, BASE_CELL);
-        });
-        boardCtx.restore();
-      }
-
-      function drawLockFlash() {
-        const elapsed = performance.now() - state.lockFlash.start;
-        if (elapsed >= LOCK_FLASH_MS) {
-          state.lockFlash = null;
-          return;
-        }
-        const alpha = 0.35 * (1 - elapsed / LOCK_FLASH_MS);
-        boardCtx.save();
-        boardCtx.globalAlpha = alpha;
-        boardCtx.fillStyle = "#ffffff";
-        state.lockFlash.cells.forEach(([x, y]) => {
-          if (y < 0) return;
-          boardCtx.fillRect(x * BASE_CELL, y * BASE_CELL, BASE_CELL, BASE_CELL);
-        });
-        boardCtx.restore();
-      }
-
-      function render() {
-        drawBoardBackground();
-        drawGrid();
-        drawLockedCells();
-
-        if (state.current && state.phase === "playing" && !state.animating) {
-          drawGhost();
-          drawPieceMatrix(boardCtx, state.current.matrix, state.current.x, state.current.y, COLORS[state.current.type], BASE_CELL);
-        }
-
-        if (state.animating && state.clearingRows.length) {
-          drawClearFlash();
-        }
-
-        if (state.lockFlash) {
-          drawLockFlash();
-        }
-      }
-
-      function drawNextPreview() {
-        nextCtx.clearRect(0, 0, NEXT_PX, NEXT_PX);
-        if (!state.next) return;
-        const { matrix, type } = state.next;
-        const size = matrix.length;
-        const offset = ((NEXT_GRID - size) / 2) * NEXT_CELL;
-        for (let y = 0; y < size; y++) {
-          for (let x = 0; x < size; x++) {
-            if (!matrix[y][x]) continue;
-            drawCellAt(nextCtx, offset + x * NEXT_CELL, offset + y * NEXT_CELL, NEXT_CELL, COLORS[type]);
-          }
-        }
-      }
-
-      /* ---------------------------------------------------------
-       * Loop principal
-       * ------------------------------------------------------- */
-      function loop(time) {
-        const delta = time - state.lastTime;
-        state.lastTime = time;
-
-        if (state.phase === "playing" && !state.animating) {
-          state.dropCounter += delta;
-          if (state.dropCounter >= state.dropInterval) {
-            dropPiece();
-          }
-        }
-
-        render();
-        requestAnimationFrame(loop);
-      }
-
-      /* ---------------------------------------------------------
-       * Entrada: teclado
-       * ------------------------------------------------------- */
-      const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space", "KeyP", "KeyR"]);
-
-      window.addEventListener(
-        "keydown",
-        (e) => {
-          if (GAME_KEYS.has(e.code)) e.preventDefault();
-
-          switch (e.code) {
-            case "KeyR":
-              if (e.repeat) return;
-              restartGame();
-              return;
-            case "KeyP":
-              if (e.repeat) return;
-              togglePause();
-              return;
-            case "ArrowLeft":
-              moveHorizontal(-1);
-              return;
-            case "ArrowRight":
-              moveHorizontal(1);
-              return;
-            case "ArrowUp":
-              if (e.repeat) return;
-              rotatePiece();
-              return;
-            case "ArrowDown":
-              softDrop();
-              return;
-            case "Space":
-              if (e.repeat) return;
-              hardDrop();
-              return;
-            default:
-              return;
-          }
-        },
-        { passive: false }
-      );
-
-      // Evita que o toque na área do jogo role a página durante a partida.
-      document.addEventListener(
-        "touchmove",
-        (e) => {
-          if (state.phase === "playing") e.preventDefault();
-        },
-        { passive: false }
-      );
-
-      /* ---------------------------------------------------------
-       * Entrada: botões (clique e toque)
-       * ------------------------------------------------------- */
-      function bindTap(el, handler) {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          handler();
-          el.blur();
-        });
-      }
-
-      // Botões que repetem a ação enquanto pressionados (mover/descer).
-      function bindHold(el, handler, interval) {
-        let timer = null;
-        const start = (e) => {
-          e.preventDefault();
-          handler();
-          clearInterval(timer);
-          timer = setInterval(handler, interval);
-        };
-        const stop = () => {
-          clearInterval(timer);
-          timer = null;
-        };
-        el.addEventListener("touchstart", start, { passive: false });
-        el.addEventListener("touchend", stop);
-        el.addEventListener("touchcancel", stop);
-        el.addEventListener("mousedown", start);
-        el.addEventListener("mouseup", stop);
-        el.addEventListener("mouseleave", stop);
-        el.addEventListener("contextmenu", (e) => e.preventDefault());
-      }
-
-      bindTap(playBtn, startGame);
-      bindTap(resumeBtn, togglePause);
-      bindTap(pauseBtn, togglePause);
-      bindTap(restartBtn, restartGame);
-      bindTap(restartBtnOverlay, restartGame);
-
-      bindHold(btnLeft, () => moveHorizontal(-1), 110);
-      bindHold(btnRight, () => moveHorizontal(1), 110);
-      bindHold(btnDown, softDrop, 90);
-      bindTap(btnRotate, rotatePiece);
-      bindTap(btnDrop, hardDrop);
-      bindTap(btnPause, togglePause);
-
-      /* ---------------------------------------------------------
-       * Inicialização
-       * ------------------------------------------------------- */
-      function setupCanvases() {
-        setupHiDPICanvas(boardCanvas, boardCtx, BOARD_PX_W, BOARD_PX_H);
-        setupHiDPICanvas(nextCanvas, nextCtx, NEXT_PX, NEXT_PX);
-        render();
-        drawNextPreview();
-      }
-
-      function init() {
-        setupCanvases();
-        resetState();
-        updateHUD();
-        window.addEventListener("resize", setupCanvases);
-        state.lastTime = performance.now();
-        requestAnimationFrame(loop);
-      }
-
-      init();
-    })();
-  </script>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 03 — EXPERTISE (scroll horizontal)
+     ====================================================================== -->
+<section class="section expertise is-native" id="expertise" data-expertise>
+  <div class="expertise__viewport">
+    <div class="section__head expertise__head">
+      <span class="section__index">02</span>
+      <span class="label">Expertise</span>
+    </div>
+
+    <div class="exp-track" data-exp-track>
+      <article class="exp-card">
+        <span class="exp-card__n">01</span>
+        <div>
+          <h3 class="exp-card__title">Frontend<br />Development</h3>
+          <p class="exp-card__txt">
+            Interfaces construídas do zero, com atenção a tipografia, ritmo e movimento.
+            Acessíveis, responsivas e fiéis ao design em qualquer tela.
+          </p>
+          <ul class="exp-card__tags">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>React</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">02</span>
+        <div>
+          <h3 class="exp-card__title">Backend<br />Development</h3>
+          <p class="exp-card__txt">
+            APIs, banco de dados e integrações. Estrutura pensada para crescer sem
+            reescrever tudo a cada nova funcionalidade.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Node.js</li><li>REST</li><li>SQL</li><li>Auth</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">03</span>
+        <div>
+          <h3 class="exp-card__title">Automation</h3>
+          <p class="exp-card__txt">
+            Processos manuais viram rotinas automáticas: relatórios, disparos, sincronização
+            entre sistemas e tudo aquilo que consome tempo sem gerar valor.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Scripts</li><li>Webhooks</li><li>Integrações</li><li>Bots</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">04</span>
+        <div>
+          <h3 class="exp-card__title">Landing<br />Pages</h3>
+          <p class="exp-card__txt">
+            Páginas de campanha com hierarquia clara, copy respirando e um único caminho
+            até a conversão. Rápidas por construção, não por plugin.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Copy</li><li>UI</li><li>SEO</li><li>Analytics</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <span class="exp-card__n">05</span>
+        <div>
+          <h3 class="exp-card__title">Performance<br />Optimization</h3>
+          <p class="exp-card__txt">
+            Auditoria de Core Web Vitals, corte de peso desnecessário e ajuste fino de
+            renderização até a página responder no primeiro toque.
+          </p>
+          <ul class="exp-card__tags">
+            <li>Lighthouse</li><li>Core Web Vitals</li><li>Cache</li><li>Build</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <div class="expertise__progress" aria-hidden="true"><i data-exp-progress></i></div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 04 — PROJETOS EM DESTAQUE (pinado)
+
+     ATENÇÃO COPY/CONTEÚDO:
+     Apenas "Tetris Classic" é um projeto real deste repositório.
+     Os demais cards são estruturas prontas — troque título, texto, stack,
+     ano, imagem (assets/) e link pelos seus projetos reais antes de publicar.
+     ====================================================================== -->
+<section class="section projects" id="projects" data-projects>
+  <div class="projects__stage">
+    <div class="projects__inner">
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-tetris.jpg" alt="Tela do jogo Tetris Classic" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 01</span>
+          <h3 class="display project__title">Tetris Classic</h3>
+          <p class="project__txt">
+            O clássico de blocos reconstruído em HTML, CSS e JavaScript puro — sem
+            framework, sem dependência. Loop de jogo próprio, sistema de rotação,
+            pontuação, níveis e controles de toque para celular.
+          </p>
+          <ul class="project__stack">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Canvas UI</li>
+          </ul>
+          <a class="cta" href="tetris/">
+            <span class="cta__dot" aria-hidden="true"></span>
+            Ver projeto
+          </a>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-02.svg" alt="Prévia do projeto de landing page" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 02</span>
+          <h3 class="display project__title">Landing de Campanha</h3>
+          <p class="project__txt">
+            Página única de lançamento: narrativa em blocos, prova social, formulário
+            integrado ao CRM e monitoramento de conversão. Estrutura leve, estática e
+            publicada em CDN.
+          </p>
+          <ul class="project__stack">
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Analytics</li>
+          </ul>
+          <a class="cta" href="#contact" data-scroll>
+            <span class="cta__dot" aria-hidden="true"></span>
+            Case study
+          </a>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project__visual">
+          <img src="assets/project-03.svg" alt="Prévia do painel de automação" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2025</span>
+        </div>
+        <div class="project__meta">
+          <span class="project__no">Projeto 03</span>
+          <h3 class="display project__title">Painel de Automação</h3>
+          <p class="project__txt">
+            Rotinas que coletam dados de várias fontes, tratam e devolvem relatórios
+            prontos. O que antes era uma planilha preenchida à mão virou um painel
+            atualizado sozinho.
+          </p>
+          <ul class="project__stack">
+            <li>Node.js</li><li>API REST</li><li>Webhooks</li><li>Cron</li>
+          </ul>
+          <a class="cta" href="#contact" data-scroll>
+            <span class="cta__dot" aria-hidden="true"></span>
+            Case study
+          </a>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="projects__counter" aria-hidden="true">
+      <b data-proj-current>01</b><span class="rule"></span><span data-proj-total>03</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     ARQUIVO — sites anteriores (imagem segue o cursor)
+     Troque heading/subheading/href/imagem pelos seus trabalhos reais.
+     ====================================================================== -->
+<section class="section" id="archive">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">03</span>
+      <span class="label">Arquivo — trabalhos anteriores</span>
+    </div>
+
+    <div class="archive__list" data-archive>
+      <a class="arch-link" href="tetris/">
+        <div>
+          <span class="arch-link__head" data-split>Tetris Classic</span>
+          <span class="arch-link__sub">Jogo em JavaScript puro · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-tetris.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Landing de Campanha</span>
+          <span class="arch-link__sub">Página de lançamento · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-02.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Painel de Automação</span>
+          <span class="arch-link__sub">Relatórios automatizados · 2025</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-03.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Site Institucional</span>
+          <span class="arch-link__sub">Identidade e conteúdo · 2024</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-04.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Experimentos</span>
+          <span class="arch-link__sub">Interações e protótipos · em curso</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-05.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 05 — PROCESSO
+     ====================================================================== -->
+<section class="section" id="process">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">04</span>
+      <span class="label">Processo</span>
+    </div>
+
+    <div class="process__list" data-process>
+      <div class="process__line" aria-hidden="true"><i data-process-line></i></div>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Discover <em>01</em></h3>
+        <p class="proc-step__txt">Conversa, contexto e objetivo. Antes de qualquer linha de código, entender o que precisa acontecer depois que o site estiver no ar.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Design <em>02</em></h3>
+        <p class="proc-step__txt">Estrutura, hierarquia e direção visual. Tipografia e espaço decidem o tom antes de qualquer efeito.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Develop <em>03</em></h3>
+        <p class="proc-step__txt">Código próprio, semântico e versionado. Componentes reutilizáveis, nada de peso morto herdado de template.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Optimize <em>04</em></h3>
+        <p class="proc-step__txt">Performance, acessibilidade e SEO medidos — não presumidos. Ajuste fino até os números fecharem.</p>
+      </article>
+
+      <article class="proc-step" data-fade>
+        <h3 class="proc-step__title">Launch <em>05</em></h3>
+        <p class="proc-step__txt">Publicação, monitoramento e acompanhamento. O lançamento é o começo da leitura de dados, não o fim do projeto.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 06 — STACK (marquee infinito)
+     ====================================================================== -->
+<section class="section stack" id="stack">
+  <div class="section__head shell">
+    <span class="section__index">05</span>
+    <span class="label">Stack</span>
+  </div>
+
+  <div class="marquee" data-marquee aria-hidden="true">
+    <div class="marquee__row" data-marquee-row>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15"/></svg>HTML5 <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/></svg>CSS3 <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 20 19.5H4Z"/></svg>JavaScript <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/></svg>TypeScript <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20 8v8l-8 4.5L4 16V8Z"/></svg>React <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>Next.js <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>Tailwind <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/></svg>GSAP <i>/</i></span>
+    </div>
+  </div>
+
+  <div class="marquee marquee--rev" data-marquee aria-hidden="true">
+    <div class="marquee__row" data-marquee-row>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15"/></svg>Node.js <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/></svg>API REST <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5 20 19.5H4Z"/></svg>SQL <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/></svg>Git <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 20 8v8l-8 4.5L4 16V8Z"/></svg>Webhooks <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>Automação <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>SEO Técnico <i>/</i></span>
+      <span class="marquee__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/></svg>Performance <i>/</i></span>
+    </div>
+  </div>
+
+  <p class="sr-only">Tecnologias: HTML5, CSS3, JavaScript, TypeScript, React, Next.js, Tailwind, GSAP, Node.js, API REST, SQL, Git, Webhooks, automação, SEO técnico e performance.</p>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 07 — DEPOIMENTOS
+
+     ATENÇÃO: textos de exemplo. Substitua por depoimentos reais
+     (com nome e autorização de quem falou) antes de publicar.
+     ====================================================================== -->
+<section class="section" id="testimonials">
+  <div class="shell">
+    <div class="section__head">
+      <span class="section__index">06</span>
+      <span class="label">Depoimentos</span>
+    </div>
+
+    <div class="quotes__grid">
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">Entregou exatamente o que combinamos, no prazo, e ainda explicou cada decisão técnica em português claro.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">A automação eliminou um trabalho manual que consumia várias horas por semana da equipe.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+
+      <figure class="quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__txt">O site ficou rápido e com uma identidade que não parece com a de mais ninguém no nosso mercado.</blockquote>
+        <figcaption class="quote__by">Depoimento de exemplo — substituir</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================
+     SEÇÃO 08 — CONTATO
+     ====================================================================== -->
+<section class="section contact" id="contact">
+  <div class="shell">
+    <h2 class="display contact__title" data-reveal lang="en">Let's Build</h2>
+
+    <div class="contact__grid">
+      <div>
+        <p class="body-copy" data-fade>
+          Tem um projeto, uma ideia solta ou um processo que precisa parar de ser feito
+          na mão? Conte o contexto — respondo em até 24 horas úteis.
+        </p>
+
+        <ul class="contact__channels" style="margin-top: 2.4rem;" data-fade>
+          <li>
+            <a class="contact__channel" href="mailto:daviguedescontato17@gmail.com">
+              <b>daviguedescontato17@gmail.com</b><span>E-mail</span>
+            </a>
+          </li>
+          <li>
+            <!-- TODO: substituir pelo número real, formato https://wa.me/5511999999999 -->
+            <a class="contact__channel" href="https://wa.me/" target="_blank" rel="noopener noreferrer">
+              <b>WhatsApp</b><span>Mensagem direta</span>
+            </a>
+          </li>
+          <li>
+            <!-- TODO: substituir pelo perfil real -->
+            <a class="contact__channel" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
+              <b>LinkedIn</b><span>Rede profissional</span>
+            </a>
+          </li>
+          <li>
+            <a class="contact__channel" href="https://github.com/guedes1818" target="_blank" rel="noopener noreferrer">
+              <b>GitHub</b><span>Código</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Formulário sem back-end: abre o cliente de e-mail.
+           Para receber no servidor, troque por um endpoint (Formspree, API própria etc.). -->
+      <form class="form" data-form novalidate>
+        <div class="field">
+          <input type="text" id="f-name" name="name" placeholder=" " required autocomplete="name" />
+          <label for="f-name">Nome</label>
+        </div>
+        <div class="field">
+          <input type="email" id="f-mail" name="email" placeholder=" " required autocomplete="email" />
+          <label for="f-mail">E-mail</label>
+        </div>
+        <div class="field">
+          <textarea id="f-msg" name="message" placeholder=" " required rows="4"></textarea>
+          <label for="f-msg">Projeto</label>
+        </div>
+        <div class="form__foot">
+          <button class="cta" type="submit">
+            <span class="cta__dot" aria-hidden="true"></span>
+            Enviar mensagem
+          </button>
+          <span class="form__note">Resposta em até 24h</span>
+        </div>
+        <p class="form__status" data-form-status role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p class="footer__name" data-fade>Davi Guedes</p>
+  <div class="footer__bar label">
+    <span>© <span data-year>2026</span> — Todos os direitos reservados</span>
+    <span>Feito à mão · HTML, CSS &amp; JavaScript</span>
+    <button class="to-top label" type="button" data-top>Voltar ao topo <span class="rule"></span></button>
+  </div>
+</footer>
+
+<!-- GSAP 3.12.5 auto-hospedado (Standard License, greensock.com). -->
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="script.js" defer></script>
 </body>
 </html>

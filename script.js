@@ -346,8 +346,10 @@
 
       if (projects.length) {
         projSection.classList.add('projects--pinned');
+        // autoAlpha = opacity + visibility: o projeto invisível some do fluxo de
+        // foco e de leitores de tela em vez de ficar clicável por baixo.
         projects.forEach(function (p, i) {
-          gsap.set(p, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : 60, visibility: i === 0 ? 'visible' : 'hidden' });
+          gsap.set(p, { autoAlpha: i === 0 ? 1 : 0, y: i === 0 ? 0 : 60 });
           if (i === 0) { p.classList.add('is-active'); }
         });
 
@@ -368,12 +370,14 @@
           }
         });
 
+        // Um de cada vez: o projeto anterior sai quase por completo antes de o
+        // seguinte entrar — sem os dois legíveis ao mesmo tempo.
         projects.forEach(function (p, i) {
-          if (i === 0) { tl.to(p, { opacity: 1, y: 0, duration: 0.6 }, 0); return; }
-          tl.to(projects[i - 1], { opacity: 0, y: -50, duration: 0.6, ease: 'power2.inOut' }, '>')
+          if (i === 0) { tl.to(p, { autoAlpha: 1, y: 0, duration: 0.6 }, 0); return; }
+          tl.to(projects[i - 1], { autoAlpha: 0, y: -90, duration: 0.45, ease: 'power2.in' }, '>')
             .fromTo(p,
-              { opacity: 0, y: 60, visibility: 'visible' },
-              { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '<0.15');
+              { autoAlpha: 0, y: 90 },
+              { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power2.out' }, '>');
         });
 
         tl.to({}, { duration: 0.5 });
