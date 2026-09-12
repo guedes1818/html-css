@@ -44,7 +44,6 @@
 <a class="sr-only" href="#about">Pular para o conteúdo</a>
 
 <div class="grain" aria-hidden="true"></div>
-<div class="vignette" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="nav__mark" href="#top" aria-label="Davi Guedes — início">Davi&nbsp;Guedes</a>
@@ -143,9 +142,9 @@
         </div>
 
         <ul class="about__stats" data-fade>
+          <li class="about__stat"><b>05</b><span>Projetos no portfólio</span></li>
+          <li class="about__stat"><b>00</b><span>Frameworks usados</span></li>
           <li class="about__stat"><b>100%</b><span>Código próprio</span></li>
-          <li class="about__stat"><b>&lt;1s</b><span>Meta de carregamento</span></li>
-          <li class="about__stat"><b>95+</b><span>Alvo no Lighthouse</span></li>
         </ul>
       </div>
     </div>
@@ -240,11 +239,8 @@
 
 <!-- ======================================================================
      SEÇÃO 04 — PROJETOS EM DESTAQUE (pinado)
-
-     ATENÇÃO COPY/CONTEÚDO:
-     Apenas "Tetris Classic" é um projeto real deste repositório.
-     Os demais cards são estruturas prontas — troque título, texto, stack,
-     ano, imagem (assets/) e link pelos seus projetos reais antes de publicar.
+     Projetos reais. As imagens em assets/ são capturas de tela dos próprios
+     sites, tiradas do código-fonte de cada repositório.
      ====================================================================== -->
 <section class="section projects" id="projects" data-projects>
   <div class="projects__stage">
@@ -252,69 +248,71 @@
 
       <article class="project">
         <div class="project__visual">
-          <img src="assets/project-tetris.jpg" alt="Tela do jogo Tetris Classic" loading="lazy" decoding="async" width="1600" height="1000" />
-          <span class="project__year">2025</span>
+          <img src="assets/project-bodyconnect.jpg" alt="Página inicial do site da Body Connect Sudoeste" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2026</span>
         </div>
         <div class="project__meta">
           <span class="project__no">Projeto 01</span>
-          <h3 class="display project__title">Tetris Classic</h3>
+          <h3 class="display project__title">Body Connect</h3>
           <p class="project__txt">
-            O clássico de blocos reconstruído em HTML, CSS e JavaScript puro — sem
-            framework, sem dependência. Loop de jogo próprio, sistema de rotação,
-            pontuação, níveis e controles de toque para celular.
+            Site da academia de treino funcional do Sudoeste, em Brasília. Diferenciais,
+            cinco modalidades, planos, FAQ e agendamento de aula experimental direto no
+            WhatsApp — com alternância entre tema claro e escuro. Página única, sem
+            framework, publicada na Vercel.
           </p>
           <ul class="project__stack">
-            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Canvas UI</li>
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Vercel</li>
           </ul>
-          <a class="cta" href="tetris/">
+          <a class="cta" href="https://body-connect-sudoeste.vercel.app/" target="_blank" rel="noopener noreferrer">
             <span class="cta__dot" aria-hidden="true"></span>
-            Ver projeto
+            Ver site
           </a>
         </div>
       </article>
 
       <article class="project">
         <div class="project__visual">
-          <img src="assets/project-02.svg" alt="Prévia do projeto de landing page" loading="lazy" decoding="async" width="1600" height="1000" />
-          <span class="project__year">2025</span>
+          <img src="assets/project-guedesstudios.jpg" alt="Página inicial da landing page da Guedes Studios" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2026</span>
         </div>
         <div class="project__meta">
           <span class="project__no">Projeto 02</span>
-          <h3 class="display project__title">Landing de Campanha</h3>
+          <h3 class="display project__title">Guedes Studios</h3>
           <p class="project__txt">
-            Página única de lançamento: narrativa em blocos, prova social, formulário
-            integrado ao CRM e monitoramento de conversão. Estrutura leve, estática e
-            publicada em CDN.
+            Landing da própria operação de desenvolvimento: nichos atendidos, serviços,
+            tabela de preços e dúvidas frequentes, com o orçamento acontecendo direto no
+            WhatsApp. Estática por escolha — carrega rápido e não depende de back-end.
           </p>
           <ul class="project__stack">
-            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Analytics</li>
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>Vercel</li>
           </ul>
+          <!-- TODO: trocar pela URL publicada da Guedes Studios. -->
           <a class="cta" href="#contact" data-scroll>
             <span class="cta__dot" aria-hidden="true"></span>
-            Case study
+            Ver site
           </a>
         </div>
       </article>
 
       <article class="project">
         <div class="project__visual">
-          <img src="assets/project-03.svg" alt="Prévia do painel de automação" loading="lazy" decoding="async" width="1600" height="1000" />
-          <span class="project__year">2025</span>
+          <img src="assets/project-harmonia.jpg" alt="Página inicial do site Harmonia Instrumentos" loading="lazy" decoding="async" width="1600" height="1000" />
+          <span class="project__year">2026</span>
         </div>
         <div class="project__meta">
           <span class="project__no">Projeto 03</span>
-          <h3 class="display project__title">Painel de Automação</h3>
+          <h3 class="display project__title">Harmonia Instrumentos</h3>
           <p class="project__txt">
-            Rotinas que coletam dados de várias fontes, tratam e devolvem relatórios
-            prontos. O que antes era uma planilha preenchida à mão virou um painel
-            atualizado sozinho.
+            Vitrine para loja de instrumentos musicais: categorias, destaques, prova social
+            e atendimento por especialista. Paleta escura com dourado e tipografia grande,
+            para os produtos ocuparem o lugar de destaque.
           </p>
           <ul class="project__stack">
-            <li>Node.js</li><li>API REST</li><li>Webhooks</li><li>Cron</li>
+            <li>HTML</li><li>CSS</li><li>JavaScript</li><li>SEO</li>
           </ul>
-          <a class="cta" href="#contact" data-scroll>
+          <a class="cta" href="https://github.com/guedes1818/loja-deinstrumentos" target="_blank" rel="noopener noreferrer">
             <span class="cta__dot" aria-hidden="true"></span>
-            Case study
+            Ver código
           </a>
         </div>
       </article>
@@ -335,60 +333,60 @@
   <div class="shell">
     <div class="section__head">
       <span class="section__index">03</span>
-      <span class="label">Arquivo — trabalhos anteriores</span>
+      <span class="label">Arquivo — todos os trabalhos</span>
     </div>
 
     <div class="archive__list" data-archive>
-      <a class="arch-link" href="tetris/">
+      <a class="arch-link" href="https://body-connect-sudoeste.vercel.app/" target="_blank" rel="noopener noreferrer">
+        <div>
+          <span class="arch-link__head" data-split>Body Connect</span>
+          <span class="arch-link__sub">Academia · Brasília-DF · 2026</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-bodyconnect.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="#contact" data-scroll>
+        <div>
+          <span class="arch-link__head" data-split>Guedes Studios</span>
+          <span class="arch-link__sub">Landing de serviços · 2026</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-guedesstudios.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="https://github.com/guedes1818/loja-deinstrumentos" target="_blank" rel="noopener noreferrer">
+        <div>
+          <span class="arch-link__head" data-split>Harmonia Instrumentos</span>
+          <span class="arch-link__sub">Loja de instrumentos · 2026</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-harmonia.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="https://github.com/guedes1818/Nextplay-" target="_blank" rel="noopener noreferrer">
+        <div>
+          <span class="arch-link__head" data-split>NextPlay</span>
+          <span class="arch-link__sub">Plataforma de jogos · 2026</span>
+        </div>
+        <img class="arch-link__img" src="assets/project-nextplay.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <span class="arch-link__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="arch-link" href="tetris/" data-scroll>
         <div>
           <span class="arch-link__head" data-split>Tetris Classic</span>
-          <span class="arch-link__sub">Jogo em JavaScript puro · 2025</span>
+          <span class="arch-link__sub">Jogo em JavaScript puro · 2026</span>
         </div>
         <img class="arch-link__img" src="assets/project-tetris.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <span class="arch-link__go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </a>
-
-      <a class="arch-link" href="#contact" data-scroll>
-        <div>
-          <span class="arch-link__head" data-split>Landing de Campanha</span>
-          <span class="arch-link__sub">Página de lançamento · 2025</span>
-        </div>
-        <img class="arch-link__img" src="assets/project-02.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <span class="arch-link__go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </a>
-
-      <a class="arch-link" href="#contact" data-scroll>
-        <div>
-          <span class="arch-link__head" data-split>Painel de Automação</span>
-          <span class="arch-link__sub">Relatórios automatizados · 2025</span>
-        </div>
-        <img class="arch-link__img" src="assets/project-03.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <span class="arch-link__go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </a>
-
-      <a class="arch-link" href="#contact" data-scroll>
-        <div>
-          <span class="arch-link__head" data-split>Site Institucional</span>
-          <span class="arch-link__sub">Identidade e conteúdo · 2024</span>
-        </div>
-        <img class="arch-link__img" src="assets/project-04.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <span class="arch-link__go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </a>
-
-      <a class="arch-link" href="#contact" data-scroll>
-        <div>
-          <span class="arch-link__head" data-split>Experimentos</span>
-          <span class="arch-link__sub">Interações e protótipos · em curso</span>
-        </div>
-        <img class="arch-link__img" src="assets/project-05.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <span class="arch-link__go" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>

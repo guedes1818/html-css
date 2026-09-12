@@ -16,6 +16,18 @@ ou sirva a pasta com qualquer servidor estático.
 └── tetris/             # Tetris Classic — projeto anterior, linkado no portfólio
 ```
 
+## Projetos no site
+
+Todos reais, com capturas tiradas do código-fonte de cada repositório:
+
+| Projeto | Repositório | Link no site |
+| --- | --- | --- |
+| Body Connect Sudoeste | `guedes1818/body-connect-sudoeste` | body-connect-sudoeste.vercel.app (URL declarada pelo próprio site — confirme se está no ar) |
+| Guedes Studios | `guedes1818/guedesstudiosa2.1site.com` | **falta a URL** (`TODO` no HTML) |
+| Harmonia Instrumentos | `guedes1818/loja-deinstrumentos` | repositório no GitHub |
+| NextPlay | `guedes1818/Nextplay-` | repositório no GitHub |
+| Tetris Classic | este repositório | `tetris/` |
+
 ## Seções
 
 | # | Seção | Destaque técnico |
@@ -24,7 +36,7 @@ ou sirva a pasta com qualquer servidor estático.
 | 02 | Sobre | Retrato com parallax e revelação de texto palavra a palavra |
 | 03 | Expertise | Scroll horizontal com seção pinada (GSAP ScrollTrigger) |
 | 04 | Projetos | Seção pinada, projetos entrando um a um |
-| — | Arquivo | Trabalhos anteriores com imagem que persegue o cursor |
+| — | Arquivo | Índice de todos os trabalhos, com imagem que persegue o cursor |
 | 05 | Processo | Linha do tempo desenhada conforme o scroll |
 | 06 | Stack | Marquee infinito em duas direções |
 | 07 | Depoimentos | Cards minimalistas |
@@ -34,9 +46,9 @@ ou sirva a pasta com qualquer servidor estático.
 
 1. **`assets/hero.jpg`** — sua foto (retrato vertical, fundo escuro, ~1600×2000).
    Sem ela o hero mostra um plano de fundo de apoio, sem quebrar o layout.
-2. **Projetos 02 e 03** e os itens do **Arquivo** — títulos, textos, stack, links e
-   imagens são estruturas de espera, marcadas com comentário no HTML. Só o
-   *Tetris Classic* é real.
+2. **Link da Guedes Studios** — é o único projeto cuja URL publicada eu não
+   consegui determinar; está marcado com `TODO` no HTML e hoje aponta para a
+   seção de contato.
 3. **Depoimentos** — os três textos são exemplos, assinados como
    "Depoimento de exemplo — substituir". Use depoimentos reais, com nome e
    autorização de quem falou.

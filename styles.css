@@ -160,7 +160,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
+  /* Sem scroll-behavior: smooth aqui — ele animaria cada window.scrollTo() do
+     loop de inércia, empilhando suavização sobre suavização. As âncoras pedem
+     o comportamento suave explicitamente no script.js. */
 }
 
 body {
@@ -237,24 +239,17 @@ button, input, textarea { font: inherit; color: inherit; }
 /* --------------------------------------------------------------------------
    4. Camadas de atmosfera (grão + vinheta)
    -------------------------------------------------------------------------- */
-.grain,
-.vignette {
+/* Uma única camada fixa para grão + vinheta: duas camadas separadas custavam
+   ~8fps no hero, por serem duas superfícies compostas sobre conteúdo em
+   movimento. */
+.grain {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 90;
-}
-
-.grain {
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-}
-
-.vignette {
-  background:
-    radial-gradient(130% 100% at 50% 45%, transparent 50%, rgba(0, 0, 0, 0.45) 100%);
-  z-index: 89;
+  background-image:
+    radial-gradient(130% 100% at 50% 45%, transparent 50%, rgba(0, 0, 0, 0.45) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* --------------------------------------------------------------------------
@@ -323,6 +318,7 @@ button, input, textarea { font: inherit; color: inherit; }
 /* Tipografia gigante ao fundo — permanece fixa durante o scroll */
 .hero__type {
   position: fixed;
+  contain: layout paint;
   top: 0; left: 0;
   width: 100%;
   height: 100svh;
@@ -356,11 +352,13 @@ button, input, textarea { font: inherit; color: inherit; }
   position: absolute;
   top: -20%; right: -6%;
   width: 46vw; height: 150%;
-  background: linear-gradient(198deg, rgba(232, 223, 201, 0.14), transparent 58%);
-  filter: blur(38px);
+  background:
+    radial-gradient(60% 50% at 78% 12%, rgba(232, 223, 201, 0.13), transparent 70%),
+    linear-gradient(198deg, rgba(232, 223, 201, 0.07), transparent 58%);
   z-index: 2;
   pointer-events: none;
   opacity: 0.85;
+  will-change: transform;
 }
 
 /* Retrato central */
@@ -395,7 +393,6 @@ button, input, textarea { font: inherit; color: inherit; }
     radial-gradient(38% 55% at 50% 62%, rgba(0, 0, 0, 0.96) 38%, transparent 72%),
     radial-gradient(26% 20% at 50% 26%, rgba(20, 18, 16, 0.98) 40%, transparent 74%),
     radial-gradient(70% 70% at 50% 50%, rgba(5, 5, 5, 0.5), transparent 70%);
-  filter: blur(6px);
 }
 
 .hero.is-noimg .hero__img { display: none; }
@@ -524,7 +521,7 @@ main { position: relative; z-index: 4; }
 .section {
   position: relative;
   background: var(--ink);
-  padding-block: clamp(5.5rem, 13vh, 11rem);
+  padding-block: clamp(4rem, 8.5vh, 7rem);
   padding-inline: var(--gutter);
 }
 
@@ -1310,7 +1307,6 @@ main { position: relative; z-index: 4; }
    17. Movimento reduzido
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

@@ -208,6 +208,7 @@
   }
 
   var mouse = { x: 0, y: 0, cx: 0, cy: 0 };
+  var lastLetterP = -1;
 
   if (!reduceMotion && !isCoarse) {
     W.addEventListener('mousemove', function (e) {
@@ -228,12 +229,12 @@
     // 5.1 scroll com inércia
     if (smooth.on) {
       if (smooth.active) {
-        smooth.current = lerp(smooth.current, smooth.target, 0.12);
+        smooth.current = lerp(smooth.current, smooth.target, 0.2);
         if (Math.abs(smooth.target - smooth.current) < 0.35) {
           smooth.current = smooth.target;
           smooth.active = false;
         }
-        W.scrollTo(0, smooth.current);
+        W.scrollTo({ top: smooth.current, behavior: 'instant' });
       } else {
         smooth.current = smooth.target = W.scrollY;
       }
@@ -246,8 +247,8 @@
     mouse.cx = lerp(mouse.cx, mouse.x, 0.06);
     mouse.cy = lerp(mouse.cy, mouse.y, 0.06);
 
-    // 5.3 hero
-    if (hero && !reduceMotion) {
+    // 5.3 hero — fora da tela, nada é recalculado nem reescrito
+    if (hero && !reduceMotion && sy < (hero.offsetHeight || vh)) {
       var hh = hero.offsetHeight || vh;
       var p = clamp(sy / hh, 0, 1);
 
@@ -268,11 +269,12 @@
       }
 
       // Letras se afastam levemente do centro conforme o scroll
-      if (heroLetters.length) {
+      if (heroLetters.length && p !== lastLetterP) {
+        lastLetterP = p;
         var mid = (heroLetters.length - 1) / 2;
         for (var i = 0; i < heroLetters.length; i++) {
           var dir = (i - mid) / mid;
-          heroLetters[i].style.transform = 'translate3d(' + (dir * p * 60) + 'px,0,0)';
+          heroLetters[i].style.transform = 'translate3d(' + (dir * p * 60).toFixed(1) + 'px,0,0)';
         }
       }
     }
@@ -324,7 +326,7 @@
         scrollTrigger: {
           trigger: expSection,
           start: 'top top',
-          end: function () { return '+=' + (distance() + W.innerHeight * 0.6); },
+          end: function () { return '+=' + (distance() + W.innerHeight * 0.15); },
           pin: true,
           scrub: 0.8,
           invalidateOnRefresh: true,
@@ -357,7 +359,7 @@
           scrollTrigger: {
             trigger: projSection,
             start: 'top top',
-            end: '+=' + (projects.length * 100) + '%',
+            end: '+=' + (projects.length * 62) + '%',
             pin: true,
             scrub: 0.7,
             anticipatePin: 1,
@@ -380,7 +382,6 @@
               { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power2.out' }, '>');
         });
 
-        tl.to({}, { duration: 0.5 });
       }
     }
 
