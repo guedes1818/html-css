@@ -1081,6 +1081,31 @@ textarea.input { height: auto; min-height: 84px; padding: 13px 15px; resize: ver
 }
 .provider-badge svg { width: 11px; height: 11px; }
 
+/* ---------- Selo de sincronização ---------- */
+.sync-pill {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-sm);
+  font-size: 11.5px;
+  color: var(--text-2);
+  animation: toast-in 260ms var(--ease) both;
+}
+.sync-pill svg { width: 12px; height: 12px; color: var(--accent); }
+.sync-pill.off svg { color: #FF8FA0; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1097,6 +1122,7 @@ textarea.input { height: auto; min-height: 84px; padding: 13px 15px; resize: ver
 <div class="frame" id="frame">
   <main class="screen" id="screen" tabindex="-1"></main>
   <nav class="tabbar" id="tabbar" aria-label="Navegação principal"></nav>
+  <div class="sync-pill" id="sync" aria-live="polite" hidden></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 </div>
 
@@ -1203,6 +1229,7 @@ function blankState() {
     logs: {},
     focusMetric: 'steps',
     createdAt: new Date().toISOString(),
+    updatedAt: '',
   };
 }
 
@@ -1249,6 +1276,7 @@ function save() {
   pendingKey = storeKey;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 90);
+  if (typeof scheduleCloudPush === 'function') scheduleCloudPush();
 }
 
 /* Grava agora o que estiver pendente. Chamado antes de trocar de sessão. */
@@ -1258,11 +1286,19 @@ function flushSave() {
   if (!pendingKey) return;
   const key = pendingKey;
   pendingKey = null;
+  S.updatedAt = new Date().toISOString();
   try {
     localStorage.setItem(key, JSON.stringify(S));
   } catch (err) {
     toast('Armazenamento cheio ou bloqueado — as alterações podem não ser salvas.', 'close');
   }
+}
+
+/* Grava já no armazenamento deste aparelho, sem mexer na nuvem. */
+function saveLocal() {
+  if (!storeKey) return;
+  pendingKey = storeKey;
+  flushSave();
 }
 
 /* Descarta a gravação pendente (usado ao excluir a conta). */
@@ -1522,7 +1558,10 @@ function saveAuth() {
   try { localStorage.setItem(AUTH_KEY, JSON.stringify(AUTH)); }
   catch (err) { toast('Não consegui salvar a conta neste navegador.', 'close'); }
 }
-function currentUser() { return AUTH.users.find((u) => u.id === AUTH.currentId) || null; }
+function currentUser() {
+  if (cloudReady && cloudUser) return cloudUser;
+  return AUTH.users.find((u) => u.id === AUTH.currentId) || null;
+}
 function userByEmail(email) {
   const e = String(email || '').trim().toLowerCase();
   if (!e) return null;
@@ -1755,14 +1794,16 @@ function renderAuth() {
     '<div class="auth-mark">' + icon('bolt') + '</div>' +
     '<h1>' + (signup ? 'Criar sua conta' : 'Bem-vindo de volta') + '</h1>' +
     '<p class="lead">' + (signup
-      ? 'Seus treinos, metas e números — separados dos de qualquer outra pessoa que use este aparelho.'
+      ? (cloudReady
+        ? 'Seus treinos, metas e números em uma conta sua — disponíveis em qualquer aparelho.'
+        : 'Seus treinos, metas e números — separados dos de qualquer outra pessoa que use este aparelho.')
       : 'Entre para abrir o seu espaço. Cada conta tem os próprios dados.') + '</p>';
 
   if (authError) {
     html += '<div class="auth-error">' + icon('close') + '<span>' + esc(authError) + '</span></div>';
   }
 
-  if (!signup && others.length) {
+  if (!signup && others.length && !cloudReady) {
     html += '<div class="account-pills">' + others.map((u) => {
       const initials = String(u.name || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
       const face = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" />' : esc(initials);
@@ -1799,11 +1840,17 @@ function renderAuth() {
   html += '<button class="btn btn-primary btn-block" data-act="auth-submit" style="margin-top:4px">' +
     icon(signup ? 'spark' : 'check') + (signup ? 'Criar conta' : 'Entrar') + '</button>';
 
+  if (cloudReady && !signup) {
+    html += '<p class="auth-switch" style="margin-top:12px">' +
+      '<button data-act="forgot-password">Esqueci minha senha</button></p>';
+  }
+
   html += '<p class="auth-switch">' + (signup ? 'Já tem conta? ' : 'Ainda não tem conta? ') +
     '<button data-act="auth-mode">' + (signup ? 'Entrar' : 'Criar agora') + '</button></p>';
 
-  html += '<p class="auth-note">Tudo fica salvo neste navegador, em um espaço só seu.<br />' +
-    'Nada é enviado para servidor nenhum.</p>';
+  html += '<p class="auth-note">' + (cloudReady
+    ? 'Sua conta é verificada no servidor e seus dados acompanham você<br />em qualquer aparelho onde entrar.'
+    : 'Tudo fica salvo neste navegador, em um espaço só seu.<br />Nada é enviado para servidor nenhum.') + '</p>';
 
   html += '</div>';
 
@@ -1821,11 +1868,254 @@ async function submitAuth() {
   const name = ($('#au-name') || {}).value || '';
   view.authEmail = email;
   try {
-    if (view.authMode === 'signup') await signUp(name, email, pass);
-    else await signIn(email, pass);
+    if (cloudReady) {
+      if (view.authMode === 'signup') await cloudSignUp(name, email, pass);
+      else await cloudSignIn(email, pass);
+    } else if (view.authMode === 'signup') {
+      await signUp(name, email, pass);
+    } else {
+      await signIn(email, pass);
+    }
   } catch (err) {
     authFail(err.message || 'Não consegui entrar.');
   }
+}
+
+/* ---------------------------------------------------------------
+   5c. Nuvem (Supabase)
+
+   Com a chave preenchida o app entra em modo nuvem: o login é de
+   verdade (servidor), os dados sincronizam entre aparelhos e o
+   isolamento entre usuários é garantido pelo Postgres, não pelo
+   navegador. Sem a chave, ou se a rede falhar, tudo continua
+   funcionando no modo local descrito acima.
+   --------------------------------------------------------------- */
+
+const SUPABASE = {
+  url: 'https://harpmzexpfpqfppzcstw.supabase.co',
+  /* Chave publicável: pode ficar à vista no código. Ela não dá acesso a
+     nada sozinha — quem decide o que cada pessoa lê e escreve é a
+     política de segurança do Postgres (RLS), no servidor. */
+  anonKey: 'sb_publishable_sQZqoBl-jbiUXjKzNFO2Ow_L-GBLYTn',
+};
+const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js';
+
+let sb = null;
+let cloudUser = null;
+let cloudReady = false;
+let cloudTimer = null;
+let syncState = 'idle'; /* idle | saving | synced | offline */
+
+const cloudConfigured = () => !!(SUPABASE.url && SUPABASE.anonKey);
+
+/* O servidor responde daqui? Alguns lugares bloqueiam a saída de rede
+   (uma prévia embutida, uma rede corporativa). Nesse caso o app cai no
+   modo local em vez de travar numa tela de login que não vai funcionar.
+   Quem já tem sessão salva continua na nuvem, lendo o cache offline. */
+async function cloudReachable() {
+  try {
+    const ctrl = new AbortController();
+    const limite = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(SUPABASE.url + '/auth/v1/health',
+      { headers: { apikey: SUPABASE.anonKey }, signal: ctrl.signal });
+    clearTimeout(limite);
+    return r.ok;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function initCloud() {
+  if (!cloudConfigured()) return false;
+  try {
+    await loadScript(SUPABASE_JS);
+    const temSessao = !!localStorage.getItem('fittrackpro.session');
+    if (!temSessao && !(await cloudReachable())) return false;
+    sb = window.supabase.createClient(SUPABASE.url, SUPABASE.anonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'fittrackpro.session',
+      },
+    });
+    cloudReady = true;
+    return true;
+  } catch (err) {
+    console.warn('FitTrack Pro: nuvem indisponível, seguindo no modo local.', err);
+    sb = null;
+    return false;
+  }
+}
+
+/* Traduz o usuário do Supabase para o formato que o app já usa. */
+function toAppUser(authUser) {
+  const meta = authUser.user_metadata || {};
+  const provider = (authUser.app_metadata || {}).provider || 'local';
+  return {
+    id: authUser.id,
+    provider: provider === 'email' ? 'local' : provider,
+    email: authUser.email || '',
+    name: meta.full_name || meta.name || String(authUser.email || '').split('@')[0] || 'Sem nome',
+    avatar: meta.avatar_url || meta.picture || '',
+    cloud: true,
+  };
+}
+
+async function startCloudSession(authUser) {
+  cloudUser = toAppUser(authUser);
+  storeKey = userStoreKey(cloudUser.id);
+  S = blankState();
+  load();                /* cache local primeiro: abre instantâneo e funciona offline */
+  adoptLegacyData();
+  if (!S.profile.name && cloudUser.name) S.profile.name = cloudUser.name;
+  if (!S.profile.avatar && cloudUser.avatar) S.profile.avatar = cloudUser.avatar;
+  view.tab = 'home';
+  view.filter = 'all';
+  authError = '';
+  applyTheme();
+  render();
+  await syncFromCloud();
+}
+
+/* Quem está mais novo vence. O carimbo de tempo vem do servidor. */
+async function syncFromCloud() {
+  if (!cloudReady || !cloudUser) return;
+  setSync('saving');
+  try {
+    const { data, error } = await sb
+      .from('user_state')
+      .select('state, updated_at')
+      .eq('user_id', cloudUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    const localAt = S.updatedAt || '';
+    if (data && data.state && Object.keys(data.state).length) {
+      if (!localAt || Date.parse(data.updated_at) > Date.parse(localAt)) {
+        S = migrate(data.state);
+        S.updatedAt = data.updated_at;
+        saveLocal();
+        applyTheme();
+        render();
+      } else {
+        await pushCloudState();
+      }
+    } else {
+      await pushCloudState();
+    }
+    setSync('synced');
+  } catch (err) {
+    setSync('offline');
+  }
+}
+
+async function pushCloudState() {
+  if (!cloudReady || !cloudUser) return;
+  setSync('saving');
+  try {
+    const { data, error } = await sb
+      .from('user_state')
+      .upsert({ user_id: cloudUser.id, state: S }, { onConflict: 'user_id' })
+      .select('updated_at')
+      .maybeSingle();
+    if (error) throw error;
+    if (data && data.updated_at) { S.updatedAt = data.updated_at; saveLocal(); }
+    setSync('synced');
+  } catch (err) {
+    setSync('offline');
+  }
+}
+
+function scheduleCloudPush() {
+  if (!cloudReady || !cloudUser) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(pushCloudState, 1200);
+}
+
+function setSync(next) {
+  syncState = next;
+  const el = $('#sync');
+  if (!el) return;
+  const labels = { saving: 'sincronizando', synced: 'sincronizado', offline: 'só neste aparelho' };
+  const icons = { saving: 'reset', synced: 'check', offline: 'close' };
+  if (next === 'idle' || !cloudReady) { el.hidden = true; return; }
+  el.hidden = false;
+  el.className = 'sync-pill' + (next === 'offline' ? ' off' : '');
+  el.innerHTML = icon(icons[next]) + '<span>' + labels[next] + '</span>';
+  if (next === 'synced') setTimeout(() => { if (syncState === 'synced') el.hidden = true; }, 1800);
+}
+
+/* ---- entrada e saída no modo nuvem ---- */
+async function cloudSignUp(name, email, password) {
+  const { data, error } = await sb.auth.signUp({
+    email: String(email).trim(),
+    password: password,
+    options: { data: { full_name: String(name).trim() }, emailRedirectTo: location.href.split('#')[0] },
+  });
+  if (error) throw new Error(traduzErroAuth(error.message));
+  if (data.user && !data.session) {
+    authError = '';
+    openSheet('Confirme seu e-mail',
+      '<p class="hint" style="font-size:14px;line-height:1.6">Enviamos um link para <b style="color:var(--text)">' +
+      esc(email) + '</b>. Abra esse link para ativar a conta e depois volte aqui para entrar.</p>',
+      '<button class="btn btn-primary btn-block" data-act="close-sheet">Entendi</button>');
+    return;
+  }
+  if (data.session) await startCloudSession(data.session.user);
+}
+
+async function cloudSignIn(email, password) {
+  const { data, error } = await sb.auth.signInWithPassword({ email: String(email).trim(), password: password });
+  if (error) throw new Error(traduzErroAuth(error.message));
+  await startCloudSession(data.user);
+}
+
+async function cloudSignOut() {
+  flushSave();
+  await pushCloudState();
+  try { await sb.auth.signOut(); } catch (err) { /* segue mesmo assim */ }
+  cloudUser = null;
+  storeKey = null;
+  S = blankState();
+  view.authMode = 'signin';
+  authError = '';
+  setSync('idle');
+  applyTheme();
+  render();
+}
+
+async function cloudOAuth(provider) {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: provider,
+    options: { redirectTo: location.href.split('#')[0] },
+  });
+  if (error) {
+    authFail(/not enabled|disabled/i.test(error.message)
+      ? 'O login com ' + providerName(provider) + ' ainda não está ligado no painel do Supabase.'
+      : traduzErroAuth(error.message));
+  }
+}
+
+async function cloudResetPassword() {
+  const email = (($('#au-email') || {}).value || '').trim();
+  if (!email) { authFail('Digite seu e-mail primeiro para receber o link.'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split('#')[0] });
+  if (error) { authFail(traduzErroAuth(error.message)); return; }
+  authError = '';
+  render();
+  toast('Link de recuperação enviado para ' + email, 'check');
+}
+
+function traduzErroAuth(msg) {
+  const m = String(msg || '');
+  if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
+  if (/User already registered|already been registered/i.test(m)) return 'Já existe uma conta com esse e-mail.';
+  if (/Password should be at least/i.test(m)) return 'A senha precisa de pelo menos 6 caracteres.';
+  if (/Unable to validate email|invalid format/i.test(m)) return 'Digite um e-mail válido.';
+  if (/rate limit|too many/i.test(m)) return 'Muitas tentativas seguidas. Espere um minuto.';
+  if (/Failed to fetch|NetworkError/i.test(m)) return 'Sem conexão com o servidor agora.';
+  return m;
 }
 
 /* ---------------------------------------------------------------
@@ -2864,7 +3154,7 @@ function saveProfile() {
 function accountSheet() {
   const u = currentUser();
   if (!u) return;
-  const social = u.provider !== 'local';
+  const social = u.provider !== 'local' || !!u.cloud;
   const initials = String(u.name || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   const body =
     '<div style="display:grid;justify-items:center;gap:10px;margin-bottom:18px">' +
@@ -2880,12 +3170,16 @@ function accountSheet() {
     '<div class="field"><label for="ac-email">E-mail</label>' +
     '<input class="input" id="ac-email" type="email" value="' + esc(u.email || '') + '"' +
     (social ? ' disabled style="opacity:.6"' : '') + ' /></div>' +
-    (social ? '<p class="hint" style="margin:-6px 0 14px">O e-mail vem do ' + esc(providerName(u.provider)) +
-      ' e é atualizado lá.</p>' : '') +
+    (social ? '<p class="hint" style="margin:-6px 0 14px">' + (u.cloud && u.provider === 'local'
+      ? 'O e-mail identifica sua conta no servidor; trocar exige confirmação por link.'
+      : 'O e-mail vem do ' + esc(providerName(u.provider)) + ' e é atualizado lá.') + '</p>' : '') +
 
     '<div class="list" style="margin-bottom:12px">' +
-    (social || !canHash ? '' :
-      linkRow('bolt', u.hash ? 'Alterar senha' : 'Definir senha', 'Vale só para esta conta', 'change-password')) +
+    (u.cloud && u.provider !== 'local' ? '' :
+      (u.cloud
+        ? linkRow('bolt', 'Alterar senha', 'Vale para todos os seus aparelhos', 'change-password')
+        : (social || !canHash ? ''
+          : linkRow('bolt', u.hash ? 'Alterar senha' : 'Definir senha', 'Vale só para esta conta', 'change-password')))) +
     linkRow('reset', 'Sair', 'Volta para a tela de entrada', 'sign-out') +
     '</div>' +
 
@@ -2912,7 +3206,11 @@ function saveAccount() {
     u.email = mail;
   }
   u.name = nome;
-  saveAuth();
+  if (u.cloud) {
+    if (sb) sb.auth.updateUser({ data: { full_name: nome } }).catch(() => {});
+  } else {
+    saveAuth();
+  }
   S.profile.name = nome;
   save();
   closeSheet();
@@ -2924,7 +3222,7 @@ function passwordSheet() {
   const u = currentUser();
   if (!u) return;
   const body =
-    (u.hash ? '<div class="field"><label for="pw-old">Senha atual</label>' +
+    (u.hash && !u.cloud ? '<div class="field"><label for="pw-old">Senha atual</label>' +
       '<input class="input" id="pw-old" type="password" autocomplete="current-password" /></div>' : '') +
     '<div class="field"><label for="pw-new">Nova senha</label>' +
     '<input class="input" id="pw-new" type="password" autocomplete="new-password" placeholder="Pelo menos 6 caracteres" /></div>' +
@@ -2944,6 +3242,13 @@ async function savePassword() {
   const rep = sheetVal('pw-rep');
   if (nova.length < 6) { toast('A senha precisa de pelo menos 6 caracteres.', 'close'); return; }
   if (nova !== rep) { toast('As duas senhas não são iguais.', 'close'); return; }
+  if (cloudReady) {
+    const { error } = await sb.auth.updateUser({ password: nova });
+    if (error) { toast(traduzErroAuth(error.message), 'close'); return; }
+    closeSheet();
+    toast('Senha atualizada.', 'check');
+    return;
+  }
   if (u.hash) {
     const atual = await derivePassword(sheetVal('pw-old'), u.salt);
     if (atual !== u.hash) { toast('Senha atual incorreta.', 'close'); return; }
@@ -2961,9 +3266,20 @@ async function deleteAccount() {
   if (!u) return;
   const ok = await confirmSheet('Excluir a conta?',
     'A conta <b style="color:var(--text)">' + esc(u.email || u.name) + '</b> e todos os dados dela ' +
-    'serão apagados deste navegador. Não dá para desfazer.', 'Excluir conta');
+    (cloudReady
+      ? 'serão apagados do servidor e deste aparelho. O cadastro de acesso em si só pode ser removido pelo painel do Supabase.'
+      : 'serão apagados deste navegador.') +
+    ' Não dá para desfazer.', 'Excluir conta');
   if (!ok) return;
   cancelSave();
+  if (cloudReady && cloudUser) {
+    try { await sb.from('user_state').delete().eq('user_id', cloudUser.id); }
+    catch (err) { toast('Não consegui apagar os dados no servidor.', 'close'); }
+    try { localStorage.removeItem(userStoreKey(u.id)); } catch (err) { /* segue */ }
+    await cloudSignOut();
+    toast('Dados apagados e sessão encerrada.', 'trash');
+    return;
+  }
   try { localStorage.removeItem(userStoreKey(u.id)); } catch (err) { /* segue */ }
   AUTH.users = AUTH.users.filter((x) => x.id !== u.id);
   saveAuth();
@@ -3298,6 +3614,7 @@ const ACTIONS = {
   },
   sso(el) {
     const id = el.dataset.id;
+    if (cloudReady) { cloudOAuth(id); return; }
     const cfg = SSO[id];
     if (!cfg || !cfg.clientId) { ssoSetupSheet(id); return; }
     if (id === 'google') googleSignIn(); else appleSignIn();
@@ -3306,7 +3623,8 @@ const ACTIONS = {
   'save-account'() { saveAccount(); },
   'change-password'() { passwordSheet(); },
   'save-password'() { savePassword(); },
-  'sign-out'() { closeSheet(); signOut(); },
+  'sign-out'() { closeSheet(); if (cloudReady) cloudSignOut(); else signOut(); },
+  'forgot-password'() { cloudResetPassword(); },
   'delete-account'() { deleteAccount(); },
 
   export() { exportData(); },
@@ -3368,15 +3686,47 @@ window.addEventListener('storage', (e) => {
 /* ---------------------------------------------------------------
    18. Inicialização
    --------------------------------------------------------------- */
-loadAuth();
-const booted = currentUser();
-if (booted) {
-  storeKey = userStoreKey(booted.id);
-  load();
-  adoptLegacyData();
-}
-applyTheme();
-render();
+(async function boot() {
+  loadAuth();
+  /* Com a nuvem ligada quem manda é a sessão do servidor, não a local. */
+  if (cloudConfigured()) AUTH.currentId = null;
+  applyTheme();
+  render();
+
+  if (await initCloud()) {
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && (!cloudUser || cloudUser.id !== session.user.id)) {
+        startCloudSession(session.user);
+      }
+      if (event === 'SIGNED_OUT' && cloudUser) {
+        cloudUser = null;
+        storeKey = null;
+        S = blankState();
+        render();
+      }
+    });
+    try {
+      const { data } = await sb.auth.getSession();
+      if (data && data.session) await startCloudSession(data.session.user);
+      else render();
+    } catch (err) {
+      render();
+    }
+    return;
+  }
+
+  const booted = currentUser();
+  if (booted) {
+    storeKey = userStoreKey(booted.id);
+    load();
+    adoptLegacyData();
+  }
+  applyTheme();
+  render();
+})();
+
+window.addEventListener('online', () => { if (cloudReady && cloudUser) syncFromCloud(); });
+window.addEventListener('offline', () => { if (cloudReady && cloudUser) setSync('offline'); });
 </script>
 </body>
 </html>
