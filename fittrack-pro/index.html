@@ -951,6 +951,136 @@ textarea.input { height: auto; min-height: 84px; padding: 13px 15px; resize: ver
 @keyframes toast-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(8px) scale(0.97); } }
 
+/* ---------- Tela de entrada ---------- */
+.auth {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 2px 20px;
+}
+.auth-mark {
+  width: 62px; height: 62px;
+  border-radius: 20px;
+  display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+  color: var(--on-accent);
+  box-shadow: 0 20px 40px -20px color-mix(in srgb, var(--accent) 70%, transparent);
+  margin-bottom: 18px;
+}
+.auth-mark svg { width: 30px; height: 30px; }
+.auth h1 {
+  margin: 0;
+  font-size: clamp(27px, 7.6vw, 32px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  font-weight: 700;
+}
+.auth .lead { margin: 8px 0 24px; color: var(--text-2); font-size: 14.5px; line-height: 1.5; }
+
+.sso { display: grid; gap: 10px; }
+.sso-btn {
+  height: 54px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border: 1px solid var(--line);
+  background: var(--glass-2);
+  color: var(--text);
+  transition: transform var(--fast), filter var(--fast);
+}
+.sso-btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+.sso-btn:active { transform: scale(0.98); }
+.sso-btn svg { width: 19px; height: 19px; flex: none; }
+.sso-btn.google { background: #FFFFFF; color: #1F1F1F; border-color: rgba(0, 0, 0, 0.12); }
+.sso-btn.apple { background: #000000; color: #FFFFFF; border-color: rgba(255, 255, 255, 0.18); }
+[data-theme="light"] .sso-btn.google { border-color: rgba(0, 0, 0, 0.18); }
+.sso-btn .tagline { font-size: 11px; font-weight: 500; opacity: 0.6; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 18px;
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+.divider::before, .divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, #FF6B7E 16%, transparent);
+  border: 1px solid color-mix(in srgb, #FF6B7E 34%, transparent);
+  color: #FF9AA8;
+  font-size: 13px;
+  line-height: 1.45;
+  animation: rise 300ms var(--ease) both;
+}
+.auth-error svg { width: 16px; height: 16px; flex: none; }
+
+.auth-switch {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.auth-switch button {
+  color: var(--accent);
+  font-weight: 600;
+  padding: 4px;
+  border-radius: 8px;
+}
+.auth-note { margin: 22px 0 0; text-align: center; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+
+.account-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+.account-pill {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px 0 5px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 13px;
+  transition: all var(--fast);
+}
+.account-pill:hover { color: var(--text); border-color: var(--line-strong); }
+.account-pill .avatar { width: 32px; height: 32px; font-size: 12px; border: 0; }
+
+.provider-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--glass-2);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.provider-badge svg { width: 11px; height: 11px; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1079,8 +1209,9 @@ function blankState() {
 let S = blankState();
 
 function load() {
+  if (!storeKey) return;
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(storeKey);
     if (!raw) return;
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === 'object') S = migrate(parsed);
@@ -1108,15 +1239,37 @@ function migrate(data) {
 }
 
 let saveTimer = null;
+let pendingKey = null;
+
+/* A gravação é adiada alguns milissegundos para não escrever a cada tecla.
+   A chave fica anotada junto: se a sessão trocar nesse meio tempo, os dados
+   vão para o dono certo, nunca para o espaço de quem acabou de entrar. */
 function save() {
+  if (!storeKey) return;
+  pendingKey = storeKey;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(S));
-    } catch (err) {
-      toast('Armazenamento cheio ou bloqueado — as alterações podem não ser salvas.', 'close');
-    }
-  }, 90);
+  saveTimer = setTimeout(flushSave, 90);
+}
+
+/* Grava agora o que estiver pendente. Chamado antes de trocar de sessão. */
+function flushSave() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  if (!pendingKey) return;
+  const key = pendingKey;
+  pendingKey = null;
+  try {
+    localStorage.setItem(key, JSON.stringify(S));
+  } catch (err) {
+    toast('Armazenamento cheio ou bloqueado — as alterações podem não ser salvas.', 'close');
+  }
+}
+
+/* Descarta a gravação pendente (usado ao excluir a conta). */
+function cancelSave() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  pendingKey = null;
 }
 
 /* ---------------------------------------------------------------
@@ -1317,6 +1470,365 @@ function applyTheme() {
 prefersLight.addEventListener('change', () => { if (S.settings.theme === 'auto') applyTheme(); });
 
 /* ---------------------------------------------------------------
+   5b. Contas, sessão e login
+
+   Sem servidor, cada conta é um espaço de dados separado dentro deste
+   navegador: entrar troca o espaço, e um usuário nunca enxerga o do
+   outro. A senha nunca é guardada — só o hash PBKDF2 derivado dela.
+   Isso separa pessoas que dividem o mesmo aparelho; não protege os
+   dados de quem tenha acesso físico ao dispositivo e saiba procurar.
+   --------------------------------------------------------------- */
+
+/* Preencha para ligar a entrada social. Os dois exigem o app publicado
+   em https e um Client ID registrado — o próprio app explica o passo a
+   passo quando o campo está vazio. */
+const SSO = {
+  google: { clientId: '' },
+  apple: { clientId: '', redirectURI: '' },
+};
+
+const AUTH_KEY = 'fittrackpro.auth';
+const LEGACY_KEY = STORE_KEY;
+let AUTH = { users: [], currentId: null, legacyAdopted: false };
+let storeKey = null;
+let authError = '';
+
+const BRAND = {
+  google: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<path fill="#4285F4" d="M23.5 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.45a5.5 5.5 0 0 1-2.4 3.6v3h3.88c2.27-2.09 3.57-5.17 3.57-8.63z"/>' +
+    '<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.09A11.99 11.99 0 0 0 12 24z"/>' +
+    '<path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.28a12 12 0 0 0 0 10.76l3.99-3.09z"/>' +
+    '<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.28 6.62l3.99 3.09C6.22 6.86 8.87 4.75 12 4.75z"/></svg>',
+  apple: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.05 12.54c-.03-2.6 2.12-3.85 2.22-3.91-1.21-1.77-3.09-2.01-3.76-2.04-1.6-.16-3.12.94-3.93.94-.81 0-2.06-.92-3.39-.9-1.74.03-3.35 1.01-4.25 2.57-1.81 3.14-.46 7.79 1.3 10.34.86 1.25 1.89 2.65 3.24 2.6 1.3-.05 1.79-.84 3.36-.84s2.01.84 3.39.81c1.4-.02 2.28-1.27 3.13-2.53.99-1.45 1.4-2.86 1.42-2.93-.03-.01-2.72-1.04-2.75-4.11zM14.6 4.6c.71-.86 1.19-2.06 1.06-3.25-1.02.04-2.26.68-3 1.54-.66.76-1.24 1.98-1.08 3.14 1.14.09 2.3-.58 3.02-1.43z"/></svg>',
+};
+
+const providerName = (p) => (p === 'google' ? 'Google' : p === 'apple' ? 'Apple' : 'e-mail e senha');
+
+function loadAuth() {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.users)) {
+      AUTH.users = parsed.users;
+      AUTH.currentId = parsed.currentId || null;
+      AUTH.legacyAdopted = !!parsed.legacyAdopted;
+    }
+  } catch (err) {
+    console.warn('FitTrack Pro: não consegui ler as contas salvas.', err);
+  }
+}
+function saveAuth() {
+  try { localStorage.setItem(AUTH_KEY, JSON.stringify(AUTH)); }
+  catch (err) { toast('Não consegui salvar a conta neste navegador.', 'close'); }
+}
+function currentUser() { return AUTH.users.find((u) => u.id === AUTH.currentId) || null; }
+function userByEmail(email) {
+  const e = String(email || '').trim().toLowerCase();
+  if (!e) return null;
+  return AUTH.users.find((u) => String(u.email || '').toLowerCase() === e) || null;
+}
+const userStoreKey = (id) => LEGACY_KEY + '.' + id;
+
+/* ---- senha ---- */
+const canHash = !!(window.crypto && window.crypto.subtle && window.crypto.getRandomValues);
+function bytesToHex(b) { return Array.from(b).map((x) => x.toString(16).padStart(2, '0')).join(''); }
+function hexToBytes(h) {
+  const out = new Uint8Array(h.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(h.substr(i * 2, 2), 16);
+  return out;
+}
+function randomSalt() {
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  return bytesToHex(b);
+}
+async function derivePassword(password, saltHex) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password),
+    'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: hexToBytes(saltHex), iterations: 150000, hash: 'SHA-256' }, key, 256);
+  return bytesToHex(new Uint8Array(bits));
+}
+
+/* ---- sessão ---- */
+function startSession(user) {
+  flushSave();
+  AUTH.currentId = user.id;
+  user.lastSeen = new Date().toISOString();
+  saveAuth();
+  storeKey = userStoreKey(user.id);
+  S = blankState();
+  load();
+  adoptLegacyData();
+  if (!S.profile.name && user.name) S.profile.name = user.name;
+  if (!S.profile.avatar && user.avatar) S.profile.avatar = user.avatar;
+  save();
+  applyTheme();
+  view.tab = 'home';
+  view.filter = 'all';
+  authError = '';
+  render();
+}
+
+/* Quem usou o app antes das contas não perde nada: os dados soltos
+   passam para a primeira conta que entrar. */
+function adoptLegacyData() {
+  if (AUTH.legacyAdopted) return;
+  let raw = null;
+  try { raw = localStorage.getItem(LEGACY_KEY); } catch (err) { return; }
+  AUTH.legacyAdopted = true;
+  if (!raw) { saveAuth(); return; }
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      S = migrate(parsed);
+      save();
+      try { localStorage.removeItem(LEGACY_KEY); } catch (err) { /* segue */ }
+      setTimeout(() => toast('Seus dados anteriores vieram para esta conta.', 'check'), 400);
+    }
+  } catch (err) { /* backup ilegível: começa limpo */ }
+  saveAuth();
+}
+
+function signOut() {
+  flushSave();
+  AUTH.currentId = null;
+  saveAuth();
+  storeKey = null;
+  S = blankState();
+  view.authMode = 'signin';
+  authError = '';
+  applyTheme();
+  render();
+}
+
+async function signUp(name, email, password) {
+  const nome = String(name || '').trim();
+  const mail = String(email || '').trim();
+  if (!nome) throw new Error('Digite seu nome.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) throw new Error('Digite um e-mail válido.');
+  if (userByEmail(mail)) throw new Error('Já existe uma conta com esse e-mail neste dispositivo.');
+  if (canHash && String(password).length < 6) throw new Error('A senha precisa de pelo menos 6 caracteres.');
+  const user = {
+    id: uid(), provider: 'local', name: nome, email: mail, avatar: '',
+    createdAt: new Date().toISOString(),
+  };
+  if (canHash) {
+    user.salt = randomSalt();
+    user.hash = await derivePassword(password, user.salt);
+  }
+  AUTH.users.push(user);
+  saveAuth();
+  startSession(user);
+  toast('Conta criada. Bem-vindo!', 'spark');
+}
+
+async function signIn(email, password) {
+  const user = userByEmail(email);
+  if (!user) throw new Error('Não encontrei nenhuma conta com esse e-mail neste dispositivo.');
+  if (user.provider !== 'local') throw new Error('Essa conta entra com ' + providerName(user.provider) + '.');
+  if (user.hash) {
+    const hash = await derivePassword(String(password), user.salt);
+    if (hash !== user.hash) throw new Error('Senha incorreta.');
+  }
+  startSession(user);
+}
+
+/* ---- entrada social ---- */
+function decodeJwt(token) {
+  const part = String(token).split('.')[1];
+  const json = decodeURIComponent(atob(part.replace(/-/g, '+').replace(/_/g, '/'))
+    .split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
+}
+
+function upsertSsoUser(provider, claims) {
+  const sub = claims.sub || claims.email;
+  if (!sub) { authFail('O provedor não devolveu uma identificação.'); return; }
+  let user = AUTH.users.find((u) => u.provider === provider && u.sub === sub);
+  if (!user) {
+    user = {
+      id: uid(), provider: provider, sub: sub,
+      name: claims.name || String(claims.email || '').split('@')[0] || 'Sem nome',
+      email: claims.email || '', avatar: claims.picture || '',
+      createdAt: new Date().toISOString(),
+    };
+    AUTH.users.push(user);
+  } else {
+    if (claims.name) user.name = claims.name;
+    if (claims.email) user.email = claims.email;
+    if (claims.picture) user.avatar = claims.picture;
+  }
+  saveAuth();
+  startSession(user);
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[data-sso="' + src + '"]')) return resolve();
+    const el = document.createElement('script');
+    el.src = src;
+    el.async = true;
+    el.dataset.sso = src;
+    el.onload = () => resolve();
+    el.onerror = () => reject(new Error('script bloqueado'));
+    document.head.appendChild(el);
+  });
+}
+
+async function googleSignIn() {
+  try {
+    await loadScript('https://accounts.google.com/gsi/client');
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: SSO.google.clientId,
+      scope: 'openid email profile',
+      callback: async (resp) => {
+        try {
+          const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+            { headers: { Authorization: 'Bearer ' + resp.access_token } });
+          const info = await r.json();
+          upsertSsoUser('google', info);
+        } catch (err) {
+          authFail('Entrei no Google, mas não consegui buscar seu perfil.');
+        }
+      },
+    });
+    client.requestAccessToken();
+  } catch (err) {
+    authFail('Não consegui carregar o Google daqui. Isso só funciona com o app publicado em https.');
+  }
+}
+
+async function appleSignIn() {
+  try {
+    await loadScript('https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/pt_BR/appleid.auth.js');
+    window.AppleID.auth.init({
+      clientId: SSO.apple.clientId,
+      scope: 'name email',
+      redirectURI: SSO.apple.redirectURI || location.href,
+      usePopup: true,
+    });
+    const res = await window.AppleID.auth.signIn();
+    const claims = decodeJwt(res.authorization.id_token);
+    if (res.user && res.user.name) {
+      claims.name = [res.user.name.firstName, res.user.name.lastName].filter(Boolean).join(' ');
+    }
+    upsertSsoUser('apple', claims);
+  } catch (err) {
+    authFail('Não consegui concluir a entrada com a Apple.');
+  }
+}
+
+function authFail(msg) {
+  authError = msg;
+  render();
+}
+
+function ssoSetupSheet(provider) {
+  const isGoogle = provider === 'google';
+  const origin = location.protocol === 'file:' ? 'https://seu-usuario.github.io' : location.origin;
+  const steps = isGoogle
+    ? ['Publique o app em um endereço https — o GitHub Pages deste repositório já serve.',
+       'Em console.cloud.google.com → APIs e serviços → Credenciais, crie um <b>ID do cliente OAuth</b> do tipo Aplicativo da Web.',
+       'Em <b>Origens JavaScript autorizadas</b>, informe o endereço do app: <code>' + esc(origin) + '</code>',
+       'Copie o Client ID e cole em <code>SSO.google.clientId</code>, no começo do bloco &lt;script&gt; do arquivo.']
+    : ['Tenha uma conta no Apple Developer Program (paga) e crie um <b>Services ID</b>.',
+       'Verifique o domínio do app e cadastre a Return URL em Sign in with Apple.',
+       'Preencha <code>SSO.apple.clientId</code> com o Services ID e <code>SSO.apple.redirectURI</code> com a Return URL.',
+       'Publique em https — a Apple não aceita arquivo local nem domínio não verificado.'];
+  openSheet('Ligar entrada com ' + (isGoogle ? 'Google' : 'Apple'),
+    '<p class="hint" style="margin-bottom:14px">Falta a configuração do provedor. Enquanto isso, a conta por e-mail e senha funciona normalmente.</p>' +
+    '<ol style="margin:0;padding-left:20px;color:var(--text-2);font-size:13.5px;line-height:1.65">' +
+    steps.map((t) => '<li style="margin-bottom:10px">' + t + '</li>').join('') + '</ol>' +
+    '<p class="hint" style="margin-top:14px">Depois disso o botão passa a abrir a janela de login de verdade.</p>',
+    '<button class="btn btn-primary btn-block" data-act="close-sheet">Entendi</button>');
+}
+
+/* ---- tela de entrada ---- */
+function renderAuth() {
+  const signup = view.authMode === 'signup';
+  const others = AUTH.users.slice().sort((a, b) =>
+    String(b.lastSeen || '').localeCompare(String(a.lastSeen || '')));
+
+  let html = '<div class="auth">' +
+    '<div class="auth-mark">' + icon('bolt') + '</div>' +
+    '<h1>' + (signup ? 'Criar sua conta' : 'Bem-vindo de volta') + '</h1>' +
+    '<p class="lead">' + (signup
+      ? 'Seus treinos, metas e números — separados dos de qualquer outra pessoa que use este aparelho.'
+      : 'Entre para abrir o seu espaço. Cada conta tem os próprios dados.') + '</p>';
+
+  if (authError) {
+    html += '<div class="auth-error">' + icon('close') + '<span>' + esc(authError) + '</span></div>';
+  }
+
+  if (!signup && others.length) {
+    html += '<div class="account-pills">' + others.map((u) => {
+      const initials = String(u.name || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+      const face = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" />' : esc(initials);
+      return '<button class="account-pill" data-act="auth-pick" data-id="' + u.id + '">' +
+        '<span class="avatar">' + face + '</span>' + esc(u.name || u.email) + '</button>';
+    }).join('') + '</div>';
+  }
+
+  html += '<div class="sso">' +
+    '<button class="sso-btn google" data-act="sso" data-id="google">' + BRAND.google + 'Continuar com Google</button>' +
+    '<button class="sso-btn apple" data-act="sso" data-id="apple">' + BRAND.apple + 'Continuar com Apple</button>' +
+    '</div>';
+
+  html += '<div class="divider">ou com e-mail</div>';
+
+  if (signup) {
+    html += '<div class="field"><label for="au-name">Nome</label>' +
+      '<input class="input" id="au-name" autocomplete="name" placeholder="Como quer ser chamado" maxlength="40" /></div>';
+  }
+  html += '<div class="field"><label for="au-email">E-mail</label>' +
+    '<input class="input" id="au-email" type="email" autocomplete="email" inputmode="email" ' +
+    'value="' + esc(view.authEmail || '') + '" placeholder="voce@email.com" /></div>';
+
+  if (canHash) {
+    html += '<div class="field"><label for="au-pass">Senha</label>' +
+      '<input class="input" id="au-pass" type="password" autocomplete="' +
+      (signup ? 'new-password' : 'current-password') + '" placeholder="' +
+      (signup ? 'Pelo menos 6 caracteres' : 'Sua senha') + '" /></div>';
+  } else {
+    html += '<p class="hint" style="margin-bottom:14px">Este navegador não oferece as funções de criptografia, ' +
+      'então a conta fica sem senha — ela apenas separa os dados de quem usa o aparelho.</p>';
+  }
+
+  html += '<button class="btn btn-primary btn-block" data-act="auth-submit" style="margin-top:4px">' +
+    icon(signup ? 'spark' : 'check') + (signup ? 'Criar conta' : 'Entrar') + '</button>';
+
+  html += '<p class="auth-switch">' + (signup ? 'Já tem conta? ' : 'Ainda não tem conta? ') +
+    '<button data-act="auth-mode">' + (signup ? 'Entrar' : 'Criar agora') + '</button></p>';
+
+  html += '<p class="auth-note">Tudo fica salvo neste navegador, em um espaço só seu.<br />' +
+    'Nada é enviado para servidor nenhum.</p>';
+
+  html += '</div>';
+
+  const screen = $('#screen');
+  screen.innerHTML = html;
+  screen.scrollTop = 0;
+  const tabbar = $('#tabbar');
+  tabbar.innerHTML = '';
+  tabbar.style.display = 'none';
+}
+
+async function submitAuth() {
+  const email = ($('#au-email') || {}).value || '';
+  const pass = ($('#au-pass') || {}).value || '';
+  const name = ($('#au-name') || {}).value || '';
+  view.authEmail = email;
+  try {
+    if (view.authMode === 'signup') await signUp(name, email, pass);
+    else await signIn(email, pass);
+  } catch (err) {
+    authFail(err.message || 'Não consegui entrar.');
+  }
+}
+
+/* ---------------------------------------------------------------
    6. Navegação
    --------------------------------------------------------------- */
 const view = {
@@ -1326,6 +1838,8 @@ const view = {
   calMonth: new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'),
   statRange: 'weekly',
   statAnchor: todayKey(),
+  authMode: 'signin',
+  authEmail: '',
 };
 
 const TABS = [
@@ -1343,6 +1857,8 @@ function renderTabs() {
 
 function render() {
   const screen = $('#screen');
+  if (!currentUser()) { renderAuth(); return; }
+  $('#tabbar').style.display = '';
   const html = view.tab === 'home' ? viewHome()
     : view.tab === 'calendar' ? viewCalendar()
     : view.tab === 'stats' ? viewStats()
@@ -1776,6 +2292,18 @@ function viewSettings() {
     '<span><b style="color:var(--text);font-size:15px">' + actCount + '</b> atividades</span>' +
     '<span><b style="color:var(--text);font-size:15px">' + logCount + '</b> dias registrados</span>' +
     '</div></section>';
+
+  const user = currentUser() || {};
+  html += '<div class="section-title"><h2>Conta</h2></div>';
+  html += '<div class="list">' +
+    '<button class="list-item" data-act="account">' +
+    '<span class="li-icon">' + icon('user') + '</span>' +
+    '<span class="grow"><span class="li-title truncate">' + esc(user.email || user.name || 'Conta local') + '</span>' +
+    '<span class="li-sub">Entra com ' + esc(providerName(user.provider)) + '</span></span>' +
+    '<span class="li-chev">' + icon('right') + '</span></button>' +
+    linkRow('reset', 'Trocar de conta', AUTH.users.length > 1
+      ? AUTH.users.length + ' contas neste dispositivo' : 'Sair e entrar com outra', 'sign-out') +
+    '</div>';
 
   html += '<div class="section-title"><h2>Aparência</h2></div>';
   html += '<div class="list"><div class="list-item" style="display:grid;gap:12px">' +
@@ -2324,10 +2852,123 @@ function profileSheet() {
 function saveProfile() {
   S.profile.name = sheetVal('p-name').trim();
   S.profile.tagline = sheetVal('p-tagline').trim();
+  const user = currentUser();
+  if (user && S.profile.name) { user.name = S.profile.name; saveAuth(); }
   save();
   closeSheet();
   render();
   toast('Perfil atualizado.', 'user');
+}
+
+/* ---- conta do usuário ---- */
+function accountSheet() {
+  const u = currentUser();
+  if (!u) return;
+  const social = u.provider !== 'local';
+  const initials = String(u.name || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const body =
+    '<div style="display:grid;justify-items:center;gap:10px;margin-bottom:18px">' +
+    '<div class="avatar" style="width:72px;height:72px;font-size:26px">' +
+    (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" />' : esc(initials)) + '</div>' +
+    '<span class="provider-badge">' +
+    (u.provider === 'google' ? BRAND.google : u.provider === 'apple' ? BRAND.apple : icon('user')) +
+    'Entra com ' + esc(providerName(u.provider)) + '</span></div>' +
+
+    '<div class="field"><label for="ac-name">Nome</label>' +
+    '<input class="input" id="ac-name" value="' + esc(u.name || '') + '" maxlength="40" /></div>' +
+
+    '<div class="field"><label for="ac-email">E-mail</label>' +
+    '<input class="input" id="ac-email" type="email" value="' + esc(u.email || '') + '"' +
+    (social ? ' disabled style="opacity:.6"' : '') + ' /></div>' +
+    (social ? '<p class="hint" style="margin:-6px 0 14px">O e-mail vem do ' + esc(providerName(u.provider)) +
+      ' e é atualizado lá.</p>' : '') +
+
+    '<div class="list" style="margin-bottom:12px">' +
+    (social || !canHash ? '' :
+      linkRow('bolt', u.hash ? 'Alterar senha' : 'Definir senha', 'Vale só para esta conta', 'change-password')) +
+    linkRow('reset', 'Sair', 'Volta para a tela de entrada', 'sign-out') +
+    '</div>' +
+
+    '<button class="btn btn-danger btn-block" data-act="delete-account">' +
+    icon('trash') + 'Excluir esta conta e seus dados</button>' +
+    '<p class="hint" style="margin-top:10px">Antes de excluir, use <b style="color:var(--text)">Exportar backup</b> ' +
+    'se quiser guardar seus registros.</p>';
+
+  openSheet('Sua conta', body,
+    '<button class="btn" data-act="close-sheet">Fechar</button>' +
+    '<button class="btn btn-primary" data-act="save-account">' + icon('check') + 'Salvar</button>');
+}
+
+function saveAccount() {
+  const u = currentUser();
+  if (!u) return;
+  const nome = sheetVal('ac-name').trim();
+  if (!nome) { toast('O nome não pode ficar vazio.', 'edit'); return; }
+  if (u.provider === 'local') {
+    const mail = sheetVal('ac-email').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { toast('Digite um e-mail válido.', 'edit'); return; }
+    const taken = userByEmail(mail);
+    if (taken && taken.id !== u.id) { toast('Outra conta já usa esse e-mail.', 'close'); return; }
+    u.email = mail;
+  }
+  u.name = nome;
+  saveAuth();
+  S.profile.name = nome;
+  save();
+  closeSheet();
+  render();
+  toast('Conta atualizada.', 'user');
+}
+
+function passwordSheet() {
+  const u = currentUser();
+  if (!u) return;
+  const body =
+    (u.hash ? '<div class="field"><label for="pw-old">Senha atual</label>' +
+      '<input class="input" id="pw-old" type="password" autocomplete="current-password" /></div>' : '') +
+    '<div class="field"><label for="pw-new">Nova senha</label>' +
+    '<input class="input" id="pw-new" type="password" autocomplete="new-password" placeholder="Pelo menos 6 caracteres" /></div>' +
+    '<div class="field"><label for="pw-rep">Repita a nova senha</label>' +
+    '<input class="input" id="pw-rep" type="password" autocomplete="new-password" /></div>' +
+    '<p class="hint">A senha não é guardada em lugar nenhum — só uma marca matemática dela, ' +
+    'que não permite descobrir a original.</p>';
+  openSheet(u.hash ? 'Alterar senha' : 'Definir senha', body,
+    '<button class="btn" data-act="close-sheet">Cancelar</button>' +
+    '<button class="btn btn-primary" data-act="save-password">' + icon('check') + 'Salvar</button>');
+}
+
+async function savePassword() {
+  const u = currentUser();
+  if (!u) return;
+  const nova = sheetVal('pw-new');
+  const rep = sheetVal('pw-rep');
+  if (nova.length < 6) { toast('A senha precisa de pelo menos 6 caracteres.', 'close'); return; }
+  if (nova !== rep) { toast('As duas senhas não são iguais.', 'close'); return; }
+  if (u.hash) {
+    const atual = await derivePassword(sheetVal('pw-old'), u.salt);
+    if (atual !== u.hash) { toast('Senha atual incorreta.', 'close'); return; }
+  }
+  u.salt = randomSalt();
+  u.hash = await derivePassword(nova, u.salt);
+  saveAuth();
+  closeSheet();
+  render();
+  toast('Senha atualizada.', 'check');
+}
+
+async function deleteAccount() {
+  const u = currentUser();
+  if (!u) return;
+  const ok = await confirmSheet('Excluir a conta?',
+    'A conta <b style="color:var(--text)">' + esc(u.email || u.name) + '</b> e todos os dados dela ' +
+    'serão apagados deste navegador. Não dá para desfazer.', 'Excluir conta');
+  if (!ok) return;
+  cancelSave();
+  try { localStorage.removeItem(userStoreKey(u.id)); } catch (err) { /* segue */ }
+  AUTH.users = AUTH.users.filter((x) => x.id !== u.id);
+  saveAuth();
+  signOut();
+  toast('Conta excluída.', 'trash');
 }
 
 function manageActivitiesSheet() {
@@ -2639,6 +3280,35 @@ const ACTIONS = {
     toast(pending.length + (pending.length === 1 ? ' atividade pendente hoje.' : ' atividades pendentes hoje.'), 'bell');
   },
 
+  'auth-mode'() {
+    view.authMode = view.authMode === 'signup' ? 'signin' : 'signup';
+    authError = '';
+    render();
+  },
+  'auth-submit'() { submitAuth(); },
+  'auth-pick'(el) {
+    const u = AUTH.users.find((x) => x.id === el.dataset.id);
+    if (!u) return;
+    view.authEmail = u.email || '';
+    authError = '';
+    if (u.provider !== 'local') { ACTIONS.sso({ dataset: { id: u.provider } }); return; }
+    render();
+    const field = $('#au-pass') || $('#au-email');
+    if (field) field.focus();
+  },
+  sso(el) {
+    const id = el.dataset.id;
+    const cfg = SSO[id];
+    if (!cfg || !cfg.clientId) { ssoSetupSheet(id); return; }
+    if (id === 'google') googleSignIn(); else appleSignIn();
+  },
+  account() { accountSheet(); },
+  'save-account'() { saveAccount(); },
+  'change-password'() { passwordSheet(); },
+  'save-password'() { savePassword(); },
+  'sign-out'() { closeSheet(); signOut(); },
+  'delete-account'() { deleteAccount(); },
+
   export() { exportData(); },
   import() { importData(); },
   'reset-stats'() { resetStats(); },
@@ -2671,6 +3341,9 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+window.addEventListener('pagehide', flushSave);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushSave(); });
+
 document.addEventListener('pointerdown', onPointerDown);
 document.addEventListener('pointermove', onPointerMove, { passive: false });
 document.addEventListener('pointerup', onPointerUp);
@@ -2685,7 +3358,8 @@ setInterval(() => {
 
 /* Outra aba alterou os dados — recarrega. */
 window.addEventListener('storage', (e) => {
-  if (e.key !== STORE_KEY) return;
+  if (e.key === AUTH_KEY) { loadAuth(); render(); return; }
+  if (!storeKey || e.key !== storeKey) return;
   load();
   applyTheme();
   render();
@@ -2694,7 +3368,13 @@ window.addEventListener('storage', (e) => {
 /* ---------------------------------------------------------------
    18. Inicialização
    --------------------------------------------------------------- */
-load();
+loadAuth();
+const booted = currentUser();
+if (booted) {
+  storeKey = userStoreKey(booted.id);
+  load();
+  adoptLegacyData();
+}
 applyTheme();
 render();
 </script>
